@@ -18,4 +18,9 @@ public class InterventionMedecin extends BaseEntity {
     private Integer numDent;
      private Acte acte;
      private Consultation consultation;
+
+    @Override
+    public int hashCode() {
+        return idIM != null ? idIM.hashCode() : 0;
+    }
 }

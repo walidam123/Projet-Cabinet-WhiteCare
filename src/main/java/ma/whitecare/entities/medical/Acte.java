@@ -19,5 +19,21 @@ public class Acte extends BaseEntity {
     private String categorie;
 
     private Double prixDeBase;
-    /* private List<InterventionMedecin> interventionMedecinlist; */
+    private List<InterventionMedecin> interventionMedecinlist=null;
+
+    @Override
+    public String toString() {
+        return "Acte{" +
+                ", idActe=" + idActe +
+                ", libelle='" + libelle + '\'' +
+                ", categorie='" + categorie + '\'' +
+                ", prixDeBase=" + prixDeBase +
+                ", interventions=" + (interventionMedecinlist != null ? interventionMedecinlist.size() : 0) +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return idActe != null ? idActe.hashCode() : 0;
+    }
 }

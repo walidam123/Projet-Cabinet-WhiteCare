@@ -5,12 +5,32 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.whitecare.entities.appointment.AgendaMensuel;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Medecin extends Utilisateur{
+public class Medecin extends Staff{
     private String specialite;
-    //private AgendaMensuel agendaDocteur;
+    private AgendaMensuel agendaDocteur;
+
+
+
+
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Médecin{%s, spécialité='%s', agenda=%s,salaire=%s}",
+                super.toString(), // Appel du toString() de Utilisateur
+                specialite != null ? specialite : "N/A",
+                agendaDocteur != null ? "disponible" : "non configuré",
+                getSalaire() != null ? String.format("+%.2f MAD", getSalaire()) : "+0.00 MAD"
+        );
+    }
+    @Override
+    public int hashCode() {
+        return getIdUser() != null ? getIdUser().hashCode() : 0;
+    }
 }

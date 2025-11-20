@@ -29,4 +29,9 @@ public class Consultation extends BaseEntity {
     private List<Ordonnance> ordonnanceList;
     private List<Facture> factureList;
 
+
+    @Override
+    public int hashCode() {
+        return idConsultation!= null ? idConsultation.hashCode() : 0;
+    }
 }

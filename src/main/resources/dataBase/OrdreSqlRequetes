@@ -1,0 +1,14 @@
+-- Exécuter dans cet ordre :
+1. CREATE DATABASE
+2. utilisateur, role, cabinet_medicale, patient, antecedents, acte, medicament
+3. staff, utilisateur_role
+4. medecin, secretaire
+5. revenues, charges, statistiques, patient_antecedents
+6. dossierMedicale
+7. consultation
+8. agenda_mensuel, certificat, rdv, intervention_medecin
+9. situation_financiere
+10. facture
+11. ordonnance
+12. prescription
+13. notification, utilisateur_notification

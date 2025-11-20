@@ -1,5 +1,5 @@
+Create dataBase Whitecare;
 
--- FULL SCHEMA (users/staff/medecin/secretaire + roles ...
 CREATE TABLE IF NOT EXISTS utilisateur (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
 
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS staff (
   date_recrutement DATE,
   solde_conge INT DEFAULT 0,
   cabinet_medicale_id BIGINT,
-  CONSTRAINT fk_staff_user FOREIGN KEY (id) REFERENCES utilisateur(id) ON DELETE CASCADE
-FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE,
+  CONSTRAINT fk_staff_user FOREIGN KEY (id) REFERENCES utilisateur(id) ON DELETE CASCADE,
+FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE
 
 );
 CREATE TABLE IF NOT EXISTS medecin (
@@ -62,27 +62,48 @@ CREATE TABLE IF NOT EXISTS utilisateur_role (
 );
 CREATE TABLE if not exists notification (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    titre ENUM() NOT NULL,-- a Remplir
+    titre ENUM('RAPPEL_RDV_DEMAIN',
+    'RAPPEL_RDV_AUJOURDHUI',
+    'FACTURE_EN_RETARD',
+    'URGENCE_DISPONIBLE',
+    'NOUVEL_UTILISATEUR',
+    'CONTRÔLE_SEMESTRIEL',
+    'ORDONNANCE_RENOUVELER',
+    'STOCK_FAIBLE',
+    'SAUVEGARDE_REUSSIE',
+    'ERREUR_SYSTEME') NOT NULL,
     message VARCHAR(100) NOT NULL,
     date DATE NOT NULL,
     time TIME NOT NULL,
-    type ENUM() NOT NULL,-- a Remplir
-    priorite ENUM() NOT NULL,-- a Remplir
+    type ENUM('RAPPEL_RDV',
+              'CONFIRMATION_RDV',
+              'MODIFICATION_RDV',
+              'FACTURE_IMPAYEE',
+              'PAIEMENT_RECU',
+              'URGENCE_MEDICALE',
+              'RAPPEL_CONTROLE',
+              'ORDONNANCE_EXPIREE',
+              'NOUVEAU_PATIENT',
+              'ANNIVERSAIRE_PATIENT',
+              'SAUVEGARDE_AUTO',
+              'ALERTE_SYSTEME',
+              'MAINTENANCE_PLANIFIEE') NOT NULL,
+    priorite ENUM('BASSE', 'MOYENNE', 'ELEVEE', 'URGENTE') NOT NULL,
     lue BOOLEAN DEFAULT FALSE,
 
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       last_modification_date TIMESTAMP NULL,
       created_by VARCHAR(64),
-      updated_by VARCHAR(64),
-)
+      updated_by VARCHAR(64)
+);
 -- Table de liaison: utilisateur_notification (ManyToMany)
-create table if not exist utilisateur_notification(
+create table if not exists utilisateur_notification(
  utilisateur_id BIGINT NOT NULL,
   notification_id BIGINT NOT NULL,
   PRIMARY KEY (utilisateur_id, notification_id),
   CONSTRAINT fk_ur_utilisateur FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id) ON DELETE CASCADE,
   CONSTRAINT fk_ur_notification FOREIGN KEY (notification_id) REFERENCES notification(id) ON DELETE CASCADE
-)
+);
 
 create table if not exists revenues(
 
@@ -93,14 +114,13 @@ create table if not exists revenues(
     date DATETIME NOT NULL,
     cabinet_medicale_id BIGINT,
 
-
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_modification_date TIMESTAMP NULL,
     created_by VARCHAR(64),
     updated_by VARCHAR(64),
     FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE,
 
-)
+);
 
 create table if not exists charges(
 
@@ -111,15 +131,14 @@ id BIGINT AUTO_INCREMENT PRIMARY KEY,
     date DATETIME NOT NULL,
     cabinet_medicale_id BIGINT,
 
-
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_modification_date TIMESTAMP NULL,
     created_by VARCHAR(64),
     updated_by VARCHAR(64),
-    FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE,
+    FOREIGN KEY fk_ccm_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE
 
 
-)
+);
  create table if not exists cabinet_medicale(
  id BIGINT AUTO_INCREMENT PRIMARY KEY,
 nom VARCHAR(30) NOT NULL ,
@@ -138,13 +157,41 @@ description VARCHAR(100) NOT NULL,
      last_modification_date TIMESTAMP NULL,
      created_by VARCHAR(64),
      updated_by VARCHAR(64)
- )
+ );
 
 
 create table if not exists statistiques(
 id BIGINT AUTO_INCREMENT PRIMARY KEY,
 nom VARCHAR(30) NOT NULL ,
-categorie ENUM() NOT NULL,-- a Remplir
+categorie ENUM(   'PATIENTS_NOUVEAUX',
+                  'PATIENTS_ACTIFS',
+                  'PATIENTS_FIDELES',
+                  'REPARTITION_AGE',
+                  'REPARTITION_GENRE',
+                  'REPARTITION_ASSURANCE',
+                  'CONSULTATIONS_TOTALES',
+                  'CONSULTATIONS_PAR_MEDECIN',
+                  'TYPES_CONSULTATION',
+                  'ACTES_REALISES',
+                  'INTERVENTIONS_DENTAIRES',
+                  'URGENCES_TRAITEES',
+                  'CHIFFRE_AFFAIRE',
+                  'REVENUS_MENSUELS',
+                  'FACTURES_IMPAYEES',
+                  'TAUX_ENCAISSEMENT',
+                  'REPARTITION_REVENUS',
+                  'DEPENSES_CABINET',
+                  'RDV_PLANIFIES',
+                  'RDV_ANNULEES',
+                  'TAUX_PRESENTATION',
+                  'RETARDS_MOYENS',
+                  'CRENEAUX_OCCUPES',
+                  'DISPONIBILITE_MEDECINS',
+                  'TAUX_REMPLISSAGE',
+                  'SATISFACTION_PATIENTS',
+                  'ACTIVITE_PAR_PERIODE',
+                  'PERFORMANCE_MEDECINS',
+                  'TEMPS_ATTENTE_MOYEN') NOT NULL,
 chiffre DECIMAL(12,2) DEFAULT 0,
 dateCalcul DATE,
     cabinet_medicale_id BIGINT,
@@ -155,9 +202,9 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      created_by VARCHAR(64),
      updated_by VARCHAR(64),
 
-    FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE,
+    FOREIGN KEY fk_sc_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE
 
-)
+);
 create table if not exists agenda_mensuel(
 id BIGINT AUTO_INCREMENT PRIMARY KEY,
     mois ENUM('JANVIER', 'FEVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN', 'JUILLET', 'AOUT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DECEMBRE') NOT NULL,
@@ -169,10 +216,10 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      last_modification_date TIMESTAMP NULL,
      created_by VARCHAR(64),
      updated_by VARCHAR(64),
-    FOREIGN KEY fk_ur_medecin(medecin_id) REFERENCES mdecin(id) ON DELETE CASCADE,
+    FOREIGN KEY fk_ur_medecin(medecin_id) REFERENCES mdecin(id) ON DELETE CASCADE
 
 
-)
+);
 
 
 
@@ -191,7 +238,7 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      updated_by VARCHAR(64)
 
 
-)
+);
 
 create table if not exists antecedents(
 id_antecedent BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -202,8 +249,8 @@ id_antecedent BIGINT AUTO_INCREMENT PRIMARY KEY,
 creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      last_modification_date TIMESTAMP NULL,
      created_by VARCHAR(64),
-     updated_by VARCHAR(64),
-)
+     updated_by VARCHAR(64)
+);
 
 CREATE TABLE IF NOT EXISTS patient_antecedents (
                                                    patient_id BIGINT NOT NULL,
@@ -223,8 +270,8 @@ idActe BIGINT AUTO_INCREMENT PRIMARY KEY,
 creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      last_modification_date TIMESTAMP NULL,
      created_by VARCHAR(64),
-     updated_by VARCHAR(64),
-)
+     updated_by VARCHAR(64)
+);
 
 
 create table if not exists medicament(
@@ -266,7 +313,7 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 
 create table if not exists ordonnance(
-    idPr BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idOrd BIGINT AUTO_INCREMENT PRIMARY KEY,
     date DATE NOT NULL,
 
     consultation_id BIGINT NOT NULL,
@@ -314,7 +361,7 @@ CREATE TABLE if not exists certificat (
     updated_by VARCHAR(64),
     CONSTRAINT fk_dc_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossiermedicale(idDm) ON DELETE CASCADE,
     CONSTRAINT fk_cc_consultation FOREIGN KEY (consulation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE
-    )
+    );
 
 CREATE TABLE if not exists rdv (
                      id_rdv BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -334,7 +381,7 @@ CREATE TABLE if not exists rdv (
 
     CONSTRAINT fk_cr_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE,
     CONSTRAINT fk_dr_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(id_Dm) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE if not exists intervention_medecin (
                                       id_im BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -349,7 +396,7 @@ CREATE TABLE if not exists intervention_medecin (
                                       updated_by VARCHAR(64),
     CONSTRAINT fk_ci_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE,
     CONSTRAINT fk_ca_acte FOREIGN KEY (acte_id) REFERENCES acte(idActe) ON DELETE CASCADE
-)
+);
 
 
 CREATE TABLE if not exists facture (
@@ -372,7 +419,7 @@ CREATE TABLE if not exists facture (
 
     CONSTRAINT fk_fs_situationfinanciere  FOREIGN KEY (situation_financiere_id) REFERENCES situation_financiere(idSf) ON DELETE CASCADE,
     CONSTRAINT fk_fc_consultation  FOREIGN KEY (consultation_id) REFERENCES consultation(idConsultation) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS situation_financiere (
                                       idSf BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -388,7 +435,7 @@ CREATE TABLE IF NOT EXISTS situation_financiere (
     created_by VARCHAR(64),
     updated_by VARCHAR(64),
     CONSTRAINT fk_ds_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDm) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE consultation (
                               id_consultation BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -404,4 +451,4 @@ CREATE TABLE consultation (
                               updated_by VARCHAR(64),
                             constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossier_medicale(idDm) ON DELETE CASCADE
 
-)
+);

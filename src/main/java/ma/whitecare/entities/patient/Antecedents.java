@@ -17,4 +17,36 @@ public class Antecedents extends BaseEntity {
     private  String categorie;
     private NiveauDeRisque niveauDeRisque;
     private List<Patient> patients;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Patient)) return false;
+        Antecedents that = (Antecedents) o;
+        return id_Antecedent != null && id_Antecedent.equals(that.id_Antecedent);
+    }
+
+    @Override
+    public int hashCode() {
+        return id_Antecedent != null ? id_Antecedent.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return """
+        Antecedent {
+          id = %d,
+          nom = '%s',
+          categorie = %s,
+          niveauRisque = %s,
+          patientsCount = %d
+        }
+        """.formatted(
+                id_Antecedent,
+                nom,
+                categorie,
+                niveauDeRisque,
+                patients == null ? 0 : patients.size()
+        );
+    }
 }

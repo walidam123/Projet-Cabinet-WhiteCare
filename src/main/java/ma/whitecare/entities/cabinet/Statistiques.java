@@ -24,5 +24,8 @@ public class Statistiques extends BaseEntity {
 
     private CabinetMedicale cabinetMedicale;
 
-
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

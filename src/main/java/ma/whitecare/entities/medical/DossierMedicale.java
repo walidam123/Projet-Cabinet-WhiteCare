@@ -28,5 +28,8 @@ public class DossierMedicale extends BaseEntity {
      private Medecin medecin;
      private List<RDV> rdvList;
      private List<Consultation> consultationList;
-
+    @Override
+    public int hashCode() {
+        return idDM != null ? idDM.hashCode() : 0;
+    }
 }

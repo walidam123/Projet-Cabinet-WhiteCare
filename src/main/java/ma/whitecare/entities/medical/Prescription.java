@@ -23,4 +23,9 @@ private int duréeEnJours ;
 
 private Medicament medicament;
 private Ordonnance ordonnance;
+
+    @Override
+    public int hashCode() {
+        return idPr != null ? idPr.hashCode() : 0;
+    }
 }

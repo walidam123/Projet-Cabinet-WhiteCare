@@ -30,5 +30,22 @@ public class RDV extends BaseEntity {
 
     private DossierMedicale dossierMedicale;
     private Consultation consultation;
+    @Override
+    public String toString() {
+        return "RDV{" +
+                ", idRDV=" + idRDV +
+                ", date=" + Date +
+                ", heure=" + heure +
+                ", motif='" + motif + '\'' +
+                ", statut=" + statut +
+                ", dossierMedicale=" + (dossierMedicale != null ? dossierMedicale.getIdDM() : "null") +
+                ", consultation=" + (consultation != null ? consultation.getIdConsultation() : "null") +
+                ", noteMedecin=" + (noteMedecin != null ? "'" + (noteMedecin.length() > 20 ? noteMedecin.substring(0, 20) + "..." : noteMedecin) + "'" : "null") +
+                '}';
+    }
 
+    @Override
+    public int hashCode() {
+        return idRDV != null ? idRDV.hashCode() : 0;
+    }
 }

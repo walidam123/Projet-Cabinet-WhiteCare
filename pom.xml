@@ -18,7 +18,7 @@
       <maven.compiler.source>25</maven.compiler.source>
       <maven.compiler.target>25</maven.compiler.target>
       <maven.compiler.release>25</maven.compiler.release>
-
+      <mysql.version>8.0.33</mysql.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -50,6 +50,11 @@
       </dependency>
 
 
+      <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>8.0.33</version>
+      </dependency>
 
   </dependencies>
 </project>

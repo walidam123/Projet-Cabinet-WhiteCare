@@ -35,4 +35,22 @@ public class CabinetMedicale extends BaseEntity {
     private List<Revenues> revenues;
     private List<Statistiques> statistiques;
    private List<Staff> staffList;
+
+    @Override
+    public String toString() {
+        return String.format(
+                "CabinetMedicale{id=%d, nom='%s', email='%s', tel='%s', charges=%d, revenues=%d, staff=%d}",
+                idUser != null ? idUser : 0,
+                nom != null ? nom : "N/A",
+                email != null ? email : "N/A",
+                tel1 != null ? tel1 : "N/A",
+                charges != null ? charges.size() : 0,
+                revenues != null ? revenues.size() : 0,
+                staffList != null ? staffList.size() : 0
+        );
+    }
+    @Override
+    public int hashCode() {
+        return idUser != null ? idUser.hashCode() : 0;
+    }
 }

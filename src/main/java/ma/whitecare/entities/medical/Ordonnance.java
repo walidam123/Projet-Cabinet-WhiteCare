@@ -21,4 +21,8 @@ public class Ordonnance extends BaseEntity {
     private List<Prescription> prescriptionList;
     private DossierMedicale dossierMedicale;
     private Consultation consultation;
+    @Override
+    public int hashCode() {
+        return idOrd != null ? idOrd.hashCode() : 0;
+    }
 }

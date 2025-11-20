@@ -26,4 +26,10 @@ public class SituationFinanciere extends BaseEntity {
 
     private List<Facture> factureList;
     private DossierMedicale dossierMedicale;
+
+
+    @Override
+    public int hashCode() {
+        return idSF != null ? idSF.hashCode() : 0;
+    }
 }
