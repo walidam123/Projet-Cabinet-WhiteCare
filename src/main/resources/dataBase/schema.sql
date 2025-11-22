@@ -230,8 +230,8 @@ idPatient BIGINT AUTO_INCREMENT PRIMARY KEY,
 sexe ENUM{'HOMME','FEMME'} not null,
 adresse VARCHAR(20),
 telephone VARCHAR(15),
+email Varchar(30)
 assurance ENUM('CNSS', 'CNOPS','PRIVEE','AUCUNE' )DEFAULT 'AUCUNE',
-
 creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      last_modification_date TIMESTAMP NULL,
      created_by VARCHAR(64),

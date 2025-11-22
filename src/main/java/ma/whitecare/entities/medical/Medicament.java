@@ -26,5 +26,5 @@ public class Medicament extends BaseEntity {
     private Boolean remboursable;
     private  Double prixUnitaire;
     private String Description ;
-    //private List<Prescription> prescriptionList;
+    private List<Prescription> prescriptionList= null;
 }
