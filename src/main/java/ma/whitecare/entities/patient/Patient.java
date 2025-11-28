@@ -8,11 +8,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.enums.Assurance;
 
-@Data @AllArgsConstructor @NoArgsConstructor @Builder
+@Data @AllArgsConstructor @NoArgsConstructor @SuperBuilder
 
 public class Patient extends BaseEntity {
     private Long id_Patient;
@@ -22,7 +23,7 @@ public class Patient extends BaseEntity {
     private String telephone;
     private String email;
     private LocalDate dateNaissance;
-    private LocalDateTime dateCreation;
+
     private Sexe sexe;
     private Assurance assurance;
 

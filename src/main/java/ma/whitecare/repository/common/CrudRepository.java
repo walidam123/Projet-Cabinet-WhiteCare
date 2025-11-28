@@ -13,7 +13,7 @@ public interface CrudRepository<T, ID> {
 
     void update(T newValuesElement);
 
-    void delete(T patient);
+    void delete(T oldElement);
 
     void deleteById(ID id);
 }

@@ -9,6 +9,7 @@ import ma.whitecare.entities.enums.*;
 import ma.whitecare.entities.patient.Antecedents;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public final class RowMappers {
 
@@ -26,11 +27,14 @@ public final class RowMappers {
         patientRow.setEmail(rs.getString("email"));
         var dn = rs.getDate("dateDeNaissance");
         if (dn != null) patientRow.setDateNaissance(dn.toLocalDate());
-        var dc = rs.getTimestamp("creation_date");
-        if (dc != null) patientRow.setDateCreation(dc.toLocalDateTime());
         patientRow.setSexe(Sexe.valueOf(rs.getString("sexe")));
         patientRow.setAssurance(Assurance.valueOf(rs.getString("assurance")));
-
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) patientRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) patientRow.setDateDerniereModification(dl.toLocalDateTime());
+        patientRow.setCreePar(rs.getString("created_by"));
+        patientRow.setModifiePar(rs.getString("updated_by"));
         return patientRow;
     }
 
@@ -38,11 +42,16 @@ public final class RowMappers {
     public static Antecedents mapAntecedent(ResultSet rs) throws SQLException {
         Antecedents antecedentRow = new Antecedents();
 
-        antecedentRow.setId_Antecedent            (rs.getLong("id"));
+        antecedentRow.setId_Antecedent            (rs.getLong("id_antecedent"));
         antecedentRow.setNom            (rs.getString("nom"));
         antecedentRow.setCategorie      (rs.getString("categorie"));
-        antecedentRow.setNiveauDeRisque  (NiveauDeRisque.valueOf(rs.getString("niveauRisque")));
-
+        antecedentRow.setNiveauDeRisque  (NiveauDeRisque.valueOf(rs.getString("niveau_de_risque")));
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) antecedentRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) antecedentRow.setDateDerniereModification(dl.toLocalDateTime());
+        antecedentRow.setCreePar(rs.getString("created_by"));
+        antecedentRow.setModifiePar(rs.getString("updated_by"));
         return antecedentRow;
     }
 
@@ -57,6 +66,7 @@ public final class RowMappers {
 
         return acteRow;
     }
+
     public static CabinetMedicale mapCabinet(ResultSet rs) throws SQLException {
         CabinetMedicale CabinetRow = new CabinetMedicale();
 

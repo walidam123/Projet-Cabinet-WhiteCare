@@ -225,8 +225,9 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 create table if not exists patient(
 idPatient BIGINT AUTO_INCREMENT PRIMARY KEY,
- nom VARCHAR(20),
- dateDeNaissance DATE,
+nom VARCHAR(20),
+prenom VARCHAR(25) ,
+dateDeNaissance DATE,
 sexe ENUM{'HOMME','FEMME'} not null,
 adresse VARCHAR(20),
 telephone VARCHAR(15),
