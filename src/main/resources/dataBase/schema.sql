@@ -453,3 +453,61 @@ CREATE TABLE consultation (
                             constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossier_medicale(idDm) ON DELETE CASCADE
 
 );
+
+CREATE TABLE agenda_mensuel (
+                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                mois VARCHAR(20) NOT NULL,
+                                annee INT NOT NULL,
+                                medecin_id BIGINT NULL,
+                                creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                last_modification_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                created_by VARCHAR(64),
+                                updated_by VARCHAR(64),
+
+
+
+                                CONSTRAINT fk_agenda_medecin
+                                    FOREIGN KEY (medecin_id)
+                                        REFERENCES staff(id) ON DELETE SET NULL,
+
+                                CONSTRAINT uk_agenda_unique
+                                    UNIQUE KEY (mois, annee, medecin_id)
+);
+
+
+CREATE TABLE jour_agenda (
+                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                             agenda_mensuel_id BIGINT NOT NULL,
+                             date_jour DATE NOT NULL,
+                             jour_semaine VARCHAR(10) NOT NULL,
+                             est_disponible BOOLEAN DEFAULT TRUE,
+                             raison_indisponibilite VARCHAR(100),
+
+                             CONSTRAINT fk_jour_agenda
+                                 FOREIGN KEY (agenda_mensuel_id)
+                                     REFERENCES agenda_mensuel(id) ON DELETE CASCADE,
+
+                             CONSTRAINT uk_jour_unique
+                                 UNIQUE KEY (agenda_mensuel_id, date_jour)
+);
+
+CREATE TABLE creneau_horaire (
+                                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                 jour_agenda_id BIGINT NOT NULL,
+                                 heure_debut TIME NOT NULL,
+                                 heure_fin TIME NOT NULL,
+                                 est_disponible BOOLEAN DEFAULT TRUE,
+                                 motif_indisponibilite VARCHAR(100),
+                                 rendez_vous_id BIGINT NULL,
+
+                                 CONSTRAINT fk_creneau_jour
+                                     FOREIGN KEY (jour_agenda_id)
+                                         REFERENCES jour_agenda(id) ON DELETE CASCADE,
+
+                                 CONSTRAINT fk_creneau_rdv
+                                     FOREIGN KEY (rendez_vous_id)
+                                         REFERENCES rdv(id_rdv) ON DELETE SET NULL,
+
+                                 CONSTRAINT uk_creneau_unique
+                                     UNIQUE KEY (jour_agenda_id, heure_debut, heure_fin)
+);

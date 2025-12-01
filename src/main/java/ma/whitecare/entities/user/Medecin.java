@@ -2,11 +2,10 @@ package ma.whitecare.entities.user;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import ma.whitecare.entities.appointment.AgendaMensuel;
+import ma.whitecare.entities.agenda.AgendaMensuel;
 
 @Data
 @AllArgsConstructor

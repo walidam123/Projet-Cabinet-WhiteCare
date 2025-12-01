@@ -6,7 +6,7 @@
 5. revenues, charges, statistiques, patient_antecedents
 6. dossierMedicale
 7. consultation
-8. agenda_mensuel, certificat, rdv, intervention_medecin
+8. agenda_mensuel,jour_agenda,creneau_horaire, certificat, rdv, intervention_medecin
 9. situation_financiere
 10. facture
 11. ordonnance

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.LibelleRole;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Role extends BaseEntity {
 
 
@@ -20,7 +21,7 @@ public class Role extends BaseEntity {
     private LibelleRole libelle;
 
 
-    private List<Utilisateur> utilisateurs;
+    private List<Long> utilisateursId;
 
 
     @Override
@@ -29,7 +30,7 @@ public class Role extends BaseEntity {
                 "Role{id=%d, libellé='%s', privilèges=%d, utilisateurs=%d}",
                 idRole != null ? idRole : 0,
                 libelle != null ? libelle : "N/A",
-                utilisateurs != null ? utilisateurs.size() : 0
+                utilisateursId != null ? utilisateursId.size() : 0
         );
     }
 

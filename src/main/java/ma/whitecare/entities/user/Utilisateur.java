@@ -14,6 +14,7 @@ import java.util.List;
 public   class  Utilisateur extends BaseEntity {
     protected Long idUser;
     protected String nom;
+    protected String prenom;
     protected String email;
     protected String adresse;
     protected String cin;
@@ -23,6 +24,7 @@ public   class  Utilisateur extends BaseEntity {
     protected String motDePass;
     protected LocalDate LastLoginDate;
     protected LocalDate dateNaissance;
+    protected Boolean actif;
 
     protected List<Role> roles;
     @Override

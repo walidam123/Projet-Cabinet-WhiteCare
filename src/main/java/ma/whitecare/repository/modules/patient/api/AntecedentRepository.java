@@ -19,4 +19,5 @@ public interface AntecedentRepository extends CrudRepository<Antecedents, Long> 
 
     // ---- Navigation inverse ----
     List<Patient> getPatientsHavingAntecedent(Long antecedentId);
+    void removeAntecedentFromAllPatients(Long antecedentId);
 }

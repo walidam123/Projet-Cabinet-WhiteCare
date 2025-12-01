@@ -206,7 +206,7 @@ public class PatientRepositoryTest {
 
 
     private static void testFindByAssurance() {
-        System.out.println("=== TEST FIND BY Assu ===");
+        System.out.println("=== TEST FIND BY Assurance ===");
 
         String testass = "CNSS";
 
@@ -255,7 +255,7 @@ public class PatientRepositoryTest {
     }
 
     private static void testAddAntecedentToPatient() {
-        Long patientId = 2L;
+        Long patientId = 3L;
         Long antecedentId = 3L;
         System.out.println("\n➕ testAddAntecedentToPatient");
         patientRepository.addAntecedentToPatient(patientId, antecedentId);

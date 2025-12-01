@@ -203,8 +203,8 @@ public class AntecedentRepositoryImpl implements AntecedentRepository {
     }
 
 
-
-    private void removeAntecedentFromAllPatients(Long antecedentId) {
+    @Override
+    public void removeAntecedentFromAllPatients(Long antecedentId) {
         String sql = "DELETE FROM patient_antecedents WHERE antecedents_id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {

@@ -16,7 +16,7 @@ public class Antecedents extends BaseEntity {
     private String nom;
     private  String categorie;
     private NiveauDeRisque niveauDeRisque;
-    private List<Patient> patients;
+    private List<Long> patientsid;
 
     @Override
     public boolean equals(Object o) {
@@ -46,7 +46,7 @@ public class Antecedents extends BaseEntity {
                 nom,
                 categorie,
                 niveauDeRisque,
-                patients == null ? 0 : patients.size()
+                patientsid == null ? 0 : patientsid.size()
         );
     }
 }

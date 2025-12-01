@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.cabinet.CabinetMedicale;
 
@@ -13,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Charges extends BaseEntity {
 
     private Long id;
@@ -22,18 +23,20 @@ public class Charges extends BaseEntity {
     private Double montant;
     private LocalDateTime date;
 
-    private CabinetMedicale cabinetMedicale;
+    private Long cabinetMedicaleId;
+
+
 
     @Override
     public String toString() {
         return String.format(
-                "Charge{id=%d, titre='%s', montant=%.2f MAD, date=%s, cabinet=%s,description:%s}",
+                "Charges{id=%d, titre='%s', montant=%.2f, date=%s,\ndescription:=%s\ncabinetId=%d}",
                 id != null ? id : 0,
                 titre != null ? titre : "N/A",
                 montant != null ? montant : 0.0,
-                date != null ? date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "N/A",
-                cabinetMedicale != null ? cabinetMedicale.getNom() : "N/A",
-                description != null ? description : "N/A"
+                date != null ? date.toString() : "N/A",
+                description!= null ? description :"N/A",
+                cabinetMedicaleId != null ? cabinetMedicaleId : 0
         );
     }
 
