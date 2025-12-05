@@ -22,7 +22,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public List<Medecin> findByNomPrenom(String nom, String prenom) {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id
@@ -50,7 +50,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public List<Medecin> findBySpecialite(String specialite) {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id
@@ -77,7 +77,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public List<Medecin> findByCabinetId(Long cabinetId) {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id
@@ -131,7 +131,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public List<Medecin> findAvailableMedecins() {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id
@@ -178,7 +178,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public List<Medecin> findPageByCabinet(Long cabinetId, int limit, int offset) {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id
@@ -252,7 +252,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public List<Medecin> findAll() {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id
@@ -276,7 +276,7 @@ public class MedecinRepositoryImpl implements MedecinRepository {
     public Medecin findById(Long id) {
         String sql = """
             SELECT u.*, s.salaire, s.prime, s.date_recrutement, s.solde_conge, 
-                   s.cabinet_medicale_id, m.specialite, m.numero_ordre
+                   s.cabinet_medicale_id, m.specialite
             FROM utilisateur u
             INNER JOIN staff s ON u.id = s.id
             INNER JOIN medecin m ON u.id = m.id

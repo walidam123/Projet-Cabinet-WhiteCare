@@ -22,7 +22,7 @@ public class Medecin extends Staff{
     @Override
     public String toString() {
         return String.format(
-                "Médecin{%s, spécialité='%s', agenda=%s,salaire=%s}",
+                "Médecin{%s, spécialité='%s', salaire=%s}",
                 super.toString(), // Appel du toString() de Utilisateur
                 specialite != null ? specialite : "N/A",
                 getSalaire() != null ? String.format("+%.2f MAD", getSalaire()) : "+0.00 MAD"

@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 
 import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Acte extends BaseEntity {
     private Long idActe;
 
@@ -19,7 +20,7 @@ public class Acte extends BaseEntity {
     private String categorie;
 
     private Double prixDeBase;
-    private List<InterventionMedecin> interventionMedecinlist=null;
+    private List<Long> interventionMedecinlist=null;
 
     @Override
     public String toString() {
@@ -28,7 +29,6 @@ public class Acte extends BaseEntity {
                 ", libelle='" + libelle + '\'' +
                 ", categorie='" + categorie + '\'' +
                 ", prixDeBase=" + prixDeBase +
-                ", interventions=" + (interventionMedecinlist != null ? interventionMedecinlist.size() : 0) +
                 '}';
     }
 

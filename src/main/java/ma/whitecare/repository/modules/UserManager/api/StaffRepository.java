@@ -30,7 +30,3 @@ public interface StaffRepository extends CrudRepository<Staff, Long> {
         void assignToCabinet(Long staffId, Long cabinetId);
         Long countStaffByCabinet(Long cabinetId);
 }
-crud
-regles
-        valider les donnes
-recuperer les donnes gestion exceptions

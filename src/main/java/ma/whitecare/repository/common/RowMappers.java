@@ -83,13 +83,19 @@ public final class RowMappers {
         return revenueRow;
     }
 
-    public static Acte mapActe(ResultSet rs) throws SQLException {
+    public static Acte mapActeComplet(ResultSet rs) throws SQLException {
         Acte acteRow = new Acte();
 
-        acteRow.setIdActe(rs.getLong("id"));
-        acteRow.setLibelle(rs.getString("nom"));
+        acteRow.setIdActe(rs.getLong("idActe"));
+        acteRow.setLibelle(rs.getString("libelle"));
         acteRow.setCategorie(rs.getString("categorie"));
         acteRow.setPrixDeBase(rs.getDouble("prixDeBase"));
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) acteRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) acteRow.setDateDerniereModification(dl.toLocalDateTime());
+        acteRow.setCreePar(rs.getString("created_by"));
+        acteRow.setModifiePar(rs.getString("updated_by"));
 
         return acteRow;
     }
