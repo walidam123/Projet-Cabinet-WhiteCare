@@ -20,5 +20,5 @@ public abstract class Staff extends Utilisateur{
     protected Double prime;
     protected LocalDate dateRecrutement;
     protected Integer soldeConge;
-    protected CabinetMedicale cabinet;
+    protected Long cabinetMedicaleId;
 }

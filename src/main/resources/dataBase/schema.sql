@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS utilisateur (
     adresse VARCHAR(255),
     cin VARCHAR(32) UNIQUE,
     tel VARCHAR(40),
-    sexe ENUM('HOMME','FEMME'),
+    sexe ENUM('HOMME','FEMME')NOT NULL,
 
   login VARCHAR(64) NOT NULL UNIQUE,
   password_hash VARCHAR(120) NOT NULL,
@@ -35,7 +35,6 @@ FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medic
 CREATE TABLE IF NOT EXISTS medecin (
   id BIGINT PRIMARY KEY,
   specialite VARCHAR(120),
-  agenda_medecin TEXT,
   CONSTRAINT fk_med_staff FOREIGN KEY (id) REFERENCES staff(id) ON DELETE CASCADE
 
 );
@@ -47,7 +46,7 @@ CREATE TABLE IF NOT EXISTS secretaire (
 );
 CREATE TABLE IF NOT EXISTS role (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  libelle VARCHAR(80) NOT NULL UNIQUE,
+  libelle ENUM('ADMIN', 'MEDECIN', 'SECRETAIRE') NOT NULL,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_modification_date TIMESTAMP NULL,
     created_by VARCHAR(64),
