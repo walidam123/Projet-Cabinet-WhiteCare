@@ -1,4 +1,5 @@
-Create dataBase Whitecare;
+CREATE DATABASE IF NOT EXISTS WhiteCare;
+USE WhiteCare;
 
 CREATE TABLE IF NOT EXISTS utilisateur (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -9,7 +10,11 @@ CREATE TABLE IF NOT EXISTS utilisateur (
     adresse VARCHAR(255),
     cin VARCHAR(32) UNIQUE,
     tel VARCHAR(40),
+<<<<<<< Updated upstream
     sexe ENUM('HOMME','FEMME'),
+=======
+    sexe ENUM('HOMME','FEMME') NOT NULL,
+>>>>>>> Stashed changes
 
   login VARCHAR(64) NOT NULL UNIQUE,
   password_hash VARCHAR(120) NOT NULL,
@@ -118,8 +123,7 @@ create table if not exists revenues(
     last_modification_date TIMESTAMP NULL,
     created_by VARCHAR(64),
     updated_by VARCHAR(64),
-    FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE,
-
+    FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE
 );
 
 create table if not exists charges(
@@ -205,21 +209,6 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY fk_sc_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE
 
 );
-create table if not exists agenda_mensuel(
-id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    mois ENUM('JANVIER', 'FEVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN', 'JUILLET', 'AOUT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DECEMBRE') NOT NULL,
-    annee INT NOT NULL,
-    medecin_id BIGINT NOT NULL,
-
-
-creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     last_modification_date TIMESTAMP NULL,
-     created_by VARCHAR(64),
-     updated_by VARCHAR(64),
-    FOREIGN KEY fk_ur_medecin(medecin_id) REFERENCES mdecin(id) ON DELETE CASCADE
-
-
-);
 
 
 
@@ -228,11 +217,11 @@ idPatient BIGINT AUTO_INCREMENT PRIMARY KEY,
 nom VARCHAR(20),
 prenom VARCHAR(25) ,
 dateDeNaissance DATE,
-sexe ENUM{'HOMME','FEMME'} not null,
+sexe ENUM('HOMME','FEMME') NOT NULL,
 adresse VARCHAR(20),
 telephone VARCHAR(15),
-email Varchar(30)
-assurance ENUM('CNSS', 'CNOPS','PRIVEE','AUCUNE' )DEFAULT 'AUCUNE',
+email Varchar(30),
+assurance ENUM('CNSS', 'CNOPS','PRIVEE','AUCUNE') DEFAULT 'AUCUNE',
 creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      last_modification_date TIMESTAMP NULL,
      created_by VARCHAR(64),
@@ -325,7 +314,7 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      created_by VARCHAR(64),
      updated_by VARCHAR(64),
 
-CONSTRAINT fk_co_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(idConsultation) ON DELETE CASCADE,
+CONSTRAINT fk_co_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE,
        CONSTRAINT fk_do_dossierMedicale FOREIGN KEY (dossierMedicale_id) REFERENCES dossierMedicale(idDM) ON DELETE CASCADE
 
 );
@@ -344,7 +333,7 @@ created_by VARCHAR(64),
     CONSTRAINT fk_dp_medecin FOREIGN KEY (medecin_id) REFERENCES medecin(id) ON DELETE CASCADE,
     CONSTRAINT fk_dp_patient FOREIGN KEY (patient_id) REFERENCES patient(idPatient) ON DELETE CASCADE
 
-)
+);
 
 CREATE TABLE if not exists certificat (
                                           id_certif BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -360,7 +349,7 @@ CREATE TABLE if not exists certificat (
                                           last_modification_date TIMESTAMP NULL,
                                           created_by VARCHAR(64),
     updated_by VARCHAR(64),
-    CONSTRAINT fk_dc_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossiermedicale(idDm) ON DELETE CASCADE,
+    CONSTRAINT fk_dc_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDM) ON DELETE CASCADE,
     CONSTRAINT fk_cc_consultation FOREIGN KEY (consulation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE
     );
 
@@ -381,7 +370,7 @@ CREATE TABLE if not exists rdv (
     updated_by VARCHAR(64),
 
     CONSTRAINT fk_cr_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE,
-    CONSTRAINT fk_dr_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(id_Dm) ON DELETE CASCADE
+    CONSTRAINT fk_dr_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDM) ON DELETE CASCADE
 );
 
 CREATE TABLE if not exists intervention_medecin (
@@ -419,7 +408,7 @@ CREATE TABLE if not exists facture (
 
 
     CONSTRAINT fk_fs_situationfinanciere  FOREIGN KEY (situation_financiere_id) REFERENCES situation_financiere(idSf) ON DELETE CASCADE,
-    CONSTRAINT fk_fc_consultation  FOREIGN KEY (consultation_id) REFERENCES consultation(idConsultation) ON DELETE CASCADE
+    CONSTRAINT fk_fc_consultation  FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS situation_financiere (
@@ -435,7 +424,7 @@ CREATE TABLE IF NOT EXISTS situation_financiere (
     last_modification_date TIMESTAMP NULL,
     created_by VARCHAR(64),
     updated_by VARCHAR(64),
-    CONSTRAINT fk_ds_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDm) ON DELETE CASCADE
+    CONSTRAINT fk_ds_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDM) ON DELETE CASCADE
 );
 
 CREATE TABLE consultation (
@@ -450,7 +439,7 @@ CREATE TABLE consultation (
                               last_modification_date TIMESTAMP NULL,
                               created_by VARCHAR(64),
                               updated_by VARCHAR(64),
-                            constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossier_medicale(idDm) ON DELETE CASCADE
+                            constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDM) ON DELETE CASCADE
 
 );
 
