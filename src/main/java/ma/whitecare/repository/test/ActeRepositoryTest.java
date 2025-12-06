@@ -79,7 +79,7 @@ public class ActeRepositoryTest {
                 System.out.println("*".repeat(50));
                 try {
                     // 2. Attendre 3 secondes
-                    Thread.sleep(10000);
+                    Thread.sleep(15000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -23,7 +23,7 @@ public class AntecedentRepositoryTest {
 
         try {
 
-            //testFindAll();
+            testFindAll();
             //testCreateAntecedent();
             //testupdateAntecedent();
             //testdeleteByIdAntecedent();

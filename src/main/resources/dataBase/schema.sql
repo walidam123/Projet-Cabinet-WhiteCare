@@ -117,7 +117,7 @@ create table if not exists revenues(
     last_modification_date TIMESTAMP NULL,
     created_by VARCHAR(64),
     updated_by VARCHAR(64),
-    FOREIGN KEY fk_ur_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE,
+    FOREIGN KEY fk_urr_cabinet_medicale(cabinet_medicale_id) REFERENCES cabinet_medicale(id) ON DELETE CASCADE
 
 );
 
@@ -324,7 +324,7 @@ creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      created_by VARCHAR(64),
      updated_by VARCHAR(64),
 
-CONSTRAINT fk_co_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(idConsultation) ON DELETE CASCADE,
+CONSTRAINT fk_co_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE,
        CONSTRAINT fk_do_dossierMedicale FOREIGN KEY (dossierMedicale_id) REFERENCES dossierMedicale(idDM) ON DELETE CASCADE
 
 );
@@ -343,7 +343,7 @@ created_by VARCHAR(64),
     CONSTRAINT fk_dp_medecin FOREIGN KEY (medecin_id) REFERENCES medecin(id) ON DELETE CASCADE,
     CONSTRAINT fk_dp_patient FOREIGN KEY (patient_id) REFERENCES patient(idPatient) ON DELETE CASCADE
 
-)
+);
 
 CREATE TABLE if not exists certificat (
                                           id_certif BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -380,7 +380,7 @@ CREATE TABLE if not exists rdv (
     updated_by VARCHAR(64),
 
     CONSTRAINT fk_cr_consultation FOREIGN KEY (consultation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE,
-    CONSTRAINT fk_dr_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(id_Dm) ON DELETE CASCADE
+    CONSTRAINT fk_dr_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDm) ON DELETE CASCADE
 );
 
 CREATE TABLE if not exists intervention_medecin (
@@ -418,7 +418,7 @@ CREATE TABLE if not exists facture (
 
 
     CONSTRAINT fk_fs_situationfinanciere  FOREIGN KEY (situation_financiere_id) REFERENCES situation_financiere(idSf) ON DELETE CASCADE,
-    CONSTRAINT fk_fc_consultation  FOREIGN KEY (consultation_id) REFERENCES consultation(idConsultation) ON DELETE CASCADE
+    CONSTRAINT fk_fc_consultation  FOREIGN KEY (consultation_id) REFERENCES consultation(id_Consultation) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS situation_financiere (
@@ -449,7 +449,7 @@ CREATE TABLE consultation (
                               last_modification_date TIMESTAMP NULL,
                               created_by VARCHAR(64),
                               updated_by VARCHAR(64),
-                            constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossier_medicale(idDm) ON DELETE CASCADE
+                            constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossiermedicale(idDm) ON DELETE CASCADE
 
 );
 

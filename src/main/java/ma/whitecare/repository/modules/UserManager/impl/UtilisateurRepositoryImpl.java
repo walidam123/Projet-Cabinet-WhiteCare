@@ -5,6 +5,8 @@ import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.user.Utilisateur;
 import ma.whitecare.repository.common.RowMappers;
 import ma.whitecare.repository.modules.UserManager.api.UtilisateurRepository;
+import ma.whitecare.repository.modules.auth.AuthentificationRepository;
+import ma.whitecare.repository.modules.auth.AuthenticationRepositoryImpl;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,7 +15,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class UtilisateurRepositoryImpl implements UtilisateurRepository {
+    // Injection du repository d'authentification pour le hashage
+    private final AuthentificationRepository authRepository;
 
+    public UtilisateurRepositoryImpl() {
+        this.authRepository = new AuthenticationRepositoryImpl(); // Ou utiliser l'injection de dépendances
+    }
 
     @Override
     public Optional<Utilisateur> findByLogin(String login) {
@@ -177,14 +184,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
     @Override
     public void updatePassword(Long userId, String newPasswordHash) {
-        String sql = "UPDATE utilisateur SET password_hash = ?, last_modification_date = ? WHERE id = ?";
-        try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, newPasswordHash);
-            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setLong(3, userId);
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        authRepository.changePassword(userId,newPasswordHash);
     }
 
     @Override
@@ -250,6 +250,16 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
 
     @Override
     public void create(Utilisateur newElement) {
+
+        // VÉRIFICATION IMPORTANTE : S'assurer que le mot de passe est hashé
+        if (newElement.getMotDePass() == null || newElement.getMotDePass().isEmpty()) {
+            throw new IllegalArgumentException("Le mot de passe est requis pour créer un utilisateur");
+        }
+
+        // HASHER LE MOT DE PASSE AVANT L'INSERTION
+
+        String hashedPassword = authRepository.hashPassword(newElement.getMotDePass());
+        newElement.setMotDePass(hashedPassword);
         String sql = "INSERT INTO utilisateur (nom, prenom, email, adresse, cin, tel, sexe, login, password_hash, " +
                 "last_login_date, date_naissance, actif, creation_date, last_modification_date, created_by, updated_by) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
