@@ -15,6 +15,8 @@ public interface RoleRepository extends CrudRepository<Role,Long> {
     Optional<Role> findByLibelle(LibelleRole libelle);
     Optional<Role> findByLibelleString(String libelle);
 
+
+    Long findIdByLibelle(LibelleRole role);
     void assignRoleToUser(Long userId, Long roleId);
 
 

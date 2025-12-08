@@ -33,7 +33,7 @@ public interface UtilisateurRepository extends CrudRepository<Utilisateur,Long> 
     List<Utilisateur> findSecretaires();
     // === STATISTICS ===
     long countAll();
-
+    boolean existsById(Long userId);
     List<Utilisateur> findWithPagination(int offset, int limit);
 
     void updatePassword(Long userId, String newPasswordHash);

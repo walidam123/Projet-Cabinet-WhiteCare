@@ -40,6 +40,18 @@ public class RoleRepositoryImpl implements RoleRepository {
         }    }
 
     @Override
+    public Long findIdByLibelle(LibelleRole role) {
+        String sql = "SELECT id FROM role WHERE libelle = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, role.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.getLong("id");
+            }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    @Override
     public void assignRoleToUser(Long userId, Long roleId) {
         String sql = "INSERT INTO utilisateur_role (utilisateur_id, role_id) VALUES (?, ?)";
         try (Connection c = SessionFactory.getInstance().getConnection();

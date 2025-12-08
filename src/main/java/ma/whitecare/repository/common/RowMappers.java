@@ -42,7 +42,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) patientRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) patientRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) patientRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         patientRow.setCreePar(rs.getString("created_by"));
         patientRow.setModifiePar(rs.getString("updated_by"));
         return patientRow;
@@ -59,7 +59,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) antecedentRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) antecedentRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) antecedentRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         antecedentRow.setCreePar(rs.getString("created_by"));
         antecedentRow.setModifiePar(rs.getString("updated_by"));
         return antecedentRow;
@@ -77,7 +77,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) revenueRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) revenueRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) revenueRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         revenueRow.setCreePar(rs.getString("created_by"));
         revenueRow.setModifiePar(rs.getString("updated_by"));
         return revenueRow;
@@ -93,7 +93,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) acteRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) acteRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) acteRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         acteRow.setCreePar(rs.getString("created_by"));
         acteRow.setModifiePar(rs.getString("updated_by"));
 
@@ -118,7 +118,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) CabinetRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) CabinetRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) CabinetRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         CabinetRow.setCreePar(rs.getString("created_by"));
         CabinetRow.setModifiePar(rs.getString("updated_by"));
 
@@ -174,7 +174,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) ChargesRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) ChargesRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) ChargesRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         ChargesRow.setCreePar(rs.getString("created_by"));
         ChargesRow.setModifiePar(rs.getString("updated_by"));
         return ChargesRow;
@@ -189,7 +189,7 @@ public final class RowMappers {
                 .dateCalcul(rs.getDate("dateCalcul").toLocalDate())
                 .cabinetMedicaleId(rs.getLong("cabinet_medicale_id"))
                 .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
@@ -203,7 +203,7 @@ public final class RowMappers {
                 .annee(rs.getInt("annee"))
                 .medecinId(rs.getLong("medecin_id"))
                 .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
@@ -235,7 +235,7 @@ public final class RowMappers {
                 .idRole(rs.getLong("id"))
                 .libelle(LibelleRole.valueOf(rs.getString("libelle")))
                 .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 // Les privilèges seront chargés séparément
@@ -260,7 +260,7 @@ public final class RowMappers {
                         rs.getDate("date_naissance").toLocalDate() : null)
                 .actif(rs.getBoolean("actif"))
                 .dateCreation(rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate())
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime().toLocalDate())
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();

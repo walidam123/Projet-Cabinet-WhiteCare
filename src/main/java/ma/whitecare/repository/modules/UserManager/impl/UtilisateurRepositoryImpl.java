@@ -166,8 +166,18 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             return rs.getLong(1);
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
+@Override
+    public boolean existsById(Long userId){
+    String sql = "SELECT 1 FROM utilisateur WHERE id = ?";
+    try (Connection c = SessionFactory.getInstance().getConnection();
+         PreparedStatement ps = c.prepareStatement(sql)) {
+        ps.setLong(1, userId);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    } catch (SQLException e) { throw new RuntimeException(e); }
 
-
+}
     @Override
     public List<Utilisateur> findWithPagination(int offset, int limit) {
         String sql = "SELECT * FROM utilisateur ORDER BY nom, prenom LIMIT ? OFFSET ?";

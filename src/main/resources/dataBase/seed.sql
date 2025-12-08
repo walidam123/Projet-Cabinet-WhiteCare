@@ -10,3 +10,12 @@ INSERT INTO antecedents (nom, categorie, niveau_de_risque, created_by, updated_b
                                                                                        ('Dépression', 'Psychiatrique', 'MOYEN', 'system', 'system'),
                                                                                        ('Migraines', 'Neurologique', 'FAIBLE', 'system', 'system'),
                                                                                        ('Tabagisme actif', 'Comportemental', 'ELEVE', 'system', 'system');
+
+INSERT INTO role (libelle,creation_date, last_modification_date, created_by, updated_by)
+VALUES ('ADMIN',CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system_test', 'system_test');
+
+INSERT INTO role (libelle,creation_date, last_modification_date, created_by, updated_by)
+VALUES ('MEDECIN',CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system_test', 'system_test');
+
+INSERT INTO role (libelle,creation_date, last_modification_date, created_by, updated_by)
+VALUES ('SECRETAIRE',CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system');
