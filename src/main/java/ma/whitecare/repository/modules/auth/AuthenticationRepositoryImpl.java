@@ -139,13 +139,5 @@ public class AuthenticationRepositoryImpl implements AuthentificationRepository 
         }
     }
 
-    @Override
-    public boolean validateUserSession(Long userId, String token) {
-        return false;
-    }
 
-    @Override
-    public void invalidateUserSessions(Long userId) {
-
-    }
 }

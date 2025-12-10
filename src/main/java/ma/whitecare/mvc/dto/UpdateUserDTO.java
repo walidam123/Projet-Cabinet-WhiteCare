@@ -1,6 +1,7 @@
 package ma.whitecare.mvc.dto;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.enums.Sexe;
 
@@ -9,7 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
+
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserDTO {
@@ -33,4 +35,10 @@ public class UpdateUserDTO {
     private Sexe sexe;
     private boolean actif;
     private List<LibelleRole> roles;
+
+
+    public boolean getActif() {
+        return actif;
+    }
+
 }

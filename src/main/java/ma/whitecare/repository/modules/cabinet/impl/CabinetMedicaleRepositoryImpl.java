@@ -149,8 +149,21 @@ public class CabinetMedicaleRepositoryImpl implements CabinetMedicaleRepository 
         return Optional.empty();
     }
 
+    @Override
+    public boolean existsById(Long cabinetId){
+        String sql = "SELECT 1 FROM cabinet_medicale WHERE id = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, cabinetId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) { throw new RuntimeException(e); }
 
-//TEST/TEST/TEST
+    }
+
+
+    //TEST/TEST/TEST
     @Override
     public Double calculateTotalCharges(Long cabinetId) {
         String sql = "SELECT SUM(montant) FROM charges WHERE cabinet_medicale_id = ?";

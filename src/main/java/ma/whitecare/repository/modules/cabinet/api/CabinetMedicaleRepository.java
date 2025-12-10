@@ -14,7 +14,7 @@ public interface CabinetMedicaleRepository extends CrudRepository<CabinetMedical
     Optional<CabinetMedicale> findByEmail(String email);
 
     Optional<CabinetMedicale> findByCin(String cin);
-
+    boolean existsById(Long cabinetId);
 //test//test//test
     Double calculateTotalCharges(Long cabinetId);
 

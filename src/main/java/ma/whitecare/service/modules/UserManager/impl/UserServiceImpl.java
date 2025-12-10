@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
         user.setAdresse(userDTO.getAdresse());
         user.setDateNaissance(userDTO.getDateNaissance());
         user.setSexe(userDTO.getSexe());
-        user.setActif(userDTO.isActif());
+        user.setActif(userDTO.getActif());
 
         // Mettre à jour les champs d'audit
         user.setModifiePar("system"); // À remplacer par l'utilisateur connecté

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.FormeMedicament;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 
 public class Medicament extends BaseEntity {
 
@@ -25,6 +26,20 @@ public class Medicament extends BaseEntity {
     private FormeMedicament forme;
     private Boolean remboursable;
     private  Double prixUnitaire;
-    private String Description ;
+    private String description ;
     private List<Prescription> prescriptionList= null;
+
+    @Override
+    public String toString() {
+        return "Medicament{" +
+                "idMct=" + idMct +
+                ", nom='" + nom + '\'' +
+                ", laboratoire='" + laboratoire + '\'' +
+                ", type='" + type + '\'' +
+                ", forme=" + forme +
+                ", remboursable=" + remboursable +
+                ", prixUnitaire=" + prixUnitaire +
+                ", description='" + description + '\''
+                ;
+    }
 }

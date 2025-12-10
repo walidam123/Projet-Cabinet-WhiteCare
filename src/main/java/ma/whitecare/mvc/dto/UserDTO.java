@@ -27,7 +27,6 @@ import java.util.List;
         private LocalDate dateNaissance;
         private Sexe sexe;
         private boolean actif;
-        private boolean compteVerrouille;
         private List<LibelleRole> roles;
         private LocalDate dateCreation;
         private LocalDateTime derniereConnexion;

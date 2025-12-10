@@ -17,6 +17,5 @@ public interface AuthentificationRepository {
 
 
     void updateLastLogin(Long userId);
-    boolean validateUserSession(Long userId, String token);
-    void invalidateUserSessions(Long userId);
+
 }

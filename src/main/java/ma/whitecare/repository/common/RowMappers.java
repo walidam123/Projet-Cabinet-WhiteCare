@@ -17,6 +17,7 @@ import ma.whitecare.entities.user.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -386,7 +387,38 @@ public final class RowMappers {
     }
 
 
+    public static Medicament mapResultSetToMedicament(ResultSet rs) throws SQLException {
+        Medicament medicament = new Medicament();
 
+        medicament.setIdMct(rs.getLong("idMct"));
+        medicament.setNom(rs.getString("nom"));
+        medicament.setLaboratoire(rs.getString("laboratoire"));
+        medicament.setType(rs.getString("type"));
+
+        String formeStr = rs.getString("forme");
+        if (formeStr != null) {
+            try {
+                medicament.setForme(FormeMedicament.valueOf(formeStr));
+            } catch (IllegalArgumentException e) {
+                medicament.setForme(null);
+            }
+        }
+
+        medicament.setRemboursable(rs.getBoolean("remboursable"));
+        medicament.setPrixUnitaire(rs.getDouble("prixUnitaire"));
+        medicament.setDescription(rs.getString("description"));
+
+        // Champs d'audit
+        medicament.setDateCreation(rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate());
+        Timestamp modifDate = rs.getTimestamp("last_modification_date");
+        if (modifDate != null) {
+            medicament.setDateDerniereModification(modifDate.toLocalDateTime().toLocalDate());
+        }
+        medicament.setCreePar(rs.getString("created_by"));
+        medicament.setModifiePar(rs.getString("updated_by"));
+
+        return medicament;
+    }
 
 
     private static Long getLong(ResultSet rs, String column) throws SQLException {
