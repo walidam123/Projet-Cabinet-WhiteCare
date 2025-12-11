@@ -10,6 +10,7 @@ import ma.whitecare.entities.financial.Revenues;
 import ma.whitecare.entities.medical.Acte;
 import ma.whitecare.entities.medical.Certificat;
 import ma.whitecare.entities.medical.Medicament;
+import ma.whitecare.entities.medical.Ordonnance;
 import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.enums.*;
 import ma.whitecare.entities.patient.Antecedents;
@@ -420,7 +421,29 @@ public final class RowMappers {
         return medicament;
     }
 
+    public static Ordonnance mapResultSetToOrdonnance(ResultSet rs) throws SQLException{
+        Ordonnance ordonnance = new Ordonnance();
+        ordonnance.setIdOrd(rs.getLong("idOrd"));
+        ordonnance.setDate(rs.getDate("date").toLocalDate());
 
+
+        ordonnance.setDateCreation(rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate());
+
+        ordonnance.setConsultationid(rs.getLong("consultation_id"));
+        ordonnance.setDossierMedicaleid(rs.getLong("dossierMedicale_id"));
+         ordonnance.setDateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime().toLocalDate());
+
+
+        ordonnance.setCreePar(rs.getString("created_by"));
+        ordonnance.setModifiePar(rs.getString("updated_by"));
+
+
+
+
+        return ordonnance;
+
+
+    }
     private static Long getLong(ResultSet rs, String column) throws SQLException {
         return rs.getLong(column);
     }
