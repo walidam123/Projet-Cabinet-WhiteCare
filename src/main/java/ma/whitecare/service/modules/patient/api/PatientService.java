@@ -1,5 +1,6 @@
 package ma.whitecare.service.modules.patient.api;
 
+import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.entities.patient.Patient;
 
 import java.time.LocalDate;

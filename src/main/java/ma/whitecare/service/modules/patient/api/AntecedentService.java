@@ -1,4 +1,4 @@
-package ma.whitecare.service.modules.Antecedent.api;
+package ma.whitecare.service.modules.patient.api;
 
 import ma.whitecare.entities.enums.NiveauDeRisque;
 import ma.whitecare.entities.patient.Antecedents;

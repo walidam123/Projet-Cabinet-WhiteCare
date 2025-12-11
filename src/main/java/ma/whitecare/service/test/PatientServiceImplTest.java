@@ -22,7 +22,12 @@ public class PatientServiceImplTest {
         try {
             // Création
             Patient created = testCreatePatient();
-
+            try {
+                // 2. Attendre 3 secondes
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             // Lecture
             testGetAllPatients();
             testGetPatientById(created.getId_Patient());

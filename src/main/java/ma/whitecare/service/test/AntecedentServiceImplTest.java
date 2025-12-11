@@ -4,8 +4,8 @@ import ma.whitecare.entities.enums.NiveauDeRisque;
 import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.repository.modules.patient.api.AntecedentRepository;
 import ma.whitecare.repository.modules.patient.impl.AntecedentRepositoryImpl;
-import ma.whitecare.service.modules.Antecedent.api.AntecedentService;
-import ma.whitecare.service.modules.Antecedent.impl.AntecedentServiceImpl;
+import ma.whitecare.service.modules.patient.api.AntecedentService;
+import ma.whitecare.service.modules.patient.impl.AntecedentServiceImpl;
 
 import java.util.List;
 

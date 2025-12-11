@@ -1,9 +1,9 @@
-package ma.whitecare.service.modules.Antecedent.impl;
+package ma.whitecare.service.modules.patient.impl;
 
 import ma.whitecare.entities.enums.NiveauDeRisque;
 import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.repository.modules.patient.api.AntecedentRepository;
-import ma.whitecare.service.modules.Antecedent.api.AntecedentService;
+import ma.whitecare.service.modules.patient.api.AntecedentService;
 
 import java.util.List;
 import java.util.Optional;
