@@ -421,29 +421,35 @@ public final class RowMappers {
         return medicament;
     }
 
-    public static Ordonnance mapResultSetToOrdonnance(ResultSet rs) throws SQLException{
+    public static Ordonnance mapResultSetToOrdonnance(ResultSet rs) throws SQLException {
         Ordonnance ordonnance = new Ordonnance();
+
         ordonnance.setIdOrd(rs.getLong("idOrd"));
         ordonnance.setDate(rs.getDate("date").toLocalDate());
 
-
-        ordonnance.setDateCreation(rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate());
+        // creation_date (jamais null normalement)
+        Timestamp creationTs = rs.getTimestamp("creation_date");
+        if (creationTs != null) {
+            ordonnance.setDateCreation(creationTs.toLocalDateTime().toLocalDate());
+        }
 
         ordonnance.setConsultationid(rs.getLong("consultation_id"));
         ordonnance.setDossierMedicaleid(rs.getLong("dossierMedicale_id"));
-         ordonnance.setDateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime().toLocalDate());
 
+        // last_modification_date -> peut etre null !!
+        Timestamp modifTs = rs.getTimestamp("last_modification_date");
+        if (modifTs != null) {
+            ordonnance.setDateDerniereModification(modifTs.toLocalDateTime().toLocalDate());
+        } else {
+            ordonnance.setDateDerniereModification(null);
+        }
 
         ordonnance.setCreePar(rs.getString("created_by"));
         ordonnance.setModifiePar(rs.getString("updated_by"));
 
-
-
-
         return ordonnance;
-
-
     }
+
     private static Long getLong(ResultSet rs, String column) throws SQLException {
         return rs.getLong(column);
     }
