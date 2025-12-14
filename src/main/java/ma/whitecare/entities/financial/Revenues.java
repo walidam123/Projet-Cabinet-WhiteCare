@@ -23,19 +23,20 @@ public class Revenues extends BaseEntity {
     private LocalDateTime date;
 
 
-    private Long cabinetMedicaleId;
+    private CabinetMedicale Cabinet;
+
 
 
     @Override
     public String toString() {
-        return String.format(
-                "Revenues{id=%d, title='%s', montant=%.2f MAD, date=%s, cabinetId=%d}",
-                id != null ? id : 0,
-                titre != null ? titre : "N/A",
-                montant != null ? montant : 0.0,
-                date != null ? date.toLocalDate().toString() : "N/A",
-                cabinetMedicaleId != null ? cabinetMedicaleId : 0
-        );
+        return """
+            Revenues {
+                id = %d,
+                titre = '%s',
+                montant = %.2f,
+                date = %s
+            }
+            """.formatted(id, titre, montant, date);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ma.whitecare.repository.test;
 
+import ma.whitecare.entities.cabinet.CabinetMedicale;
 import ma.whitecare.entities.financial.Revenues;
 import ma.whitecare.repository.modules.cabinet.api.RevenuesRepository;
 import ma.whitecare.repository.modules.cabinet.impl.RevenuesRepositoryImpl;
@@ -17,6 +18,8 @@ public class RevenuesRepositoryTest {
         System.out.println("=== DEBUT DES TESTS PATIENT REPOSITORY ===\n");
 
         try {
+            CabinetMedicale cabinettest=new CabinetMedicale();
+            cabinettest.setId(testCabinetId);
             // 1. TEST CREATE
             System.out.println("1. 📝 Test création revenue...");
             Revenues revenue = Revenues.builder()
@@ -24,7 +27,7 @@ public class RevenuesRepositoryTest {
                     .description("Consultation du Dr. Smith")
                     .montant(300.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(testCabinetId)
+                    .Cabinet(cabinettest)
                     .creePar("test_user")
                     .modifiePar("test_user")
                     .build();

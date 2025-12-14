@@ -20,4 +20,18 @@ public abstract class BaseEntity {
     protected LocalDate dateDerniereModification;
     protected String modifiePar;
     protected String creePar;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BaseEntity)) return false;
+        BaseEntity that = (BaseEntity) o;
+        return idEntite != null && idEntite.equals(that.idEntite);
+    }
+
+    @Override
+    public int hashCode() {
+        return idEntite != null ? idEntite.hashCode() : 0;
+    }
+
 }

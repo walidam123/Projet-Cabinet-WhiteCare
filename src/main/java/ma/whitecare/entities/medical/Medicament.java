@@ -30,16 +30,30 @@ public class Medicament extends BaseEntity {
     private List<Prescription> prescriptionList= null;
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Medicament)) return false;
+        Medicament that = (Medicament) o;
+        return idMct != null && idMct.equals(that.idMct);
+    }
+
+    @Override
+    public int hashCode() {
+        return idMct != null ? idMct.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
-        return "Medicament{" +
-                "idMct=" + idMct +
-                ", nom='" + nom + '\'' +
-                ", laboratoire='" + laboratoire + '\'' +
-                ", type='" + type + '\'' +
-                ", forme=" + forme +
-                ", remboursable=" + remboursable +
-                ", prixUnitaire=" + prixUnitaire +
-                ", description='" + description + '\''
-                ;
+        return """
+            Medicament {
+                id = %d,
+                nom = '%s',
+                laboratoire = '%s',
+                forme = %s,
+                prixUnitaire = %.2f, 
+                prescriptionCount = '%d',
+            }
+            """.formatted(idMct, nom, laboratoire, forme,
+                prixUnitaire != null ? prixUnitaire : 0.0, prescriptionList == null ? 0 : prescriptionList.size());
     }
 }

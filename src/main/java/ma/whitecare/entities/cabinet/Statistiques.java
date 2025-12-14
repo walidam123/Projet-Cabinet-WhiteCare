@@ -21,7 +21,7 @@ public class Statistiques extends BaseEntity {
     private CategorieStatistique categorie;
     private Double chiffre;
     private LocalDate dateCalcul;
-    Long cabinetMedicaleId;
+    private CabinetMedicale cabinet;
 
 
 
@@ -29,15 +29,15 @@ public class Statistiques extends BaseEntity {
 
     @Override
     public String toString() {
-        return String.format(
-                "Statistiques{id=%d, nom='%s', categorie=%s, valeur=%.2f, date=%s, cabinetId=%d}",
-                id != null ? id : 0,
-                nom != null ? nom : "N/A",
-                categorie != null ? categorie.name() : "N/A",
-                chiffre,
-                dateCalcul != null ? dateCalcul.toString() : "N/A",
-                cabinetMedicaleId != null ? cabinetMedicaleId : 0
-        );
+        return """
+            Statistiques {
+                id = %d,
+                nom = '%s',
+                categorie = %s,
+                chiffre = %.2f,
+                dateCalcul = %s
+            }
+            """.formatted(id, nom, categorie, chiffre, dateCalcul);
     }
     @Override
     public int hashCode() {

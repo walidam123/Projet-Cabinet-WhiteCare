@@ -50,7 +50,7 @@ public class RevenuesRepositoryImpl implements RevenuesRepository {
             ps.setString(2, revenue.getDescription());
             ps.setDouble(3, revenue.getMontant());
             ps.setTimestamp(4, Timestamp.valueOf(revenue.getDate()));
-            ps.setLong(5, revenue.getCabinetMedicaleId());
+            ps.setLong(5, revenue.getCabinet().getId());
             Timestamp now = new Timestamp(System.currentTimeMillis());
             ps.setTimestamp(6, now);
             ps.setTimestamp(7, now);
@@ -77,7 +77,7 @@ public class RevenuesRepositoryImpl implements RevenuesRepository {
             ps.setString(2, revenue.getDescription());
             ps.setDouble(3, revenue.getMontant());
             ps.setTimestamp(4, Timestamp.valueOf(revenue.getDate()));
-            ps.setLong(5, revenue.getCabinetMedicaleId());
+            ps.setLong(5, revenue.getCabinet().getId());
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setString(7, revenue.getModifiePar());
             ps.setLong(8, revenue.getId());

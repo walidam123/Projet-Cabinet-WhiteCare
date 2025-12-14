@@ -6,10 +6,10 @@ import ma.whitecare.entities.agenda.Jour;
 import ma.whitecare.entities.cabinet.CabinetMedicale;
 import ma.whitecare.entities.cabinet.Statistiques;
 import ma.whitecare.entities.financial.Charges;
+import ma.whitecare.entities.financial.Facture;
 import ma.whitecare.entities.financial.Revenues;
-import ma.whitecare.entities.medical.Acte;
-import ma.whitecare.entities.medical.Certificat;
-import ma.whitecare.entities.medical.Medicament;
+import ma.whitecare.entities.financial.SituationFinanciere;
+import ma.whitecare.entities.medical.*;
 import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.enums.*;
 import ma.whitecare.entities.patient.Antecedents;
@@ -49,6 +49,129 @@ public final class RowMappers {
         return patientRow;
     }
 
+    public static Consultation mapConsultation(ResultSet rs) throws SQLException {
+        Consultation consultation = new Consultation();
+        consultation.setIdConsultation(rs.getLong("id_consultation"));
+        var date = rs.getDate("date");
+        if (date != null) {
+            consultation.setDate(date.toLocalDate());
+        }
+        String statutStr = rs.getString("statut");
+        if (statutStr != null) {
+            consultation.setStatut(StatutConsultation.valueOf(statutStr));
+        }
+        consultation.setObservationMedecin(rs.getString("observation_medecin"));
+
+        // Mapping de l'ID du dossier médical
+        Long dossierId = getLongSafe(rs, "dossier_medicale_id");
+        if (dossierId != null) {
+            DossierMedicale dossier = new DossierMedicale();
+            dossier.setIdDM(dossierId);
+            consultation.setDossierMedicale(dossier);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) consultation.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) consultation.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        consultation.setCreePar(rs.getString("created_by"));
+        consultation.setModifiePar(rs.getString("updated_by"));
+        return consultation;
+    }
+
+    public static InterventionMedecin mapInterventionMedecin(ResultSet rs) throws SQLException {
+        InterventionMedecin intervention = new InterventionMedecin();
+        intervention.setIdIM(rs.getLong("id_im"));
+        intervention.setPrixDePatient(rs.getDouble("prix_de_patient"));
+        int numDent = rs.getInt("num_dent");
+        intervention.setNumDent(rs.wasNull() ? null : numDent);
+
+        // Mapping des IDs des relations
+        Long consultationId = getLongSafe(rs, "consultation_id");
+        if (consultationId != null) {
+            Consultation consultation = new Consultation();
+            consultation.setIdConsultation(consultationId);
+            intervention.setConsultation(consultation);
+        }
+
+        Long acteId = getLongSafe(rs, "acte_id");
+        if (acteId != null) {
+            Acte acte = new Acte();
+            acte.setIdActe(acteId);
+            intervention.setActe(acte);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) intervention.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) intervention.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        intervention.setCreePar(rs.getString("created_by"));
+        intervention.setModifiePar(rs.getString("updated_by"));
+        return intervention;
+    }
+
+    public static DossierMedicale mapDossierMedicale(ResultSet rs) throws SQLException {
+        DossierMedicale dossier = new DossierMedicale();
+        dossier.setIdDM(rs.getLong("idDM"));
+        var dateCreation = rs.getDate("dateDecreation");
+        if (dateCreation != null) {
+            dossier.setDateDeCreation(dateCreation.toLocalDate());
+        }
+
+        // Mapping des IDs des relations pour éviter les nulls lors des updates
+        Long patientId = getLongSafe(rs, "patient_id");
+        if (patientId != null) {
+            Patient patient = new Patient();
+            patient.setId_Patient(patientId);
+            dossier.setPatient(patient);
+        }
+
+        Long medecinId = getLongSafe(rs, "medecin_id");
+        if (medecinId != null) {
+            Medecin medecin = new Medecin();
+            medecin.setIdUser(medecinId);
+            dossier.setMedecin(medecin);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) dossier.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) dossier.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        dossier.setCreePar(rs.getString("created_by"));
+        dossier.setModifiePar(rs.getString("updated_by"));
+        return dossier;
+    }
+
+    public static Prescription mapPrescription(ResultSet rs) throws SQLException {
+        Prescription prescription = new Prescription();
+        prescription.setIdPr(rs.getLong("idPr"));
+        prescription.setQuantite(rs.getInt("quantite"));
+        prescription.setFrequence(rs.getString("frequence"));
+        prescription.setDureeEnJours(rs.getInt("dureeEnjours"));
+
+        // Mapping des IDs des relations
+        Long medicamentId = getLongSafe(rs, "medicament_id");
+        if (medicamentId != null) {
+            Medicament medicament = new Medicament();
+            medicament.setIdMct(medicamentId);
+            prescription.setMedicament(medicament);
+        }
+
+        Long ordonnanceId = getLongSafe(rs, "ordonnance_id");
+        if (ordonnanceId != null) {
+            Ordonnance ordonnance = new Ordonnance();
+            ordonnance.setIdOrd(ordonnanceId);
+            prescription.setOrdonnance(ordonnance);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) prescription.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) prescription.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        prescription.setCreePar(rs.getString("created_by"));
+        prescription.setModifiePar(rs.getString("updated_by"));
+        return prescription;
+    }
 
     public static Antecedents mapAntecedent(ResultSet rs) throws SQLException {
         Antecedents antecedentRow = new Antecedents();
@@ -74,7 +197,15 @@ public final class RowMappers {
         revenueRow.setDescription(rs.getString("description"));
         revenueRow.setMontant(rs.getDouble("montant"));
         revenueRow.setDate(rs.getTimestamp("date").toLocalDateTime());
-        revenueRow.setCabinetMedicaleId(rs.getLong("cabinet_medicale_id"));
+
+        // Mapping des IDs des relations
+        Long CabinetMedicaleId = rs.getLong("cabinet_medicale_id");
+        if (CabinetMedicaleId != null) {
+            CabinetMedicale Cabinet = new CabinetMedicale();
+            Cabinet.setId(CabinetMedicaleId);
+            revenueRow.setCabinet(Cabinet);
+        }
+
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) revenueRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
@@ -171,7 +302,12 @@ public final class RowMappers {
         ChargesRow.setDescription(rs.getString("description"));
         ChargesRow.setMontant(rs.getDouble("montant"));
         ChargesRow.setDate(rs.getTimestamp("date").toLocalDateTime());
-        ChargesRow.setCabinetMedicaleId(rs.getLong("cabinet_medicale_id"));
+        Long cabinetId = getLong(rs, "cabinet_medicale_id");
+        if (cabinetId != null) {
+            CabinetMedicale cabinet = new CabinetMedicale();
+            cabinet.setId(cabinetId);
+            ChargesRow.setCabinet(cabinet);
+        }
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) ChargesRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
@@ -182,18 +318,25 @@ public final class RowMappers {
     }
 
     public static Statistiques mapStatistique(ResultSet rs) throws SQLException {
-        return Statistiques.builder()
-                .id(rs.getLong("id"))
-                .nom(rs.getString("nom"))
-                .categorie(CategorieStatistique.valueOf(rs.getString("categorie")))
-                .chiffre(rs.getDouble("chiffre"))
-                .dateCalcul(rs.getDate("dateCalcul").toLocalDate())
-                .cabinetMedicaleId(rs.getLong("cabinet_medicale_id"))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
-                .creePar(rs.getString("created_by"))
-                .modifiePar(rs.getString("updated_by"))
-                .build();
+
+        Statistiques StatRow=new Statistiques();
+        StatRow.setId(rs.getLong("id"));
+        StatRow.setNom(rs.getString("nom"));
+        StatRow.setCategorie(CategorieStatistique.valueOf(rs.getString("categorie")));
+        StatRow.setChiffre(rs.getDouble("chiffre"));
+        StatRow.setDateCalcul(rs.getDate("dateCalcul").toLocalDate());
+        Long cabinetId = getLong(rs, "cabinet_medicale_id");
+        if (cabinetId != null) {
+            CabinetMedicale cabinet = new CabinetMedicale();
+            cabinet.setId(cabinetId);
+            StatRow.setCabinet(cabinet);
+        }
+        StatRow.setDateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()));
+        StatRow.setDateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()));
+        StatRow.setCreePar(rs.getString("created_by"));
+        StatRow.setModifiePar(rs.getString("updated_by"));
+
+        return StatRow;
     }
 
 
@@ -420,6 +563,64 @@ public final class RowMappers {
         return medicament;
     }
 
+    public static Certificat mapResultSetToCertificat(ResultSet rs) throws SQLException {
+        Certificat certificat = new Certificat();
+
+        // Champs primaires
+        certificat.setIdCertif(rs.getLong("id_certif"));
+
+        // Dates
+        java.sql.Date dateDebutSql = rs.getDate("date_debut");
+        if (dateDebutSql != null) {
+            certificat.setDateDebut(dateDebutSql.toLocalDate());
+        }
+
+        java.sql.Date dateFinSql = rs.getDate("date_fin");
+        if (dateFinSql != null) {
+            certificat.setDateFin(dateFinSql.toLocalDate());
+        }
+
+        // Durée
+        certificat.setDuree(rs.getInt("duree"));
+
+        // Note médecin
+        certificat.setNoteMedecin(rs.getString("note_medecin"));
+
+        // Relations (créer des objets minimaux avec juste les IDs)
+        Long dossierId = rs.getLong("dossier_medicale_id");
+        if (!rs.wasNull()) {
+            DossierMedicale dossier = new DossierMedicale();
+            dossier.setIdDM(dossierId);
+            certificat.setDossierMedicale(dossier);
+        }
+
+        Long consultationId = rs.getLong("consultation_id");
+        if (!rs.wasNull()) {
+            Consultation consultation = new Consultation();
+            consultation.setIdConsultation(consultationId);
+            certificat.setConsultation(consultation);
+        }
+
+        // Champs d'audit
+        Timestamp creationDate = rs.getTimestamp("creation_date");
+        if (creationDate != null) {
+            certificat.setDateCreation(creationDate.toLocalDateTime().toLocalDate());
+        }
+
+        Timestamp modifDate = rs.getTimestamp("last_modification_date");
+        if (modifDate != null) {
+            certificat.setDateDerniereModification(modifDate.toLocalDateTime().toLocalDate());
+        }
+
+        certificat.setCreePar(rs.getString("created_by"));
+        certificat.setModifiePar(rs.getString("updated_by"));
+
+
+
+        return certificat;
+    }
+
+
 
     private static Long getLong(ResultSet rs, String column) throws SQLException {
         return rs.getLong(column);
@@ -453,5 +654,110 @@ public final class RowMappers {
     private static LocalDateTime getLocalDateTime(ResultSet rs, String column) throws SQLException {
         java.sql.Timestamp timestamp = rs.getTimestamp(column);
         return timestamp.toLocalDateTime();
+    }
+
+    public static Facture mapFacture(ResultSet rs) throws SQLException {
+        Facture facture = new Facture();
+        
+        facture.setIdFature(rs.getLong("id_facture"));
+        facture.setTotaleFacture(getDoubleSafe(rs, "totale_facture"));
+        facture.setTotalePayé(getDoubleSafe(rs, "totale_paye"));
+        facture.setReste(getDoubleSafe(rs, "reste"));
+        
+        String statutStr = rs.getString("statut");
+        if (statutStr != null) {
+            try {
+                facture.setStatut(StatutFacture.valueOf(statutStr));
+            } catch (IllegalArgumentException e) {
+                facture.setStatut(null);
+            }
+        }
+        
+        Timestamp dateFacture = rs.getTimestamp("date_facture");
+        if (dateFacture != null) {
+            facture.setDateFacture(dateFacture.toLocalDateTime());
+        }
+        
+        // Mapping des relations
+        Long situationFinanciereId = getLongSafe(rs, "situation_financiere_id");
+        if (situationFinanciereId != null) {
+            SituationFinanciere situationFinanciere = new SituationFinanciere();
+            situationFinanciere.setIdSF(situationFinanciereId);
+            facture.setSituationFinanciere(situationFinanciere);
+        }
+        
+        Long consultationId = getLongSafe(rs, "consultation_id");
+        if (consultationId != null) {
+            Consultation consultation = new Consultation();
+            consultation.setIdConsultation(consultationId);
+            facture.setConsultation(consultation);
+        }
+        
+        // Mapping des champs BaseEntity
+        Timestamp creationDate = rs.getTimestamp("creation_date");
+        if (creationDate != null) {
+            facture.setDateCreation(creationDate.toLocalDateTime().toLocalDate());
+        }
+        
+        Timestamp modifDate = rs.getTimestamp("last_modification_date");
+        if (modifDate != null) {
+            facture.setDateDerniereModification(modifDate.toLocalDateTime().toLocalDate());
+        }
+        
+        facture.setCreePar(rs.getString("created_by"));
+        facture.setModifiePar(rs.getString("updated_by"));
+        
+        return facture;
+    }
+
+    public static SituationFinanciere mapSituationFinanciere(ResultSet rs) throws SQLException {
+        SituationFinanciere situationFinanciere = new SituationFinanciere();
+        
+        situationFinanciere.setIdSF(rs.getLong("idSf"));
+        situationFinanciere.setTotaleDesActes(getDoubleSafe(rs, "totale_des_actes"));
+        situationFinanciere.setTotalePaye(getDoubleSafe(rs, "totale_paye"));
+        situationFinanciere.setCrédit(getDoubleSafe(rs, "credit"));
+        
+        String statutStr = rs.getString("statut");
+        if (statutStr != null) {
+            try {
+                situationFinanciere.setStatut(StatutSituationFinanciere.valueOf(statutStr));
+            } catch (IllegalArgumentException e) {
+                situationFinanciere.setStatut(null);
+            }
+        }
+        
+        String enPromoStr = rs.getString("en_promo");
+        if (enPromoStr != null) {
+            try {
+                situationFinanciere.setEnPromo(EnPromo.valueOf(enPromoStr));
+            } catch (IllegalArgumentException e) {
+                situationFinanciere.setEnPromo(null);
+            }
+        }
+        
+        // Mapping de la relation
+        Long dossierMedicaleId = getLongSafe(rs, "dossier_medicale_id");
+        if (dossierMedicaleId != null) {
+            DossierMedicale dossierMedicale = new DossierMedicale();
+            dossierMedicale.setIdDM(dossierMedicaleId);
+            situationFinanciere.setDossierMedicale(dossierMedicale);
+        }
+        
+        // Mapping des champs BaseEntity
+        Timestamp creationDate = rs.getTimestamp("creation_date");
+        if (creationDate != null) {
+            situationFinanciere.setDateCreation(creationDate.toLocalDateTime().toLocalDate());
+        }
+        
+        Timestamp modifDate = rs.getTimestamp("last_modification_date");
+        if (modifDate != null) {
+            situationFinanciere.setDateDerniereModification(modifDate.toLocalDateTime().toLocalDate());
+        }
+        
+        situationFinanciere.setCreePar(rs.getString("created_by"));
+        situationFinanciere.setModifiePar(rs.getString("updated_by"));
+        
+        return situationFinanciere;
     }
 }

@@ -37,6 +37,13 @@ public class CabinetMedicale extends BaseEntity {
     private List<Statistiques> statistiques;
    private List<Staff> staffList;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CabinetMedicale)) return false;
+        CabinetMedicale that = (CabinetMedicale) o;
+        return id != null && id.equals(that.id);
+    }
 
     @Override
     public String toString() {

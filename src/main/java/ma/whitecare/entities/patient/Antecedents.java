@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -17,7 +18,8 @@ public class Antecedents extends BaseEntity {
     private String nom;
     private  String categorie;
     private NiveauDeRisque niveauDeRisque;
-    private List<Long> patientsid;
+    private List<Patient> patients = new ArrayList<>();
+
 
     @Override
     public boolean equals(Object o) {
@@ -47,7 +49,7 @@ public class Antecedents extends BaseEntity {
                 nom,
                 categorie,
                 niveauDeRisque,
-                patientsid == null ? 0 : patientsid.size()
+                patients == null ? 0 : patients.size()
         );
     }
 }

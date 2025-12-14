@@ -51,7 +51,7 @@ public class StatistiqueRepositoryImpl implements StatistiqueRepository {
             ps.setString(2, newElement.getCategorie().name());
             ps.setDouble(3, newElement.getChiffre());
             ps.setDate(4, Date.valueOf(newElement.getDateCalcul()));
-            ps.setLong(5, newElement.getCabinetMedicaleId());
+            ps.setLong(5, newElement.getCabinet().getId());
             Timestamp now = new Timestamp(System.currentTimeMillis());
             ps.setTimestamp(6,now  );
             ps.setTimestamp(7,now );
@@ -78,7 +78,7 @@ public class StatistiqueRepositoryImpl implements StatistiqueRepository {
             ps.setString(2, newValuesElement.getCategorie().name());
             ps.setDouble(3, newValuesElement.getChiffre());
             ps.setDate(4, Date.valueOf(newValuesElement.getDateCalcul()));
-            ps.setLong(5, newValuesElement.getCabinetMedicaleId());
+            ps.setLong(5, newValuesElement.getCabinet().getId());
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setString(7, newValuesElement.getModifiePar());
             ps.setLong(8, newValuesElement.getId());
