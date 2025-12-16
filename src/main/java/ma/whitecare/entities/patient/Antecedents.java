@@ -24,7 +24,7 @@ public class Antecedents extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Patient)) return false;
+        if (!(o instanceof Antecedents)) return false;
         Antecedents that = (Antecedents) o;
         return id_Antecedent != null && id_Antecedent.equals(that.id_Antecedent);
     }

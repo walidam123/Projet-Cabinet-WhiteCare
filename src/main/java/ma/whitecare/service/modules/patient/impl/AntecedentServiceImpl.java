@@ -1,7 +1,10 @@
 package ma.whitecare.service.modules.patient.impl;
 
+import ma.whitecare.common.exceptions.AntecedentNotFoundException;
+import ma.whitecare.common.validators.AntecedentValidator;
 import ma.whitecare.entities.enums.NiveauDeRisque;
 import ma.whitecare.entities.patient.Antecedents;
+import ma.whitecare.mvc.dto.PatientAntecedentDto.AntecedentDto;
 import ma.whitecare.repository.modules.patient.api.AntecedentRepository;
 import ma.whitecare.service.modules.patient.api.AntecedentService;
 
@@ -23,19 +26,24 @@ public class AntecedentServiceImpl implements AntecedentService {
 
     @Override
     public Antecedents getAntecedentById(Long id) {
-        if (!antecedentRepository.existsById(id)) {
-            throw new RuntimeException("Antécédent non trouvé");
+        Antecedents antecedent = antecedentRepository.findById(id);
+        if (antecedent == null) {
+            throw new AntecedentNotFoundException(id);
         }
-        return antecedentRepository.findById(id);
+        return antecedent;
     }
 
     @Override
     public void createAntecedent(Antecedents antecedent) {
+        AntecedentDto dto = convertToDto(antecedent);
+        AntecedentValidator.validate(dto);
         antecedentRepository.create(antecedent);
     }
 
     @Override
     public void updateAntecedent(Antecedents antecedent) {
+        AntecedentDto dto = convertToDto(antecedent);
+        AntecedentValidator.validate(dto);
         antecedentRepository.update(antecedent);
     }
 
@@ -72,5 +80,16 @@ public class AntecedentServiceImpl implements AntecedentService {
     @Override
     public List<Antecedents> findPage(int limit, int offset) {
         return antecedentRepository.findPage(limit, offset);
+    }
+
+    // ✅ Méthode utilitaire pour convertir un Antecedents en DTO
+    private AntecedentDto convertToDto(Antecedents a) {
+        AntecedentDto dto = new AntecedentDto();
+        dto.setNom(a.getNom());
+        dto.setCategorie(a.getCategorie());
+        dto.setNiveauDeRisque(a.getNiveauDeRisque());
+        dto.setCreePar(a.getCreePar());
+        dto.setModifiePar(a.getModifiePar());
+        return dto;
     }
 }

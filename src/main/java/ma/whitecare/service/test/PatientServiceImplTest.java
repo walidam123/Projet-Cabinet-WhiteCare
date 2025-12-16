@@ -1,5 +1,6 @@
 package ma.whitecare.service.test;
 
+import ma.whitecare.common.exceptions.PatientNotFoundException;
 import ma.whitecare.entities.enums.Assurance;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.patient.Patient;
@@ -13,41 +14,30 @@ import java.util.List;
 
 public class PatientServiceImplTest {
 
-    private static PatientRepository patientRepository = new PatientRepositoryImpl();
-    private static PatientService patientService = new PatientServiceImpl(patientRepository);
+    private static final PatientRepository patientRepository = new PatientRepositoryImpl();
+    private static final PatientService patientService = new PatientServiceImpl(patientRepository);
 
     public static void main(String[] args) {
-        System.out.println("=== DEBUT DES TESTS PATIENT SERVICE ===\n");
+        System.out.println("=== DÉBUT DES TESTS PATIENT SERVICE ===\n");
 
         try {
-            // Création
             Patient created = testCreatePatient();
-            try {
-                // 2. Attendre 3 secondes
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // Lecture
             testGetAllPatients();
             testGetPatientById(created.getId_Patient());
-
-            // Update
             testUpdatePatient(created.getId_Patient());
-
-            // Recherches
             testFindByEmail(created.getEmail());
             testFindByTelephone(created.getTelephone());
-            testFindByAssurance("CNSS");
-            testFindBySexe("HOMME");
+            testFindByAssurance(created.getAssurance().name());
+            testFindBySexe(created.getSexe().name());
             testFindByDateNaissanceBetween();
-
-            // Suppression
             testDeletePatientById(created.getId_Patient());
 
-            System.out.println("\n=== TOUS LES TESTS ONT REUSSI ===");
+            // Test exception
+            testPatientNotFound();
+
+            System.out.println("\n=== TOUS LES TESTS ONT RÉUSSI ===");
         } catch (Exception e) {
-            System.err.println("❌ Erreur pendant les tests: " + e.getMessage());
+            System.err.println("❌ Erreur pendant les tests : " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -55,57 +45,47 @@ public class PatientServiceImplTest {
     private static Patient testCreatePatient() {
         System.out.println("=== TEST CREATE PATIENT ===");
         Patient patient = new Patient();
-        patient.setNom("TEST");
-        patient.setPrenom("Service");
-        patient.setDateNaissance(LocalDate.of(1990, 1, 1));
+        patient.setNom("Dupont");
+        patient.setPrenom("Jean");
+        patient.setDateNaissance(LocalDate.of(1990, 5, 20));
         patient.setSexe(Sexe.HOMME);
-        patient.setAdresse("Adresse test");
-        patient.setTelephone("0611111111");
-        patient.setEmail("service@test.com");
-        patient.setAssurance(Assurance.CNSS);
+        patient.setAdresse("Rabat, Maroc");
+        patient.setTelephone("0612345678");
+        patient.setEmail("jean.dupont@test.com");
+        patient.setAssurance(Assurance.CNOPS);
         patient.setCreePar("test_user");
         patient.setModifiePar("test_user");
 
         patientService.createPatient(patient);
-        System.out.println("✓ Patient créé avec ID: " + patient.getId_Patient());
+        System.out.println("✓ Patient créé avec ID : " + patient.getId_Patient());
         return patient;
     }
 
     private static void testGetAllPatients() {
         System.out.println("=== TEST GET ALL PATIENTS ===");
         List<Patient> patients = patientService.getAllPatients();
-        System.out.println("📊 Nombre total de patients: " + patients.size());
+        System.out.println("📊 Nombre total de patients : " + patients.size());
         patients.forEach(p -> System.out.println(" - " + p));
     }
 
     private static void testGetPatientById(Long id) {
         System.out.println("=== TEST GET PATIENT BY ID ===");
-        try {
-            Patient patient = patientService.getPatientById(id);
-            System.out.println("✓ Patient trouvé: " + patient);
-        } catch (RuntimeException e) {
-            System.out.println("⚠️ Patient avec ID " + id + " non trouvé");
-        }
+        Patient patient = patientService.getPatientById(id);
+        System.out.println("✓ Patient trouvé : " + patient);
     }
 
     private static void testUpdatePatient(Long id) {
         System.out.println("=== TEST UPDATE PATIENT ===");
         Patient patient = patientService.getPatientById(id);
-        if (patient != null) {
-            patient.setNom("MODIFIE");
-            patientService.updatePatient(patient);
-            System.out.println("✓ Patient modifié: " + patient);
-        }
+        patient.setNom("Dupont modifié");
+        patientService.updatePatient(patient);
+        System.out.println("✓ Patient modifié : " + patient);
     }
 
     private static void testDeletePatientById(Long id) {
         System.out.println("=== TEST DELETE PATIENT BY ID ===");
-        try {
-            patientService.deletePatientById(id);
-            System.out.println("✓ Patient supprimé avec ID: " + id);
-        } catch (Exception e) {
-            System.out.println("⚠️ Impossible de supprimer patient avec ID " + id);
-        }
+        patientService.deletePatientById(id);
+        System.out.println("✓ Patient supprimé avec ID : " + id);
     }
 
     private static void testFindByEmail(String email) {
@@ -114,9 +94,9 @@ public class PatientServiceImplTest {
         patients.forEach(p -> System.out.println("✓ " + p));
     }
 
-    private static void testFindByTelephone(String tel) {
+    private static void testFindByTelephone(String telephone) {
         System.out.println("=== TEST FIND BY TELEPHONE ===");
-        List<Patient> patients = patientService.findByTelephone(tel);
+        List<Patient> patients = patientService.findByTelephone(telephone);
         patients.forEach(p -> System.out.println("✓ " + p));
     }
 
@@ -139,5 +119,14 @@ public class PatientServiceImplTest {
                 LocalDate.of(2000, 12, 31)
         );
         patients.forEach(p -> System.out.println("✓ " + p));
+    }
+
+    private static void testPatientNotFound() {
+        System.out.println("=== TEST PATIENT NOT FOUND EXCEPTION ===");
+        try {
+            patientService.getPatientById(-1L); // ID inexistant
+        } catch (PatientNotFoundException e) {
+            System.out.println("✓ Exception bien lancée : " + e.getMessage());
+        }
     }
 }
