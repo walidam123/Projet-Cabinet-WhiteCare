@@ -1,6 +1,6 @@
 package ma.whitecare.common.validators;
 
-import ma.whitecare.mvc.dto.CreateMedecinDTO;
+import ma.whitecare.mvc.dto.UserDto.CreateMedecinDTO;
 
 
 import java.util.ArrayList;

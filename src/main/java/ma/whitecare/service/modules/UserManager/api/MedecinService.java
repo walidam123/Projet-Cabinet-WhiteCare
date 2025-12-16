@@ -1,13 +1,12 @@
 package ma.whitecare.service.modules.UserManager.api;
 
 import ma.whitecare.entities.user.Medecin;
-import ma.whitecare.mvc.dto.CreateMedecinDTO;
-import ma.whitecare.mvc.dto.MedecinDTO;
-import ma.whitecare.mvc.dto.MedecinStatisticsDTO;
-import ma.whitecare.mvc.dto.UpdateMedecinDTO;
+import ma.whitecare.mvc.dto.UserDto.CreateMedecinDTO;
+import ma.whitecare.mvc.dto.UserDto.MedecinDTO;
+import ma.whitecare.mvc.dto.UserDto.MedecinStatisticsDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateMedecinDTO;
 
 import java.util.List;
-import java.util.Map;
 
 public interface MedecinService {
 

@@ -6,8 +6,8 @@ package ma.whitecare.service.test;
 import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.user.Utilisateur;
-import ma.whitecare.mvc.dto.CreateUserDTO;
-import ma.whitecare.mvc.dto.UpdateUserDTO;
+import ma.whitecare.mvc.dto.UserDto.CreateUserDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateUserDTO;
 import ma.whitecare.repository.modules.UserManager.api.RoleRepository;
 import ma.whitecare.repository.modules.UserManager.api.UtilisateurRepository;
 import ma.whitecare.repository.modules.UserManager.impl.RoleRepositoryImpl;
@@ -16,7 +16,6 @@ import ma.whitecare.service.modules.UserManager.impl.UserServiceImpl;
 
 
 import java.time.LocalDate;
-import java.util.*;
 
 import java.util.Arrays;
 import java.util.List;

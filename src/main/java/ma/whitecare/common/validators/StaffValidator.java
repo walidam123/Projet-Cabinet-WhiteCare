@@ -2,7 +2,7 @@ package ma.whitecare.common.validators;
 
 
 
-import ma.whitecare.mvc.dto.UpdateStaffDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateStaffDTO;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

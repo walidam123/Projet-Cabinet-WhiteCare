@@ -1,10 +1,9 @@
 package ma.whitecare.service.modules.UserManager.api;
 
 import ma.whitecare.entities.user.Staff;
-import ma.whitecare.mvc.dto.StaffDTO;
-import ma.whitecare.mvc.dto.StaffStatisticsDTO;
-import ma.whitecare.mvc.dto.UpdateMedecinDTO;
-import ma.whitecare.mvc.dto.UpdateStaffDTO;
+import ma.whitecare.mvc.dto.UserDto.StaffDTO;
+import ma.whitecare.mvc.dto.UserDto.StaffStatisticsDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateStaffDTO;
 
 import java.util.List;
 

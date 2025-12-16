@@ -2,9 +2,8 @@ package ma.whitecare.service.test;
 
 
 
-import ma.whitecare.mvc.dto.StaffDTO;
-import ma.whitecare.mvc.dto.StaffStatisticsDTO;
-import ma.whitecare.mvc.dto.UpdateStaffDTO;
+import ma.whitecare.mvc.dto.UserDto.StaffDTO;
+import ma.whitecare.mvc.dto.UserDto.StaffStatisticsDTO;
 import ma.whitecare.repository.modules.UserManager.api.RoleRepository;
 import ma.whitecare.repository.modules.UserManager.api.UtilisateurRepository;
 import ma.whitecare.repository.modules.UserManager.impl.RoleRepositoryImpl;

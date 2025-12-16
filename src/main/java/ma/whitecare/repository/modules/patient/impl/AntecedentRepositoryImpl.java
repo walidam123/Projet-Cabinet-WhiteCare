@@ -25,7 +25,7 @@ public class AntecedentRepositoryImpl implements AntecedentRepository {
             while (rs.next()) out.add(RowMappers.mapAntecedent(rs));
         } catch (SQLException e) { throw new RuntimeException(e); }
         return out;
-    }
+    } 
 
     @Override
     public Antecedents findById(Long id) {

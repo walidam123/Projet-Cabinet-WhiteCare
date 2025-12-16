@@ -3,9 +3,9 @@ package ma.whitecare.common.validators;
 
 
 
-import ma.whitecare.mvc.dto.CreateUserDTO;
-import ma.whitecare.mvc.dto.UpdateUserDTO;
-import ma.whitecare.mvc.dto.UpdateProfileDTO;
+import ma.whitecare.mvc.dto.UserDto.CreateUserDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateUserDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateProfileDTO;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

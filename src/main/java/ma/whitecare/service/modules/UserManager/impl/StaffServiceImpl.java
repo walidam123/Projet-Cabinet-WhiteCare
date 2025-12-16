@@ -7,7 +7,7 @@ import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.user.Medecin;
 import ma.whitecare.entities.user.Secretaire;
 import ma.whitecare.entities.user.Staff;
-import ma.whitecare.mvc.dto.*;
+import ma.whitecare.mvc.dto.UserDto.*;
 import ma.whitecare.repository.modules.UserManager.api.StaffRepository;
 import ma.whitecare.repository.modules.cabinet.api.CabinetMedicaleRepository;
 import ma.whitecare.service.modules.UserManager.api.StaffService;

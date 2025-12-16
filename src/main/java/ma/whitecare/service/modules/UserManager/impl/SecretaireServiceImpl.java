@@ -5,16 +5,17 @@ import ma.whitecare.common.validators.SecretaireValidator;
 import ma.whitecare.common.validators.UserValidator;
 import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.user.Secretaire;
-import ma.whitecare.entities.user.Utilisateur;
-import ma.whitecare.mvc.dto.*;
 
+import ma.whitecare.mvc.dto.UserDto.CreateSecretaireDTO;
+import ma.whitecare.mvc.dto.UserDto.SecretaireDTO;
+import ma.whitecare.mvc.dto.UserDto.SecretaireStatisticsDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateSecretaireDTO;
 import ma.whitecare.repository.modules.UserManager.api.SecretaireRepository;
 import ma.whitecare.repository.modules.cabinet.api.CabinetMedicaleRepository;
 import ma.whitecare.service.modules.UserManager.api.SecretaireService;
 import ma.whitecare.service.modules.UserManager.api.UserService;
 
 import javax.validation.ValidationException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
