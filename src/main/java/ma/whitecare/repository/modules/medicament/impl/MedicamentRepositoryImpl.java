@@ -150,5 +150,20 @@ public class MedicamentRepositoryImpl implements MedicamentRepository {
             throw new RuntimeException("Erreur lors de la suppression du médicament ID: " + id, e);
         }
     }
+
+    @Override
+    public boolean existsById(Long medicamentId) {
+        String sql = "SELECT 1 FROM medicament WHERE idMct = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, medicamentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la vérification d'existence par ID: " + medicamentId, e);
+        }
+    }
 }
+
 

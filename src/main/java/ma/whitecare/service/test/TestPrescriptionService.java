@@ -1,6 +1,5 @@
 package ma.whitecare.service.test;
 
-import ma.whitecare.entities.medical.Prescription;
 import ma.whitecare.entities.medical.Ordonnance;
 import ma.whitecare.entities.medical.Medicament;
 import ma.whitecare.entities.medical.Consultation;
@@ -11,6 +10,9 @@ import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.enums.Assurance;
 import ma.whitecare.entities.enums.StatutConsultation;
 import ma.whitecare.entities.enums.FormeMedicament;
+import ma.whitecare.mvc.dto.dossierMedical.PrescriptionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreatePrescriptionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdatePrescriptionDTO;
 import ma.whitecare.repository.modules.dossierMedical.api.PrescriptionRepository;
 import ma.whitecare.repository.modules.ordonnance.api.OrdonnanceRepository;
 import ma.whitecare.repository.modules.medicament.api.MedicamentRepository;
@@ -44,7 +46,7 @@ public class TestPrescriptionService {
             DossierMedicalRepository dossierRepo = new DossierMedicalRepositoryImpl();
             PatientRepository patientRepo = new PatientRepositoryImpl();
             MedecinRepository medecinRepo = new MedecinRepositoryImpl();
-            PrescriptionServiceImpl prescriptionService = new PrescriptionServiceImpl(prescriptionRepo, ordonnanceRepo, medicamentRepo);
+            PrescriptionServiceImpl prescriptionService = new PrescriptionServiceImpl(prescriptionRepo, ordonnanceRepo, medicamentRepo, dossierRepo);
 
             // 2. Préparation: Créer les données de test nécessaires
             System.out.println("Préparation: Création des données de test");
@@ -122,21 +124,27 @@ public class TestPrescriptionService {
 
             // 3. TEST 1: Liste de toutes les prescriptions
             System.out.println("\n=== Test 1: Liste de toutes les prescriptions ===");
-            List<Prescription> allPrescriptions = prescriptionService.getAllPrescriptions();
+            List<PrescriptionDTO> allPrescriptions = prescriptionService.getAllPrescriptions();
+            System.out.println("Liste des prescriptions:");
+            for (PrescriptionDTO p : allPrescriptions) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Quantité: " + p.getQuantité() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours" +
+                    ", Fréquence: " + p.getFréquence());
+            }
             System.out.println("✓ Nombre total de prescriptions: " + allPrescriptions.size());
 
             // 4. TEST 2: Création d'une prescription
             System.out.println("\n=== Test 2: Création d'une prescription ===");
-            Prescription newPrescription = new Prescription();
-            newPrescription.setQuantité(2);
-            newPrescription.setFréquence("2 fois par jour");
-            newPrescription.setDuréeEnJours(7);
-            newPrescription.setOrdonnance(ordonnance);
-            newPrescription.setMedicament(medicament);
-            newPrescription.setCreePar("system");
-            newPrescription.setModifiePar("system");
+            CreatePrescriptionDTO createDTO = CreatePrescriptionDTO.builder()
+                    .ordonnanceId(ordonnance.getIdOrd())
+                    .medicamentId(medicament.getIdMct())
+                    .quantité(2)
+                    .fréquence("2 fois par jour")
+                    .duréeEnJours(7)
+                    .build();
 
-            Prescription created = prescriptionService.createPrescription(newPrescription);
+            PrescriptionDTO created = prescriptionService.createPrescription(createDTO);
             System.out.println("✓ Prescription créée avec ID: " + created.getIdPr());
             System.out.println("  Quantité: " + created.getQuantité());
             System.out.println("  Fréquence: " + created.getFréquence());
@@ -144,28 +152,53 @@ public class TestPrescriptionService {
 
             // 5. TEST 3: Récupération par ID
             System.out.println("\n=== Test 3: Récupération par ID ===");
-            Prescription found = prescriptionService.getPrescriptionById(created.getIdPr());
+            PrescriptionDTO found = prescriptionService.getPrescriptionById(created.getIdPr());
             System.out.println("✓ Prescription trouvée: ID " + found.getIdPr());
 
             // 6. TEST 4: Recherche par ordonnance
             System.out.println("\n=== Test 4: Recherche par ordonnance ID ===");
-            List<Prescription> byOrdonnance = prescriptionService.findByOrdonnanceId(ordonnance.getIdOrd());
+            List<PrescriptionDTO> byOrdonnance = prescriptionService.findByOrdonnanceId(ordonnance.getIdOrd());
+            System.out.println("Prescriptions pour ordonnance ID " + ordonnance.getIdOrd() + ":");
+            for (PrescriptionDTO p : byOrdonnance) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Quantité: " + p.getQuantité() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours");
+            }
             System.out.println("✓ Prescriptions pour ordonnance ID " + ordonnance.getIdOrd() + ": " + byOrdonnance.size());
 
             // 7. TEST 5: Recherche par médicament
             System.out.println("\n=== Test 5: Recherche par médicament ID ===");
-            List<Prescription> byMedicament = prescriptionService.findByMedicamentId(medicament.getIdMct());
+            List<PrescriptionDTO> byMedicament = prescriptionService.findByMedicamentId(medicament.getIdMct());
+            System.out.println("Prescriptions pour médicament ID " + medicament.getIdMct() + ":");
+            for (PrescriptionDTO p : byMedicament) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Quantité: " + p.getQuantité() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours");
+            }
             System.out.println("✓ Prescriptions pour médicament ID " + medicament.getIdMct() + ": " + byMedicament.size());
 
             // 8. TEST 6: Recherche par durée supérieure
             System.out.println("\n=== Test 6: Recherche par durée supérieure ===");
-            List<Prescription> byDuree = prescriptionService.findByDureeSuperieure(7);
+            List<PrescriptionDTO> byDuree = prescriptionService.findByDureeSuperieure(7);
+            System.out.println("Prescriptions avec durée >= 7 jours:");
+            for (PrescriptionDTO p : byDuree) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours" +
+                    ", Quantité: " + p.getQuantité());
+            }
             System.out.println("✓ Prescriptions avec durée >= 7 jours: " + byDuree.size());
 
             // 9. TEST 7: Recherche par ordonnance et médicament
             System.out.println("\n=== Test 7: Recherche par ordonnance et médicament ===");
-            List<Prescription> byOrdonnanceAndMedicament = prescriptionService.findByOrdonnanceAndMedicament(
+            List<PrescriptionDTO> byOrdonnanceAndMedicament = prescriptionService.findByOrdonnanceAndMedicament(
                 ordonnance.getIdOrd(), medicament.getIdMct());
+            System.out.println("Prescriptions pour ordonnance ID " + ordonnance.getIdOrd() + 
+                " et médicament ID " + medicament.getIdMct() + ":");
+            for (PrescriptionDTO p : byOrdonnanceAndMedicament) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Quantité: " + p.getQuantité() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours");
+            }
             System.out.println("✓ Prescriptions pour ordonnance et médicament: " + byOrdonnanceAndMedicament.size());
 
             // 10. TEST 8: Calcul du coût total d'une ordonnance
@@ -189,18 +222,47 @@ public class TestPrescriptionService {
 
             // 13. TEST 11: Mise à jour
             System.out.println("\n=== Test 11: Mise à jour ===");
-            Prescription updatePrescription = new Prescription();
-            updatePrescription.setQuantité(3);
-            updatePrescription.setFréquence("3 fois par jour");
-            updatePrescription.setDuréeEnJours(10);
-            Prescription updated = prescriptionService.updatePrescription(created.getIdPr(), updatePrescription);
+            UpdatePrescriptionDTO updateDTO = UpdatePrescriptionDTO.builder()
+                    .quantité(3)
+                    .fréquence("3 fois par jour")
+                    .duréeEnJours(10)
+                    .build();
+            PrescriptionDTO updated = prescriptionService.updatePrescription(created.getIdPr(), updateDTO);
             System.out.println("✓ Prescription mise à jour");
             System.out.println("  Nouvelle quantité: " + updated.getQuantité());
             System.out.println("  Nouvelle fréquence: " + updated.getFréquence());
             System.out.println("  Nouvelle durée: " + updated.getDuréeEnJours() + " jours");
 
-            // 14. TEST 12: Suppression
-            System.out.println("\n=== Test 12: Suppression ===");
+            // 14. TEST 12: Prescriptions actives
+            System.out.println("\n=== Test 12: Prescriptions actives ===");
+            List<PrescriptionDTO> prescriptionsActives = prescriptionService.getPrescriptionsActives(testPatient.getId_Patient());
+            System.out.println("Prescriptions actives pour patient ID " + testPatient.getId_Patient() + ":");
+            for (PrescriptionDTO p : prescriptionsActives) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Quantité: " + p.getQuantité() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours" +
+                    ", Fréquence: " + p.getFréquence());
+            }
+            System.out.println("✓ Nombre de prescriptions actives: " + prescriptionsActives.size());
+
+            // 15. TEST 13: Historique prescriptions
+            System.out.println("\n=== Test 13: Historique prescriptions ===");
+            List<PrescriptionDTO> historique = prescriptionService.getHistoriquePrescriptions(testPatient.getId_Patient());
+            System.out.println("Historique des prescriptions pour patient ID " + testPatient.getId_Patient() + ":");
+            for (PrescriptionDTO p : historique) {
+                System.out.println("  - Prescription ID: " + p.getIdPr() + 
+                    ", Quantité: " + p.getQuantité() + 
+                    ", Durée: " + p.getDuréeEnJours() + " jours");
+            }
+            System.out.println("✓ Nombre de prescriptions dans l'historique: " + historique.size());
+
+            // 16. TEST 14: Suppression
+            System.out.println("\n=== Test 14: Suppression ===");
+            try {
+                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             prescriptionService.deletePrescription(created.getIdPr());
             System.out.println("✓ Prescription supprimée");
 

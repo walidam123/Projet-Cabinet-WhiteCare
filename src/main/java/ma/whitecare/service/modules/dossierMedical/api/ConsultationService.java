@@ -1,7 +1,10 @@
 package ma.whitecare.service.modules.dossierMedical.api;
 
-import ma.whitecare.entities.medical.Consultation;
 import ma.whitecare.entities.enums.StatutConsultation;
+import ma.whitecare.mvc.dto.dossierMedical.ConsultationDTO;
+import ma.whitecare.mvc.dto.dossierMedical.ConsultationCompleteDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreateConsultationDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdateConsultationDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,18 +12,18 @@ import java.util.List;
 public interface ConsultationService {
 
     // ========== CRUD CONSULTATION ==========
-    Consultation createConsultation(Consultation consultation);
-    Consultation updateConsultation(Long consultationId, Consultation consultation);
+    ConsultationDTO createConsultation(CreateConsultationDTO dto);
+    ConsultationDTO updateConsultation(Long consultationId, UpdateConsultationDTO dto);
     void deleteConsultation(Long consultationId);
-    Consultation getConsultationById(Long consultationId);
-    List<Consultation> getAllConsultations();
+    ConsultationDTO getConsultationById(Long consultationId);
+    List<ConsultationDTO> getAllConsultations();
 
     // ========== RECHERCHES SPÉCIFIQUES ==========
-    List<Consultation> findByDossierMedicalId(Long dossierId);
-    List<Consultation> findByStatut(StatutConsultation statut);
-    List<Consultation> findByDate(LocalDate date);
-    List<Consultation> findByDateBetween(LocalDate startDate, LocalDate endDate);
-    List<Consultation> findByDossierAndDate(Long dossierId, LocalDate date);
+    List<ConsultationDTO> findByDossierMedicalId(Long dossierId);
+    List<ConsultationDTO> findByStatut(StatutConsultation statut);
+    List<ConsultationDTO> findByDate(LocalDate date);
+    List<ConsultationDTO> findByDateBetween(LocalDate startDate, LocalDate endDate);
+    List<ConsultationDTO> findByDossierAndDate(Long dossierId, LocalDate date);
 
     // ========== GESTION STATUT ==========
     void changeStatut(Long consultationId, StatutConsultation nouveauStatut);
@@ -32,5 +35,9 @@ public interface ConsultationService {
     long countAllConsultations();
     long countByStatut(StatutConsultation statut);
     long countByDossierMedicalId(Long dossierId);
+
+    // ========== MÉTHODES MÉTIER IMPORTANTES ==========
+    List<ConsultationDTO> getConsultationsDuJour();
+    ConsultationCompleteDTO getConsultationComplete(Long consultationId);
 }
 

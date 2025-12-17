@@ -1,23 +1,26 @@
 package ma.whitecare.service.modules.dossierMedical.api;
 
-import ma.whitecare.entities.medical.InterventionMedecin;
+import ma.whitecare.mvc.dto.dossierMedical.InterventionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreateInterventionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdateInterventionDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface InterventionService {
 
     // ========== CRUD INTERVENTION ==========
-    InterventionMedecin createIntervention(InterventionMedecin intervention);
-    InterventionMedecin updateIntervention(Long interventionId, InterventionMedecin intervention);
+    InterventionDTO createIntervention(CreateInterventionDTO dto);
+    InterventionDTO updateIntervention(Long interventionId, UpdateInterventionDTO dto);
     void deleteIntervention(Long interventionId);
-    InterventionMedecin getInterventionById(Long interventionId);
-    List<InterventionMedecin> getAllInterventions();
+    InterventionDTO getInterventionById(Long interventionId);
+    List<InterventionDTO> getAllInterventions();
 
     // ========== RECHERCHES SPÉCIFIQUES ==========
-    List<InterventionMedecin> findByConsultationId(Long consultationId);
-    List<InterventionMedecin> findByActeId(Long acteId);
-    List<InterventionMedecin> findByNumDent(Integer numDent);
-    List<InterventionMedecin> findByConsultationAndActe(Long consultationId, Long acteId);
+    List<InterventionDTO> findByConsultationId(Long consultationId);
+    List<InterventionDTO> findByActeId(Long acteId);
+    List<InterventionDTO> findByNumDent(Integer numDent);
+    List<InterventionDTO> findByConsultationAndActe(Long consultationId, Long acteId);
 
     // ========== CALCULS ==========
     Double calculateTotalByConsultation(Long consultationId);
@@ -29,5 +32,9 @@ public interface InterventionService {
     long countAllInterventions();
     long countByConsultationId(Long consultationId);
     long countByActeId(Long acteId);
+
+    // ========== MÉTHODES MÉTIER IMPORTANTES ==========
+    Map<Integer, List<InterventionDTO>> getHistoriqueDentaire(Long dossierId);
+    Double getCoutTotalPatient(Long dossierId);
 }
 

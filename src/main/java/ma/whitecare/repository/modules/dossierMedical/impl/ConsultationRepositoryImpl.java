@@ -2,10 +2,12 @@ package ma.whitecare.repository.modules.dossierMedical.impl;
 
 import ma.whitecare.conf.SessionFactory;
 import ma.whitecare.entities.medical.Consultation;
+import ma.whitecare.entities.enums.StatutConsultation;
 import ma.whitecare.repository.common.RowMappers;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +150,161 @@ public class ConsultationRepositoryImpl implements ConsultationRepository {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erreur lors de la suppression de la consultation ID: " + id, e);
+        }
+    }
+
+    @Override
+    public List<Consultation> findByDossierMedicalId(Long dossierId) {
+        String sql = "SELECT * FROM consultation WHERE dossier_medicale_id = ? ORDER BY date DESC, id_consultation";
+        List<Consultation> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, dossierId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapConsultation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par dossier médical ID: " + dossierId, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<Consultation> findByStatut(StatutConsultation statut) {
+        String sql = "SELECT * FROM consultation WHERE statut = ? ORDER BY date DESC, id_consultation";
+        List<Consultation> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, statut.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapConsultation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par statut: " + statut, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<Consultation> findByDate(LocalDate date) {
+        String sql = "SELECT * FROM consultation WHERE date = ? ORDER BY id_consultation";
+        List<Consultation> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(date));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapConsultation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par date: " + date, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<Consultation> findByDateBetween(LocalDate startDate, LocalDate endDate) {
+        String sql = "SELECT * FROM consultation WHERE date >= ? AND date <= ? ORDER BY date DESC, id_consultation";
+        List<Consultation> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(startDate));
+            ps.setDate(2, Date.valueOf(endDate));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapConsultation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche entre les dates: " + startDate + " et " + endDate, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<Consultation> findByDossierAndDate(Long dossierId, LocalDate date) {
+        String sql = "SELECT * FROM consultation WHERE dossier_medicale_id = ? AND date = ? ORDER BY id_consultation";
+        List<Consultation> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, dossierId);
+            ps.setDate(2, Date.valueOf(date));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapConsultation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par dossier et date", e);
+        }
+        return out;
+    }
+
+    @Override
+    public boolean existsById(Long consultationId) {
+        String sql = "SELECT 1 FROM consultation WHERE id_consultation = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, consultationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la vérification d'existence par ID: " + consultationId, e);
+        }
+    }
+
+    @Override
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM consultation";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du comptage de toutes les consultations", e);
+        }
+    }
+
+    @Override
+    public long countByStatut(StatutConsultation statut) {
+        String sql = "SELECT COUNT(*) FROM consultation WHERE statut = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, statut.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du comptage par statut: " + statut, e);
+        }
+    }
+
+    @Override
+    public long countByDossierMedicalId(Long dossierId) {
+        String sql = "SELECT COUNT(*) FROM consultation WHERE dossier_medicale_id = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, dossierId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du comptage par dossier médical ID: " + dossierId, e);
         }
     }
 }

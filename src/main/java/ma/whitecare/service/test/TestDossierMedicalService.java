@@ -1,13 +1,18 @@
 package ma.whitecare.service.test;
 
-import ma.whitecare.entities.medical.DossierMedicale;
 import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.user.Medecin;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.enums.Assurance;
+import ma.whitecare.mvc.dto.dossierMedical.DossierMedicalDTO;
+import ma.whitecare.mvc.dto.dossierMedical.ConsultationDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreateDossierMedicalDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdateDossierMedicalDTO;
+import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
 import ma.whitecare.repository.modules.patient.api.PatientRepository;
 import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
+import ma.whitecare.repository.modules.dossierMedical.impl.ConsultationRepositoryImpl;
 import ma.whitecare.repository.modules.dossierMedical.impl.DossierMedicalRepositoryImpl;
 import ma.whitecare.repository.modules.patient.impl.PatientRepositoryImpl;
 import ma.whitecare.repository.modules.UserManager.impl.MedecinRepositoryImpl;
@@ -26,7 +31,8 @@ public class TestDossierMedicalService {
             DossierMedicalRepository dossierRepo = new DossierMedicalRepositoryImpl();
             PatientRepository patientRepo = new PatientRepositoryImpl();
             MedecinRepository medecinRepo = new MedecinRepositoryImpl();
-            DossierMedicalServiceImpl dossierService = new DossierMedicalServiceImpl(dossierRepo, patientRepo, medecinRepo);
+            ConsultationRepository consultationRepo = new ConsultationRepositoryImpl();
+            DossierMedicalServiceImpl dossierService = new DossierMedicalServiceImpl(dossierRepo, patientRepo, medecinRepo, consultationRepo);
 
             // 2. Créer un patient de test
             System.out.println("Préparation: Création d'un patient de test");
@@ -61,35 +67,48 @@ public class TestDossierMedicalService {
 
             // 4. TEST 1: Création d'un dossier médical
             System.out.println("\n=== Test 1: Création d'un dossier médical ===");
-            DossierMedicale dossier = new DossierMedicale();
-            dossier.setDateDeCreation(LocalDate.now());
-            dossier.setPatient(testPatient);
-            dossier.setMedecin(testMedecin);
-            dossier.setCreePar("system");
-            dossier.setModifiePar("system");
+            CreateDossierMedicalDTO createDTO = CreateDossierMedicalDTO.builder()
+                    .patientId(testPatient.getId_Patient())
+                    .medecinId(testMedecin.getIdUser())
+                    .dateDeCreation(LocalDate.now())
+                    .build();
 
-            DossierMedicale createdDossier = dossierService.createDossierMedical(dossier);
+            DossierMedicalDTO createdDossier = dossierService.createDossierMedical(createDTO);
             System.out.println("✓ Dossier médical créé avec ID: " + createdDossier.getIdDM());
             System.out.println("  Date de création: " + createdDossier.getDateDeCreation());
 
             // 5. TEST 2: Récupération par ID
             System.out.println("\n=== Test 2: Récupération par ID ===");
-            DossierMedicale foundDossier = dossierService.getDossierMedicalById(createdDossier.getIdDM());
+            DossierMedicalDTO foundDossier = dossierService.getDossierMedicalById(createdDossier.getIdDM());
             System.out.println("✓ Dossier trouvé: ID " + foundDossier.getIdDM());
 
             // 6. TEST 3: Liste de tous les dossiers
             System.out.println("\n=== Test 3: Liste de tous les dossiers ===");
-            List<DossierMedicale> allDossiers = dossierService.getAllDossiersMedicaux();
+            List<DossierMedicalDTO> allDossiers = dossierService.getAllDossiersMedicaux();
+            System.out.println("Liste des dossiers:");
+            for (DossierMedicalDTO d : allDossiers) {
+                System.out.println("  - Dossier ID: " + d.getIdDM() + 
+                    ", Patient ID: " + (d.getPatientId() != null ? d.getPatientId() : "N/A") +
+                    ", Date: " + d.getDateDeCreation());
+            }
             System.out.println("✓ Nombre total de dossiers: " + allDossiers.size());
 
             // 7. TEST 4: Recherche par patient
             System.out.println("\n=== Test 4: Recherche par patient ID ===");
-            List<DossierMedicale> byPatient = dossierService.findByPatientId(testPatient.getId_Patient());
+            List<DossierMedicalDTO> byPatient = dossierService.findByPatientId(testPatient.getId_Patient());
+            System.out.println("Dossiers trouvés pour le patient ID " + testPatient.getId_Patient() + ":");
+            for (DossierMedicalDTO d : byPatient) {
+                System.out.println("  - Dossier ID: " + d.getIdDM() + ", Date: " + d.getDateDeCreation());
+            }
             System.out.println("✓ Dossiers trouvés pour le patient: " + byPatient.size());
 
             // 8. TEST 5: Recherche par médecin
             System.out.println("\n=== Test 5: Recherche par médecin ID ===");
-            List<DossierMedicale> byMedecin = dossierService.findByMedecinId(testMedecin.getIdUser());
+            List<DossierMedicalDTO> byMedecin = dossierService.findByMedecinId(testMedecin.getIdUser());
+            System.out.println("Dossiers trouvés pour le médecin ID " + testMedecin.getIdUser() + ":");
+            for (DossierMedicalDTO d : byMedecin) {
+                System.out.println("  - Dossier ID: " + d.getIdDM() + ", Date: " + d.getDateDeCreation());
+            }
             System.out.println("✓ Dossiers trouvés pour le médecin: " + byMedecin.size());
 
             // 9. TEST 6: Vérification d'existence
@@ -99,14 +118,23 @@ public class TestDossierMedicalService {
 
             // 10. TEST 7: Recherche par date
             System.out.println("\n=== Test 7: Recherche par date ===");
-            List<DossierMedicale> byDate = dossierService.findByDateCreation(LocalDate.now());
+            List<DossierMedicalDTO> byDate = dossierService.findByDateCreation(LocalDate.now());
+            System.out.println("Dossiers créés aujourd'hui (" + LocalDate.now() + "):");
+            for (DossierMedicalDTO d : byDate) {
+                System.out.println("  - Dossier ID: " + d.getIdDM() + ", Patient ID: " + 
+                    (d.getPatientId() != null ? d.getPatientId() : "N/A"));
+            }
             System.out.println("✓ Dossiers créés aujourd'hui: " + byDate.size());
 
             // 11. TEST 8: Recherche par période
             System.out.println("\n=== Test 8: Recherche par période ===");
             LocalDate startDate = LocalDate.now().minusDays(30);
             LocalDate endDate = LocalDate.now();
-            List<DossierMedicale> byPeriod = dossierService.findByDateCreationBetween(startDate, endDate);
+            List<DossierMedicalDTO> byPeriod = dossierService.findByDateCreationBetween(startDate, endDate);
+            System.out.println("Dossiers créés entre " + startDate + " et " + endDate + ":");
+            for (DossierMedicalDTO d : byPeriod) {
+                System.out.println("  - Dossier ID: " + d.getIdDM() + ", Date: " + d.getDateDeCreation());
+            }
             System.out.println("✓ Dossiers créés dans les 30 derniers jours: " + byPeriod.size());
 
             // 12. TEST 9: Statistiques
@@ -120,16 +148,43 @@ public class TestDossierMedicalService {
 
             // 13. TEST 10: Mise à jour
             System.out.println("\n=== Test 10: Mise à jour ===");
-            DossierMedicale updateDossier = new DossierMedicale();
-            updateDossier.setDateDeCreation(LocalDate.now().minusDays(1));
-            updateDossier.setPatient(testPatient);
-            updateDossier.setMedecin(testMedecin);
-            DossierMedicale updated = dossierService.updateDossierMedical(createdDossier.getIdDM(), updateDossier);
+            UpdateDossierMedicalDTO updateDTO = UpdateDossierMedicalDTO.builder()
+                    .dateDeCreation(LocalDate.now().minusDays(1))
+                    .build();
+            DossierMedicalDTO updated = dossierService.updateDossierMedical(createdDossier.getIdDM(), updateDTO);
             System.out.println("✓ Dossier mis à jour");
             System.out.println("  Nouvelle date: " + updated.getDateDeCreation());
 
-            // 14. TEST 11: Suppression
-            System.out.println("\n=== Test 11: Suppression ===");
+            // 14. TEST 11: Dernière consultation
+            System.out.println("\n=== Test 11: Dernière consultation ===");
+            Long dossierId = createdDossier.getIdDM();
+            System.out.println("Dossier ID choisi: " + dossierId);
+            ConsultationDTO derniereConsultation = dossierService.getDerniereConsultation(dossierId);
+            if (derniereConsultation != null) {
+                System.out.println("✓ Dernière consultation trouvée: ID " + derniereConsultation.getIdConsultation());
+                System.out.println("  Date: " + derniereConsultation.getDate());
+                System.out.println("  Statut: " + derniereConsultation.getStatut());
+            } else {
+                System.out.println("✓ Aucune consultation trouvée pour ce dossier (normal si aucune consultation n'a été créée)");
+            }
+
+            // 15. TEST 12: Historique complet patient
+            System.out.println("\n=== Test 12: Historique complet patient ===");
+            List<ConsultationDTO> historique = dossierService.getHistoriqueCompletPatient(testPatient.getId_Patient());
+            System.out.println("Historique des consultations pour le patient ID " + testPatient.getId_Patient() + ":");
+            for (ConsultationDTO c : historique) {
+                System.out.println("  - Consultation ID: " + c.getIdConsultation() + 
+                    ", Date: " + c.getDate() + ", Statut: " + c.getStatut());
+            }
+            System.out.println("✓ Nombre de consultations dans l'historique: " + historique.size());
+
+            // 16. TEST 13: Suppression
+            System.out.println("\n=== Test 13: Suppression ===");
+            try {
+                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             dossierService.deleteDossierMedical(createdDossier.getIdDM());
             System.out.println("✓ Dossier supprimé");
 

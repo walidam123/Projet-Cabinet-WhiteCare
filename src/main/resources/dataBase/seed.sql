@@ -1,4 +1,4 @@
-note-- Insertion des antécédents médicaux les plus courants
+-- Insertion des antécédents médicaux les plus courants
 INSERT INTO antecedents (nom, categorie, niveau_de_risque, created_by, updated_by) VALUES
                                                                                        ('Hypertension artérielle', 'Cardiovasculaire', 'MOYEN', 'system', 'system'),
                                                                                        ('Diabète de type 2', 'Métabolique', 'ELEVE', 'system', 'system'),

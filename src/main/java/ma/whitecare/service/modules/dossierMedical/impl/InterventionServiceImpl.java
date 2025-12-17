@@ -3,30 +3,42 @@ package ma.whitecare.service.modules.dossierMedical.impl;
 import ma.whitecare.entities.medical.InterventionMedecin;
 import ma.whitecare.entities.medical.Consultation;
 import ma.whitecare.entities.medical.Acte;
+import ma.whitecare.mvc.dto.dossierMedical.InterventionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreateInterventionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdateInterventionDTO;
 import ma.whitecare.repository.modules.dossierMedical.api.InterventionRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
+import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
 import ma.whitecare.repository.modules.actes.api.ActeRepository;
 import ma.whitecare.service.modules.dossierMedical.api.InterventionService;
 
 import javax.validation.ValidationException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class InterventionServiceImpl implements InterventionService {
 
     private final InterventionRepository interventionRepository;
     private final ConsultationRepository consultationRepository;
     private final ActeRepository acteRepository;
+    private final DossierMedicalRepository dossierMedicalRepository;
 
     public InterventionServiceImpl(InterventionRepository interventionRepository,
                                     ConsultationRepository consultationRepository,
-                                    ActeRepository acteRepository) {
+                                    ActeRepository acteRepository,
+                                    DossierMedicalRepository dossierMedicalRepository) {
         this.interventionRepository = interventionRepository;
         this.consultationRepository = consultationRepository;
         this.acteRepository = acteRepository;
+        this.dossierMedicalRepository = dossierMedicalRepository;
     }
 
     @Override
-    public InterventionMedecin createIntervention(InterventionMedecin intervention) {
+    public InterventionDTO createIntervention(CreateInterventionDTO dto) {
+        // Convertir DTO en Entity
+        InterventionMedecin intervention = convertToEntity(dto);
         // Validation
         validateIntervention(intervention);
 
@@ -64,61 +76,27 @@ public class InterventionServiceImpl implements InterventionService {
 
         // Créer l'intervention
         interventionRepository.create(intervention);
-        return intervention;
+        return convertToDTO(intervention);
     }
 
     @Override
-    public InterventionMedecin updateIntervention(Long interventionId, InterventionMedecin intervention) {
-        InterventionMedecin existingIntervention = getInterventionById(interventionId);
+    public InterventionDTO updateIntervention(Long interventionId, UpdateInterventionDTO dto) {
+        InterventionMedecin existingIntervention = interventionRepository.findById(interventionId);
+        if (existingIntervention == null) {
+            throw new ValidationException("Intervention non trouvée avec l'ID: " + interventionId);
+        }
+
+        // Mettre à jour l'entité depuis le DTO
+        updateEntityFromDTO(existingIntervention, dto);
 
         // Validation
-        validateIntervention(intervention);
-
-        // Vérifier que la consultation existe si modifiée
-        if (intervention.getConsultation() != null && intervention.getConsultation().getIdConsultation() != null) {
-            Consultation consultation = consultationRepository.findById(intervention.getConsultation().getIdConsultation());
-            if (consultation == null) {
-                throw new ValidationException("La consultation avec l'ID " + intervention.getConsultation().getIdConsultation() + " n'existe pas");
-            }
-        }
-
-        // Vérifier que l'acte existe si modifié
-        if (intervention.getActe() != null && intervention.getActe().getIdActe() != null) {
-            Acte acte = acteRepository.findById(intervention.getActe().getIdActe());
-            if (acte == null) {
-                throw new ValidationException("L'acte avec l'ID " + intervention.getActe().getIdActe() + " n'existe pas");
-            }
-        }
-
-        // Valider le prix si modifié
-        if (intervention.getPrixDePatient() != null && intervention.getPrixDePatient() < 0) {
-            throw new ValidationException("Le prix de l'intervention doit être positif ou nul");
-        }
-
-        // Valider le numéro de dent si modifié
-        if (intervention.getNumDent() != null && (intervention.getNumDent() < 1 || intervention.getNumDent() > 32)) {
-            throw new ValidationException("Le numéro de dent doit être entre 1 et 32");
-        }
-
-        // Mettre à jour les champs
-        if (intervention.getPrixDePatient() != null) {
-            existingIntervention.setPrixDePatient(intervention.getPrixDePatient());
-        }
-        if (intervention.getNumDent() != null) {
-            existingIntervention.setNumDent(intervention.getNumDent());
-        }
-        if (intervention.getActe() != null) {
-            existingIntervention.setActe(intervention.getActe());
-        }
-        if (intervention.getConsultation() != null) {
-            existingIntervention.setConsultation(intervention.getConsultation());
-        }
+        validateIntervention(existingIntervention);
 
         // Mettre à jour les champs d'audit
         existingIntervention.setModifiePar("system"); // À remplacer par l'utilisateur connecté
 
         interventionRepository.update(existingIntervention);
-        return existingIntervention;
+        return convertToDTO(existingIntervention);
     }
 
     @Override
@@ -130,67 +108,62 @@ public class InterventionServiceImpl implements InterventionService {
     }
 
     @Override
-    public InterventionMedecin getInterventionById(Long interventionId) {
+    public InterventionDTO getInterventionById(Long interventionId) {
         InterventionMedecin intervention = interventionRepository.findById(interventionId);
         if (intervention == null) {
             throw new ValidationException("Intervention non trouvée avec l'ID: " + interventionId);
         }
-        return intervention;
+        return convertToDTO(intervention);
     }
 
     @Override
-    public List<InterventionMedecin> getAllInterventions() {
-        return interventionRepository.findAll();
+    public List<InterventionDTO> getAllInterventions() {
+        return interventionRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<InterventionMedecin> findByConsultationId(Long consultationId) {
+    public List<InterventionDTO> findByConsultationId(Long consultationId) {
         if (consultationId == null) {
             throw new ValidationException("L'ID de la consultation ne peut pas être null");
         }
-        List<InterventionMedecin> allInterventions = getAllInterventions();
-        return allInterventions.stream()
-                .filter(i -> i.getConsultation() != null && consultationId.equals(i.getConsultation().getIdConsultation()))
-                .toList();
+        return interventionRepository.findByConsultationId(consultationId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<InterventionMedecin> findByActeId(Long acteId) {
+    public List<InterventionDTO> findByActeId(Long acteId) {
         if (acteId == null) {
             throw new ValidationException("L'ID de l'acte ne peut pas être null");
         }
-        List<InterventionMedecin> allInterventions = getAllInterventions();
-        return allInterventions.stream()
-                .filter(i -> i.getActe() != null && acteId.equals(i.getActe().getIdActe()))
-                .toList();
+        return interventionRepository.findByActeId(acteId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<InterventionMedecin> findByNumDent(Integer numDent) {
+    public List<InterventionDTO> findByNumDent(Integer numDent) {
         if (numDent == null) {
             throw new ValidationException("Le numéro de dent ne peut pas être null");
         }
         if (numDent < 1 || numDent > 32) {
             throw new ValidationException("Le numéro de dent doit être entre 1 et 32");
         }
-        List<InterventionMedecin> allInterventions = getAllInterventions();
-        return allInterventions.stream()
-                .filter(i -> numDent.equals(i.getNumDent()))
-                .toList();
+        return interventionRepository.findByNumDent(numDent).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<InterventionMedecin> findByConsultationAndActe(Long consultationId, Long acteId) {
+    public List<InterventionDTO> findByConsultationAndActe(Long consultationId, Long acteId) {
         if (consultationId == null || acteId == null) {
             throw new ValidationException("L'ID de la consultation et l'ID de l'acte sont requis");
         }
-        List<InterventionMedecin> allInterventions = getAllInterventions();
-        return allInterventions.stream()
-                .filter(i -> i.getConsultation() != null &&
-                        consultationId.equals(i.getConsultation().getIdConsultation()) &&
-                        i.getActe() != null &&
-                        acteId.equals(i.getActe().getIdActe()))
-                .toList();
+        return interventionRepository.findByConsultationAndActe(consultationId, acteId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -198,11 +171,7 @@ public class InterventionServiceImpl implements InterventionService {
         if (consultationId == null) {
             throw new ValidationException("L'ID de la consultation ne peut pas être null");
         }
-        List<InterventionMedecin> interventions = findByConsultationId(consultationId);
-        return interventions.stream()
-                .filter(i -> i.getPrixDePatient() != null)
-                .mapToDouble(InterventionMedecin::getPrixDePatient)
-                .sum();
+        return interventionRepository.calculateTotalByConsultation(consultationId);
     }
 
     @Override
@@ -210,22 +179,153 @@ public class InterventionServiceImpl implements InterventionService {
         if (interventionId == null) {
             return false;
         }
-        return interventionRepository.findById(interventionId) != null;
+        return interventionRepository.existsById(interventionId);
     }
 
     @Override
     public long countAllInterventions() {
-        return getAllInterventions().size();
+        return interventionRepository.countAll();
     }
 
     @Override
     public long countByConsultationId(Long consultationId) {
-        return findByConsultationId(consultationId).size();
+        if (consultationId == null) {
+            throw new ValidationException("L'ID de la consultation ne peut pas être null");
+        }
+        return interventionRepository.countByConsultationId(consultationId);
     }
 
     @Override
     public long countByActeId(Long acteId) {
-        return findByActeId(acteId).size();
+        if (acteId == null) {
+            throw new ValidationException("L'ID de l'acte ne peut pas être null");
+        }
+        return interventionRepository.countByActeId(acteId);
+    }
+
+    @Override
+    public Map<Integer, List<InterventionDTO>> getHistoriqueDentaire(Long dossierId) {
+        if (dossierId == null) {
+            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+        }
+        
+        // Vérifier que le dossier existe
+        if (dossierMedicalRepository.findById(dossierId) == null) {
+            throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
+        }
+        
+        // Récupérer toutes les consultations du dossier
+        List<Consultation> consultations = consultationRepository.findByDossierMedicalId(dossierId);
+        
+        // Récupérer toutes les interventions de toutes les consultations
+        List<InterventionMedecin> toutesInterventions = consultations.stream()
+                .flatMap(consultation -> interventionRepository.findByConsultationId(consultation.getIdConsultation()).stream())
+                .collect(Collectors.toList());
+        
+        // Grouper par numéro de dent et convertir en DTOs
+        Map<Integer, List<InterventionDTO>> historiqueParDent = new HashMap<>();
+        for (InterventionMedecin intervention : toutesInterventions) {
+            if (intervention.getNumDent() != null) {
+                historiqueParDent.computeIfAbsent(intervention.getNumDent(), k -> new java.util.ArrayList<>())
+                        .add(convertToDTO(intervention));
+            }
+        }
+        
+        return historiqueParDent;
+    }
+
+    @Override
+    public Double getCoutTotalPatient(Long dossierId) {
+        if (dossierId == null) {
+            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+        }
+        
+        // Vérifier que le dossier existe
+        if (dossierMedicalRepository.findById(dossierId) == null) {
+            throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
+        }
+        
+        // Récupérer toutes les consultations du dossier
+        List<Consultation> consultations = consultationRepository.findByDossierMedicalId(dossierId);
+        
+        // Calculer le coût total de toutes les interventions
+        double total = 0.0;
+        for (Consultation consultation : consultations) {
+            Double coutConsultation = calculateTotalByConsultation(consultation.getIdConsultation());
+            if (coutConsultation != null) {
+                total += coutConsultation;
+            }
+        }
+        
+        return total;
+    }
+
+    // ========== CONVERSION METHODS ==========
+    private InterventionMedecin convertToEntity(CreateInterventionDTO dto) {
+        // Charger la consultation
+        Consultation consultation = consultationRepository.findById(dto.getConsultationId());
+        if (consultation == null) {
+            throw new ValidationException("La consultation avec l'ID " + dto.getConsultationId() + " n'existe pas");
+        }
+
+        // Charger l'acte
+        Acte acte = acteRepository.findById(dto.getActeId());
+        if (acte == null) {
+            throw new ValidationException("L'acte avec l'ID " + dto.getActeId() + " n'existe pas");
+        }
+
+        // Construire l'entité
+        return InterventionMedecin.builder()
+                .consultation(consultation)
+                .acte(acte)
+                .prixDePatient(dto.getPrixDePatient())
+                .numDent(dto.getNumDent())
+                .build();
+    }
+
+    private void updateEntityFromDTO(InterventionMedecin entity, UpdateInterventionDTO dto) {
+        // Mettre à jour le prix si fourni
+        if (dto.getPrixDePatient() != null) {
+            entity.setPrixDePatient(dto.getPrixDePatient());
+        }
+
+        // Mettre à jour le numéro de dent si fourni
+        if (dto.getNumDent() != null) {
+            entity.setNumDent(dto.getNumDent());
+        }
+
+        // Mettre à jour l'acte si fourni
+        if (dto.getActeId() != null) {
+            Acte acte = acteRepository.findById(dto.getActeId());
+            if (acte == null) {
+                throw new ValidationException("L'acte avec l'ID " + dto.getActeId() + " n'existe pas");
+            }
+            entity.setActe(acte);
+        }
+
+        // Mettre à jour la consultation si fournie
+        if (dto.getConsultationId() != null) {
+            Consultation consultation = consultationRepository.findById(dto.getConsultationId());
+            if (consultation == null) {
+                throw new ValidationException("La consultation avec l'ID " + dto.getConsultationId() + " n'existe pas");
+            }
+            entity.setConsultation(consultation);
+        }
+    }
+
+    private InterventionDTO convertToDTO(InterventionMedecin entity) {
+        return InterventionDTO.builder()
+                .idIM(entity.getIdIM())
+                .prixDePatient(entity.getPrixDePatient())
+                .numDent(entity.getNumDent())
+                .acteId(entity.getActe() != null ? entity.getActe().getIdActe() : null)
+                .consultationId(entity.getConsultation() != null ? 
+                    entity.getConsultation().getIdConsultation() : null)
+                .dateCreation(entity.getDateCreation())
+                .dateDerniereModification(entity.getDateDerniereModification())
+                .createdBy(entity.getCreePar())
+                .updatedBy(entity.getModifiePar())
+                .build();
     }
 
     // ========== VALIDATION PRIVÉE ==========

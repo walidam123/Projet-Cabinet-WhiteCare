@@ -158,4 +158,158 @@ public class InterventionRepositoryImpl implements InterventionRepository {
             throw new RuntimeException("Erreur lors de la suppression de l'intervention ID: " + id, e);
         }
     }
+
+    @Override
+    public List<InterventionMedecin> findByConsultationId(Long consultationId) {
+        String sql = "SELECT * FROM intervention_medecin WHERE consultation_id = ? ORDER BY id_im";
+        List<InterventionMedecin> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, consultationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapInterventionMedecin(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par consultation ID: " + consultationId, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<InterventionMedecin> findByActeId(Long acteId) {
+        String sql = "SELECT * FROM intervention_medecin WHERE acte_id = ? ORDER BY id_im";
+        List<InterventionMedecin> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, acteId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapInterventionMedecin(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par acte ID: " + acteId, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<InterventionMedecin> findByNumDent(Integer numDent) {
+        String sql = "SELECT * FROM intervention_medecin WHERE num_dent = ? ORDER BY id_im";
+        List<InterventionMedecin> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, numDent);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapInterventionMedecin(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par numéro de dent: " + numDent, e);
+        }
+        return out;
+    }
+
+    @Override
+    public List<InterventionMedecin> findByConsultationAndActe(Long consultationId, Long acteId) {
+        String sql = "SELECT * FROM intervention_medecin WHERE consultation_id = ? AND acte_id = ? ORDER BY id_im";
+        List<InterventionMedecin> out = new ArrayList<>();
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, consultationId);
+            ps.setLong(2, acteId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(RowMappers.mapInterventionMedecin(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par consultation et acte", e);
+        }
+        return out;
+    }
+
+    @Override
+    public Double calculateTotalByConsultation(Long consultationId) {
+        String sql = "SELECT SUM(prix_de_patient) FROM intervention_medecin WHERE consultation_id = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, consultationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double total = rs.getDouble(1);
+                    return rs.wasNull() ? 0.0 : total;
+                }
+                return 0.0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du calcul du total par consultation ID: " + consultationId, e);
+        }
+    }
+
+    @Override
+    public boolean existsById(Long interventionId) {
+        String sql = "SELECT 1 FROM intervention_medecin WHERE id_im = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, interventionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la vérification d'existence par ID: " + interventionId, e);
+        }
+    }
+
+    @Override
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM intervention_medecin";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du comptage de toutes les interventions", e);
+        }
+    }
+
+    @Override
+    public long countByConsultationId(Long consultationId) {
+        String sql = "SELECT COUNT(*) FROM intervention_medecin WHERE consultation_id = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, consultationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du comptage par consultation ID: " + consultationId, e);
+        }
+    }
+
+    @Override
+    public long countByActeId(Long acteId) {
+        String sql = "SELECT COUNT(*) FROM intervention_medecin WHERE acte_id = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, acteId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du comptage par acte ID: " + acteId, e);
+        }
+    }
 }

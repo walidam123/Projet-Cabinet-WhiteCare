@@ -1,6 +1,5 @@
 package ma.whitecare.service.test;
 
-import ma.whitecare.entities.medical.InterventionMedecin;
 import ma.whitecare.entities.medical.Consultation;
 import ma.whitecare.entities.medical.Acte;
 import ma.whitecare.entities.medical.DossierMedicale;
@@ -9,6 +8,9 @@ import ma.whitecare.entities.user.Medecin;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.enums.Assurance;
 import ma.whitecare.entities.enums.StatutConsultation;
+import ma.whitecare.mvc.dto.dossierMedical.InterventionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreateInterventionDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdateInterventionDTO;
 import ma.whitecare.repository.modules.dossierMedical.api.InterventionRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
@@ -25,6 +27,7 @@ import ma.whitecare.service.modules.dossierMedical.impl.InterventionServiceImpl;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class TestInterventionService {
 
@@ -39,7 +42,7 @@ public class TestInterventionService {
             DossierMedicalRepository dossierRepo = new DossierMedicalRepositoryImpl();
             PatientRepository patientRepo = new PatientRepositoryImpl();
             MedecinRepository medecinRepo = new MedecinRepositoryImpl();
-            InterventionServiceImpl interventionService = new InterventionServiceImpl(interventionRepo, consultationRepo, acteRepo);
+            InterventionServiceImpl interventionService = new InterventionServiceImpl(interventionRepo, consultationRepo, acteRepo, dossierRepo);
 
             // 2. Préparation: Créer les données de test nécessaires
             System.out.println("Préparation: Création des données de test");
@@ -103,48 +106,75 @@ public class TestInterventionService {
 
             // 3. TEST 1: Liste de toutes les interventions
             System.out.println("\n=== Test 1: Liste de toutes les interventions ===");
-            List<InterventionMedecin> allInterventions = interventionService.getAllInterventions();
+            List<InterventionDTO> allInterventions = interventionService.getAllInterventions();
+            System.out.println("Liste des interventions:");
+            for (InterventionDTO i : allInterventions) {
+                System.out.println("  - Intervention ID: " + i.getIdIM() + 
+                    ", Prix: " + i.getPrixDePatient() + " MAD" +
+                    (i.getNumDent() != null ? ", Dent: " + i.getNumDent() : ""));
+            }
             System.out.println("✓ Nombre total d'interventions: " + allInterventions.size());
 
             // 4. TEST 2: Création d'une intervention
             System.out.println("\n=== Test 2: Création d'une intervention ===");
-            InterventionMedecin newIntervention = new InterventionMedecin();
-            newIntervention.setPrixDePatient(500.0);
-            newIntervention.setNumDent(16);
-            newIntervention.setConsultation(consultation);
-            newIntervention.setActe(acte);
-            newIntervention.setCreePar("system");
-            newIntervention.setModifiePar("system");
+            CreateInterventionDTO createDTO = CreateInterventionDTO.builder()
+                    .consultationId(consultation.getIdConsultation())
+                    .acteId(acte.getIdActe())
+                    .prixDePatient(500.0)
+                    .numDent(16)
+                    .build();
 
-            InterventionMedecin created = interventionService.createIntervention(newIntervention);
+            InterventionDTO created = interventionService.createIntervention(createDTO);
             System.out.println("✓ Intervention créée avec ID: " + created.getIdIM());
             System.out.println("  Prix: " + created.getPrixDePatient() + " MAD");
             System.out.println("  Dent: " + created.getNumDent());
 
             // 5. TEST 3: Récupération par ID
             System.out.println("\n=== Test 3: Récupération par ID ===");
-            InterventionMedecin found = interventionService.getInterventionById(created.getIdIM());
+            InterventionDTO found = interventionService.getInterventionById(created.getIdIM());
             System.out.println("✓ Intervention trouvée: ID " + found.getIdIM());
 
             // 6. TEST 4: Recherche par consultation
             System.out.println("\n=== Test 4: Recherche par consultation ID ===");
-            List<InterventionMedecin> byConsultation = interventionService.findByConsultationId(consultation.getIdConsultation());
+            List<InterventionDTO> byConsultation = interventionService.findByConsultationId(consultation.getIdConsultation());
+            System.out.println("Interventions pour consultation ID " + consultation.getIdConsultation() + ":");
+            for (InterventionDTO i : byConsultation) {
+                System.out.println("  - Intervention ID: " + i.getIdIM() + 
+                    ", Prix: " + i.getPrixDePatient() + " MAD" +
+                    (i.getNumDent() != null ? ", Dent: " + i.getNumDent() : ""));
+            }
             System.out.println("✓ Interventions pour consultation ID " + consultation.getIdConsultation() + ": " + byConsultation.size());
 
             // 7. TEST 5: Recherche par acte
             System.out.println("\n=== Test 5: Recherche par acte ID ===");
-            List<InterventionMedecin> byActe = interventionService.findByActeId(acte.getIdActe());
+            List<InterventionDTO> byActe = interventionService.findByActeId(acte.getIdActe());
+            System.out.println("Interventions pour acte ID " + acte.getIdActe() + ":");
+            for (InterventionDTO i : byActe) {
+                System.out.println("  - Intervention ID: " + i.getIdIM() + 
+                    ", Prix: " + i.getPrixDePatient() + " MAD");
+            }
             System.out.println("✓ Interventions pour acte ID " + acte.getIdActe() + ": " + byActe.size());
 
             // 8. TEST 6: Recherche par numéro de dent
             System.out.println("\n=== Test 6: Recherche par numéro de dent ===");
-            List<InterventionMedecin> byDent = interventionService.findByNumDent(16);
+            List<InterventionDTO> byDent = interventionService.findByNumDent(16);
+            System.out.println("Interventions pour dent 16:");
+            for (InterventionDTO i : byDent) {
+                System.out.println("  - Intervention ID: " + i.getIdIM() + 
+                    ", Prix: " + i.getPrixDePatient() + " MAD");
+            }
             System.out.println("✓ Interventions pour dent 16: " + byDent.size());
 
             // 9. TEST 7: Recherche par consultation et acte
             System.out.println("\n=== Test 7: Recherche par consultation et acte ===");
-            List<InterventionMedecin> byConsultationAndActe = interventionService.findByConsultationAndActe(
+            List<InterventionDTO> byConsultationAndActe = interventionService.findByConsultationAndActe(
                 consultation.getIdConsultation(), acte.getIdActe());
+            System.out.println("Interventions pour consultation ID " + consultation.getIdConsultation() + 
+                " et acte ID " + acte.getIdActe() + ":");
+            for (InterventionDTO i : byConsultationAndActe) {
+                System.out.println("  - Intervention ID: " + i.getIdIM() + 
+                    ", Prix: " + i.getPrixDePatient() + " MAD");
+            }
             System.out.println("✓ Interventions pour consultation et acte: " + byConsultationAndActe.size());
 
             // 10. TEST 8: Calcul du total par consultation
@@ -168,16 +198,39 @@ public class TestInterventionService {
 
             // 13. TEST 11: Mise à jour
             System.out.println("\n=== Test 11: Mise à jour ===");
-            InterventionMedecin updateIntervention = new InterventionMedecin();
-            updateIntervention.setPrixDePatient(600.0);
-            updateIntervention.setNumDent(17);
-            InterventionMedecin updated = interventionService.updateIntervention(created.getIdIM(), updateIntervention);
+            UpdateInterventionDTO updateDTO = UpdateInterventionDTO.builder()
+                    .prixDePatient(600.0)
+                    .numDent(17)
+                    .build();
+            InterventionDTO updated = interventionService.updateIntervention(created.getIdIM(), updateDTO);
             System.out.println("✓ Intervention mise à jour");
             System.out.println("  Nouveau prix: " + updated.getPrixDePatient() + " MAD");
             System.out.println("  Nouvelle dent: " + updated.getNumDent());
 
-            // 14. TEST 12: Suppression
-            System.out.println("\n=== Test 12: Suppression ===");
+            // 14. TEST 12: Historique dentaire
+            System.out.println("\n=== Test 12: Historique dentaire ===");
+            Map<Integer, List<InterventionDTO>> historiqueDentaire = interventionService.getHistoriqueDentaire(dossier.getIdDM());
+            System.out.println("Historique dentaire pour dossier ID " + dossier.getIdDM() + ":");
+            for (Map.Entry<Integer, List<InterventionDTO>> entry : historiqueDentaire.entrySet()) {
+                System.out.println("  - Dent " + entry.getKey() + ": " + entry.getValue().size() + " intervention(s)");
+                for (InterventionDTO i : entry.getValue()) {
+                    System.out.println("    * Intervention ID: " + i.getIdIM() + ", Prix: " + i.getPrixDePatient() + " MAD");
+                }
+            }
+            System.out.println("✓ Nombre de dents traitées: " + historiqueDentaire.size());
+
+            // 15. TEST 13: Coût total patient
+            System.out.println("\n=== Test 13: Coût total patient ===");
+            Double coutTotal = interventionService.getCoutTotalPatient(dossier.getIdDM());
+            System.out.println("✓ Coût total pour dossier ID " + dossier.getIdDM() + ": " + coutTotal + " MAD");
+
+            // 16. TEST 14: Suppression
+            System.out.println("\n=== Test 14: Suppression ===");
+            try {
+                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             interventionService.deleteIntervention(created.getIdIM());
             System.out.println("✓ Intervention supprimée");
 

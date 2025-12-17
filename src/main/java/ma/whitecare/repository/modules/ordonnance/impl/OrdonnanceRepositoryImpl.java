@@ -3,7 +3,6 @@ package ma.whitecare.repository.modules.ordonnance.impl;
 import ma.whitecare.conf.SessionFactory;
 import ma.whitecare.entities.medical.Ordonnance;
 import ma.whitecare.repository.modules.ordonnance.api.OrdonnanceRepository;
-import ma.whitecare.repository.common.RowMappers;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -140,6 +139,20 @@ public class OrdonnanceRepositoryImpl implements OrdonnanceRepository {
             throw new RuntimeException("Erreur lors de la suppression de l'ordonnance ID: " + id, e);
         }
     }
+
+    @Override
+    public boolean existsById(Long ordonnanceId) {
+        String sql = "SELECT 1 FROM ordonnance WHERE idOrd = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, ordonnanceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la vérification d'existence par ID: " + ordonnanceId, e);
+        }
+    }
     
     private Ordonnance mapOrdonnance(ResultSet rs) throws SQLException {
         Ordonnance ordonnance = new Ordonnance();
@@ -169,4 +182,5 @@ public class OrdonnanceRepositoryImpl implements OrdonnanceRepository {
         return ordonnance;
     }
 }
+
 

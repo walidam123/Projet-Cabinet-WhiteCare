@@ -1,6 +1,14 @@
 package ma.whitecare.service.modules.dossierMedical.impl;
 
+import ma.whitecare.entities.medical.Consultation;
 import ma.whitecare.entities.medical.DossierMedicale;
+import ma.whitecare.entities.patient.Patient;
+import ma.whitecare.entities.user.Medecin;
+import ma.whitecare.mvc.dto.dossierMedical.ConsultationDTO;
+import ma.whitecare.mvc.dto.dossierMedical.DossierMedicalDTO;
+import ma.whitecare.mvc.dto.dossierMedical.CreateDossierMedicalDTO;
+import ma.whitecare.mvc.dto.dossierMedical.UpdateDossierMedicalDTO;
+import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
 import ma.whitecare.repository.modules.patient.api.PatientRepository;
 import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
@@ -8,45 +16,37 @@ import ma.whitecare.service.modules.dossierMedical.api.DossierMedicalService;
 
 import javax.validation.ValidationException;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DossierMedicalServiceImpl implements DossierMedicalService {
 
     private final DossierMedicalRepository dossierMedicalRepository;
     private final PatientRepository patientRepository;
     private final MedecinRepository medecinRepository;
+    private final ConsultationRepository consultationRepository;
 
     public DossierMedicalServiceImpl(DossierMedicalRepository dossierMedicalRepository,
                                      PatientRepository patientRepository,
-                                     MedecinRepository medecinRepository) {
+                                     MedecinRepository medecinRepository,
+                                     ConsultationRepository consultationRepository) {
         this.dossierMedicalRepository = dossierMedicalRepository;
         this.patientRepository = patientRepository;
         this.medecinRepository = medecinRepository;
+        this.consultationRepository = consultationRepository;
     }
 
     @Override
-    public DossierMedicale createDossierMedical(DossierMedicale dossierMedical) {
+    public DossierMedicalDTO createDossierMedical(CreateDossierMedicalDTO dto) {
+        // Convertir DTO en Entity
+        DossierMedicale dossierMedical = convertToEntity(dto);
+
         // Validation
         validateDossierMedical(dossierMedical);
 
-        // Vérifier que le patient existe
-        if (dossierMedical.getPatient() == null || dossierMedical.getPatient().getId_Patient() == null) {
-            throw new ValidationException("Le patient est requis pour créer un dossier médical");
-        }
-        if (patientRepository.findById(dossierMedical.getPatient().getId_Patient()) == null) {
-            throw new ValidationException("Le patient avec l'ID " + dossierMedical.getPatient().getId_Patient() + " n'existe pas");
-        }
-
-        // Vérifier que le médecin existe
-        if (dossierMedical.getMedecin() == null || dossierMedical.getMedecin().getIdUser() == null) {
-            throw new ValidationException("Le médecin est requis pour créer un dossier médical");
-        }
-        if (medecinRepository.findById(dossierMedical.getMedecin().getIdUser()) == null) {
-            throw new ValidationException("Le médecin avec l'ID " + dossierMedical.getMedecin().getIdUser() + " n'existe pas");
-        }
-
         // Vérifier l'unicité : un patient ne peut avoir qu'un seul dossier médical
-        if (existsByPatientId(dossierMedical.getPatient().getId_Patient())) {
+        if (existsByPatientId(dto.getPatientId())) {
             throw new ValidationException("Un dossier médical existe déjà pour ce patient");
         }
 
@@ -61,46 +61,27 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
         // Créer le dossier médical
         dossierMedicalRepository.create(dossierMedical);
-        return dossierMedical;
+        return convertToDTO(dossierMedical);
     }
 
     @Override
-    public DossierMedicale updateDossierMedical(Long dossierId, DossierMedicale dossierMedical) {
-        DossierMedicale existingDossier = getDossierMedicalById(dossierId);
+    public DossierMedicalDTO updateDossierMedical(Long dossierId, UpdateDossierMedicalDTO dto) {
+        DossierMedicale existingDossier = dossierMedicalRepository.findById(dossierId);
+        if (existingDossier == null) {
+            throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
+        }
+
+        // Mettre à jour l'entité depuis le DTO
+        updateEntityFromDTO(existingDossier, dto);
 
         // Validation
-        validateDossierMedical(dossierMedical);
-
-        // Vérifier que le patient existe si modifié
-        if (dossierMedical.getPatient() != null && dossierMedical.getPatient().getId_Patient() != null) {
-            if (patientRepository.findById(dossierMedical.getPatient().getId_Patient()) == null) {
-                throw new ValidationException("Le patient avec l'ID " + dossierMedical.getPatient().getId_Patient() + " n'existe pas");
-            }
-        }
-
-        // Vérifier que le médecin existe si modifié
-        if (dossierMedical.getMedecin() != null && dossierMedical.getMedecin().getIdUser() != null) {
-            if (medecinRepository.findById(dossierMedical.getMedecin().getIdUser()) == null) {
-                throw new ValidationException("Le médecin avec l'ID " + dossierMedical.getMedecin().getIdUser() + " n'existe pas");
-            }
-        }
-
-        // Mettre à jour les champs
-        if (dossierMedical.getDateDeCreation() != null) {
-            existingDossier.setDateDeCreation(dossierMedical.getDateDeCreation());
-        }
-        if (dossierMedical.getPatient() != null) {
-            existingDossier.setPatient(dossierMedical.getPatient());
-        }
-        if (dossierMedical.getMedecin() != null) {
-            existingDossier.setMedecin(dossierMedical.getMedecin());
-        }
+        validateDossierMedical(existingDossier);
 
         // Mettre à jour les champs d'audit
         existingDossier.setModifiePar("system"); // À remplacer par l'utilisateur connecté
 
         dossierMedicalRepository.update(existingDossier);
-        return existingDossier;
+        return convertToDTO(existingDossier);
     }
 
     @Override
@@ -112,66 +93,62 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     }
 
     @Override
-    public DossierMedicale getDossierMedicalById(Long dossierId) {
+    public DossierMedicalDTO getDossierMedicalById(Long dossierId) {
         DossierMedicale dossier = dossierMedicalRepository.findById(dossierId);
         if (dossier == null) {
             throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
         }
-        return dossier;
+        return convertToDTO(dossier);
     }
 
     @Override
-    public List<DossierMedicale> getAllDossiersMedicaux() {
-        return dossierMedicalRepository.findAll();
+    public List<DossierMedicalDTO> getAllDossiersMedicaux() {
+        return dossierMedicalRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<DossierMedicale> findByPatientId(Long patientId) {
+    public List<DossierMedicalDTO> findByPatientId(Long patientId) {
         if (patientId == null) {
             throw new ValidationException("L'ID du patient ne peut pas être null");
         }
-        List<DossierMedicale> allDossiers = getAllDossiersMedicaux();
-        return allDossiers.stream()
-                .filter(d -> d.getPatient() != null && patientId.equals(d.getPatient().getId_Patient()))
-                .toList();
+        return dossierMedicalRepository.findByPatientId(patientId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<DossierMedicale> findByMedecinId(Long medecinId) {
+    public List<DossierMedicalDTO> findByMedecinId(Long medecinId) {
         if (medecinId == null) {
             throw new ValidationException("L'ID du médecin ne peut pas être null");
         }
-        List<DossierMedicale> allDossiers = getAllDossiersMedicaux();
-        return allDossiers.stream()
-                .filter(d -> d.getMedecin() != null && medecinId.equals(d.getMedecin().getIdUser()))
-                .toList();
+        return dossierMedicalRepository.findByMedecinId(medecinId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<DossierMedicale> findByDateCreation(LocalDate date) {
+    public List<DossierMedicalDTO> findByDateCreation(LocalDate date) {
         if (date == null) {
             throw new ValidationException("La date ne peut pas être null");
         }
-        List<DossierMedicale> allDossiers = getAllDossiersMedicaux();
-        return allDossiers.stream()
-                .filter(d -> date.equals(d.getDateDeCreation()))
-                .toList();
+        return dossierMedicalRepository.findByDateCreation(date).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<DossierMedicale> findByDateCreationBetween(LocalDate startDate, LocalDate endDate) {
+    public List<DossierMedicalDTO> findByDateCreationBetween(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null) {
             throw new ValidationException("Les dates de début et de fin sont requises");
         }
         if (startDate.isAfter(endDate)) {
             throw new ValidationException("La date de début doit être antérieure à la date de fin");
         }
-        List<DossierMedicale> allDossiers = getAllDossiersMedicaux();
-        return allDossiers.stream()
-                .filter(d -> d.getDateDeCreation() != null &&
-                        !d.getDateDeCreation().isBefore(startDate) &&
-                        !d.getDateDeCreation().isAfter(endDate))
-                .toList();
+        return dossierMedicalRepository.findByDateCreationBetween(startDate, endDate).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -179,7 +156,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         if (patientId == null) {
             return false;
         }
-        return !findByPatientId(patientId).isEmpty();
+        return dossierMedicalRepository.existsByPatientId(patientId);
     }
 
     @Override
@@ -187,22 +164,150 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         if (dossierId == null) {
             return false;
         }
-        return dossierMedicalRepository.findById(dossierId) != null;
+        return dossierMedicalRepository.existsById(dossierId);
     }
 
     @Override
     public long countAllDossiers() {
-        return getAllDossiersMedicaux().size();
+        return dossierMedicalRepository.countAll();
     }
 
     @Override
     public long countByPatientId(Long patientId) {
-        return findByPatientId(patientId).size();
+        if (patientId == null) {
+            throw new ValidationException("L'ID du patient ne peut pas être null");
+        }
+        return dossierMedicalRepository.countByPatientId(patientId);
     }
 
     @Override
     public long countByMedecinId(Long medecinId) {
-        return findByMedecinId(medecinId).size();
+        if (medecinId == null) {
+            throw new ValidationException("L'ID du médecin ne peut pas être null");
+        }
+        return dossierMedicalRepository.countByMedecinId(medecinId);
+    }
+
+    @Override
+    public ConsultationDTO getDerniereConsultation(Long dossierId) {
+        if (dossierId == null) {
+            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+        }
+        
+        // Vérifier que le dossier existe
+        if (!existsById(dossierId)) {
+            throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
+        }
+        
+        // Récupérer toutes les consultations du dossier, triées par date décroissante
+        List<Consultation> consultations = consultationRepository.findByDossierMedicalId(dossierId);
+        
+        if (consultations == null || consultations.isEmpty()) {
+            return null;
+        }
+        
+        // Retourner la consultation la plus récente
+        Consultation consultation = consultations.stream()
+                .max(Comparator.comparing(Consultation::getDate, Comparator.nullsLast(Comparator.naturalOrder())))
+                .orElse(null);
+        
+        return consultation != null ? convertConsultationToDTO(consultation) : null;
+    }
+
+    @Override
+    public List<ConsultationDTO> getHistoriqueCompletPatient(Long patientId) {
+        if (patientId == null) {
+            throw new ValidationException("L'ID du patient ne peut pas être null");
+        }
+        
+        // Récupérer le dossier médical du patient
+        List<DossierMedicale> dossiers = dossierMedicalRepository.findByPatientId(patientId);
+        
+        if (dossiers == null || dossiers.isEmpty()) {
+            return List.of();
+        }
+        
+        // Récupérer toutes les consultations de tous les dossiers du patient
+        return dossiers.stream()
+                .flatMap(dossier -> consultationRepository.findByDossierMedicalId(dossier.getIdDM()).stream())
+                .sorted(Comparator.comparing(Consultation::getDate, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(this::convertConsultationToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ========== CONVERSION METHODS ==========
+    private DossierMedicale convertToEntity(CreateDossierMedicalDTO dto) {
+        // Charger le patient
+        Patient patient = patientRepository.findById(dto.getPatientId());
+        if (patient == null) {
+            throw new ValidationException("Le patient avec l'ID " + dto.getPatientId() + " n'existe pas");
+        }
+
+        // Charger le médecin
+        Medecin medecin = medecinRepository.findById(dto.getMedecinId());
+        if (medecin == null) {
+            throw new ValidationException("Le médecin avec l'ID " + dto.getMedecinId() + " n'existe pas");
+        }
+
+        // Construire l'entité
+        return DossierMedicale.builder()
+                .dateDeCreation(dto.getDateDeCreation() != null ? dto.getDateDeCreation() : LocalDate.now())
+                .patient(patient)
+                .medecin(medecin)
+                .build();
+    }
+
+    private void updateEntityFromDTO(DossierMedicale entity, UpdateDossierMedicalDTO dto) {
+        // Mettre à jour la date de création si fournie
+        if (dto.getDateDeCreation() != null) {
+            entity.setDateDeCreation(dto.getDateDeCreation());
+        }
+
+        // Mettre à jour le patient si fourni
+        if (dto.getPatientId() != null) {
+            Patient patient = patientRepository.findById(dto.getPatientId());
+            if (patient == null) {
+                throw new ValidationException("Le patient avec l'ID " + dto.getPatientId() + " n'existe pas");
+            }
+            entity.setPatient(patient);
+        }
+
+        // Mettre à jour le médecin si fourni
+        if (dto.getMedecinId() != null) {
+            Medecin medecin = medecinRepository.findById(dto.getMedecinId());
+            if (medecin == null) {
+                throw new ValidationException("Le médecin avec l'ID " + dto.getMedecinId() + " n'existe pas");
+            }
+            entity.setMedecin(medecin);
+        }
+    }
+
+    private DossierMedicalDTO convertToDTO(DossierMedicale entity) {
+        return DossierMedicalDTO.builder()
+                .idDM(entity.getIdDM())
+                .dateDeCreation(entity.getDateDeCreation())
+                .patientId(entity.getPatient() != null ? entity.getPatient().getId_Patient() : null)
+                .medecinId(entity.getMedecin() != null ? entity.getMedecin().getIdUser() : null)
+                .dateCreation(entity.getDateCreation())
+                .dateDerniereModification(entity.getDateDerniereModification())
+                .createdBy(entity.getCreePar())
+                .updatedBy(entity.getModifiePar())
+                .build();
+    }
+
+    private ConsultationDTO convertConsultationToDTO(Consultation consultation) {
+        return ConsultationDTO.builder()
+                .idConsultation(consultation.getIdConsultation())
+                .date(consultation.getDate())
+                .statut(consultation.getStatut())
+                .observationMedecin(consultation.getObservationMedecin())
+                .dossierMedicalId(consultation.getDossierMedicale() != null ? 
+                    consultation.getDossierMedicale().getIdDM() : null)
+                .dateCreation(consultation.getDateCreation())
+                .dateDerniereModification(consultation.getDateDerniereModification())
+                .createdBy(consultation.getCreePar())
+                .updatedBy(consultation.getModifiePar())
+                .build();
     }
 
     // ========== VALIDATION PRIVÉE ==========

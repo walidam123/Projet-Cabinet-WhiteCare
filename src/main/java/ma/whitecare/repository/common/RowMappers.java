@@ -194,8 +194,10 @@ public final class RowMappers {
                 .chiffre(rs.getDouble("chiffre"))
                 .dateCalcul(rs.getDate("dateCalcul").toLocalDate())
                 .cabinetMedicaleId(rs.getLong("cabinet_medicale_id"))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()) : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()) : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
@@ -208,8 +210,10 @@ public final class RowMappers {
                 .mois(Mois.valueOf(rs.getString("mois")))
                 .annee(rs.getInt("annee"))
                 .medecinId(rs.getLong("medecin_id"))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()) : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()) : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
@@ -240,8 +244,10 @@ public final class RowMappers {
         return Role.builder()
                 .idRole(rs.getLong("id"))
                 .libelle(LibelleRole.valueOf(rs.getString("libelle")))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()) : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()) : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 // Les privilèges seront chargés séparément
@@ -265,8 +271,10 @@ public final class RowMappers {
                 .dateNaissance(rs.getDate("date_naissance") != null ?
                         rs.getDate("date_naissance").toLocalDate() : null)
                 .actif(rs.getBoolean("actif"))
-                .dateCreation(rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate())
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime().toLocalDate())
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate() : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        rs.getTimestamp("last_modification_date").toLocalDateTime().toLocalDate() : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
