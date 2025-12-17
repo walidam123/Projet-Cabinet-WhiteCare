@@ -23,32 +23,11 @@ public class Jour {
     private boolean estDisponible;
     private String raisonIndisponibilite;
 
-    @Builder.Default
-    private List<Creneau> creneaux = new ArrayList<>();
 
-    // Méthodes utilitaires
-    public boolean estWeekend() {
-        return jourSemaine == JourSemaine.SAMEDI || jourSemaine == JourSemaine.DIMANCHE;
-    }
+    private List<Long> creneaux ;
 
-    public boolean estFerie() {
-        // Logique pour déterminer si c'est un jour férié
-        // À implémenter selon le calendrier marocain
-        return false;
-    }
 
-    public void ajouterCreneau(Creneau creneau) {
-        if (creneaux == null) {
-            creneaux = new ArrayList<>();
-        }
-        creneaux.add(creneau);
-    }
 
-    public void supprimerCreneau(Creneau creneau) {
-        if (creneaux != null) {
-            creneaux.remove(creneau);
-        }
-    }
 
     @Override
     public String toString() {

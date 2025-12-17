@@ -6,6 +6,10 @@ import ma.whitecare.entities.agenda.Creneau;
 import ma.whitecare.entities.agenda.Jour;
 import ma.whitecare.entities.enums.JourSemaine;
 import ma.whitecare.entities.enums.Mois;
+import ma.whitecare.entities.enums.Sexe;
+import ma.whitecare.entities.user.Medecin;
+import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
+import ma.whitecare.repository.modules.UserManager.impl.MedecinRepositoryImpl;
 import ma.whitecare.repository.modules.agenda.api.AgendaRepository;
 import ma.whitecare.repository.modules.agenda.impl.AgendaRepositoryImpl;
 
@@ -19,7 +23,7 @@ public class AgendaRepositoryTest {
 
     private static AgendaRepository repository=new AgendaRepositoryImpl();;
     private static Long testCabinetId = 1L;
-    private static Long testMedecinId = 2L;
+    private static Long testMedecinId = 1L;
     private static AgendaMensuel agendaTest;
     private static Jour jourTest;
     private static Creneau creneauTest;
@@ -86,6 +90,7 @@ public class AgendaRepositoryTest {
         System.out.println("1. 📝 Test création agenda...");
         agendaTest = AgendaMensuel.builder()
                 .mois(Mois.JANVIER)
+                .medecinId(testMedecinId)
                 .annee(2024)
                 .medecinId(testMedecinId)
                 .creePar("test_user")
@@ -100,7 +105,7 @@ public class AgendaRepositoryTest {
         AgendaMensuel found = repository.findById(agendaTest.getId());
         assertNotNull(found, "Agenda doit être trouvé");
         assertEquals(Mois.JANVIER, found.getMois());
-        System.out.println("✅ Agenda trouvé: " + found.getMois() + " " + found.getAnnee());
+        System.out.println(found.toString());
 
 
 
@@ -108,6 +113,7 @@ public class AgendaRepositoryTest {
         System.out.println("\n4. 👨‍⚕️ Test recherche par médecin...");
         List<AgendaMensuel> agendasMedecin = repository.findByMedecinId(testMedecinId);
         System.out.println("✅ " + agendasMedecin.size() + " agendas trouvés pour le médecin");
+        agendasMedecin.forEach(a-> System.out.println(a.toString()));
 
 
 
@@ -357,5 +363,27 @@ public class AgendaRepositoryTest {
         if (!expected.equals(actual)) {
             throw new AssertionError("❌ Expected: " + expected + ", Actual: " + actual);
         }
+    }
+
+    private static void  createTestMedecin() {
+        MedecinRepository repo = new MedecinRepositoryImpl();
+        Medecin medecin = new Medecin();
+        medecin.setNom("TEST_NOM");
+        medecin.setPrenom("TEST_PRENOM");
+        medecin.setMotDePass("medmdp");
+        medecin.setEmail("test.medecin@example.com");
+        medecin.setSexe(Sexe.FEMME);
+        medecin.setLogin("medecin1233");
+        medecin.setActif(true);
+        medecin.setSalaire(12000.0);
+        medecin.setPrime(2000.0);
+        medecin.setDateRecrutement(LocalDate.now());
+        medecin.setSoldeConge(25);
+        medecin.setCabinetMedicaleId(testCabinetId);
+        medecin.setSpecialite("Orthodontie");
+        medecin.setCreePar("user_test");
+        System.out.println("Creation du medecin pour Test");
+        repo.create(medecin);
+        System.out.println("Medecin: " + medecin.getIdUser() + " , nom: " + medecin.getNom());
     }
 }

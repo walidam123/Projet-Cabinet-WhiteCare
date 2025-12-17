@@ -10,15 +10,21 @@ import ma.whitecare.entities.financial.Revenues;
 import ma.whitecare.entities.medical.Acte;
 import ma.whitecare.entities.medical.Certificat;
 import ma.whitecare.entities.medical.Medicament;
+import ma.whitecare.entities.medical.DossierMedicale;
+import ma.whitecare.entities.medical.Consultation;
+import ma.whitecare.entities.medical.InterventionMedecin;
+import ma.whitecare.entities.medical.Prescription;
+import ma.whitecare.entities.medical.Ordonnance;
 import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.enums.*;
 import ma.whitecare.entities.patient.Antecedents;
-import ma.whitecare.entities.user.Role;
-import ma.whitecare.entities.user.Utilisateur;
+import ma.whitecare.entities.user.*;
+import ma.whitecare.entities.user.Medecin;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public final class RowMappers {
 
@@ -42,7 +48,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) patientRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) patientRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) patientRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         patientRow.setCreePar(rs.getString("created_by"));
         patientRow.setModifiePar(rs.getString("updated_by"));
         return patientRow;
@@ -59,7 +65,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) antecedentRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) antecedentRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) antecedentRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         antecedentRow.setCreePar(rs.getString("created_by"));
         antecedentRow.setModifiePar(rs.getString("updated_by"));
         return antecedentRow;
@@ -77,19 +83,25 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) revenueRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) revenueRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) revenueRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         revenueRow.setCreePar(rs.getString("created_by"));
         revenueRow.setModifiePar(rs.getString("updated_by"));
         return revenueRow;
     }
 
-    public static Acte mapActe(ResultSet rs) throws SQLException {
+    public static Acte mapActeComplet(ResultSet rs) throws SQLException {
         Acte acteRow = new Acte();
 
-        acteRow.setIdActe(rs.getLong("id"));
-        acteRow.setLibelle(rs.getString("nom"));
+        acteRow.setIdActe(rs.getLong("idActe"));
+        acteRow.setLibelle(rs.getString("libelle"));
         acteRow.setCategorie(rs.getString("categorie"));
         acteRow.setPrixDeBase(rs.getDouble("prixDeBase"));
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) acteRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) acteRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        acteRow.setCreePar(rs.getString("created_by"));
+        acteRow.setModifiePar(rs.getString("updated_by"));
 
         return acteRow;
     }
@@ -112,7 +124,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) CabinetRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) CabinetRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) CabinetRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         CabinetRow.setCreePar(rs.getString("created_by"));
         CabinetRow.setModifiePar(rs.getString("updated_by"));
 
@@ -150,7 +162,7 @@ public final class RowMappers {
         MedicamentRow.setForme(FormeMedicament.valueOf(rs.getString("forme")));
         MedicamentRow.setRemboursable(rs.getBoolean("remboursable"));
         MedicamentRow.setPrixUnitaire(rs.getDouble("prixUnitaire"));
-        MedicamentRow.setDescription(rs.getString("Descritpion"));
+        MedicamentRow.setDescription(rs.getString("description"));
         var da = rs.getTimestamp("creation_date");
         if (da != null) MedicamentRow.setDateCreation(da.toLocalDateTime().toLocalDate());
         return MedicamentRow;
@@ -168,7 +180,7 @@ public final class RowMappers {
         var dc = rs.getTimestamp("creation_date");
         if (dc != null) ChargesRow.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
         var dl = rs.getTimestamp("last_modification_date");
-        if (dl != null) ChargesRow.setDateDerniereModification(dl.toLocalDateTime());
+        if (dl != null) ChargesRow.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
         ChargesRow.setCreePar(rs.getString("created_by"));
         ChargesRow.setModifiePar(rs.getString("updated_by"));
         return ChargesRow;
@@ -182,8 +194,10 @@ public final class RowMappers {
                 .chiffre(rs.getDouble("chiffre"))
                 .dateCalcul(rs.getDate("dateCalcul").toLocalDate())
                 .cabinetMedicaleId(rs.getLong("cabinet_medicale_id"))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()) : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()) : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
@@ -196,8 +210,10 @@ public final class RowMappers {
                 .mois(Mois.valueOf(rs.getString("mois")))
                 .annee(rs.getInt("annee"))
                 .medecinId(rs.getLong("medecin_id"))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()) : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()) : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
@@ -228,8 +244,10 @@ public final class RowMappers {
         return Role.builder()
                 .idRole(rs.getLong("id"))
                 .libelle(LibelleRole.valueOf(rs.getString("libelle")))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()) : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()) : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 // Les privilèges seront chargés séparément
@@ -253,10 +271,297 @@ public final class RowMappers {
                 .dateNaissance(rs.getDate("date_naissance") != null ?
                         rs.getDate("date_naissance").toLocalDate() : null)
                 .actif(rs.getBoolean("actif"))
-                .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
-                .dateDerniereModification(rs.getTimestamp("last_modification_date").toLocalDateTime())
+                .dateCreation(rs.getTimestamp("creation_date") != null ?
+                        rs.getTimestamp("creation_date").toLocalDateTime().toLocalDate() : null)
+                .dateDerniereModification(rs.getTimestamp("last_modification_date") != null ?
+                        rs.getTimestamp("last_modification_date").toLocalDateTime().toLocalDate() : null)
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
+    }
+
+
+
+
+    // === MÉTHODE POUR COPIER LES PROPRIÉTÉS UTILISATEUR ===
+    private static void copierProprietesUtilisateur(Utilisateur dest, Utilisateur source) {
+        dest.setIdUser(source.getIdUser());
+        dest.setNom(source.getNom());
+        dest.setPrenom(source.getPrenom());
+        dest.setEmail(source.getEmail());
+        dest.setAdresse(source.getAdresse());
+        dest.setCin(source.getCin());
+        dest.setTel(source.getTel());
+        dest.setSexe(source.getSexe());
+        dest.setLogin(source.getLogin());
+        dest.setMotDePass(source.getMotDePass());
+        dest.setLastLoginDate(source.getLastLoginDate());
+        dest.setDateNaissance(source.getDateNaissance());
+        dest.setDateCreation(source.getDateCreation());
+        dest.setDateDerniereModification(source.getDateDerniereModification());
+        dest.setCreePar(source.getCreePar());
+        dest.setModifiePar(source.getModifiePar());
+        dest.setActif(source.getActif());
+    }
+
+    // === MÉTHODE POUR COPIER LES PROPRIÉTÉS STAFF ===
+    private static void copierProprietesStaff(Staff dest, Staff source) {
+        copierProprietesUtilisateur(dest, source);
+        dest.setSalaire(source.getSalaire());
+        dest.setPrime(source.getPrime());
+        dest.setDateRecrutement(source.getDateRecrutement());
+        dest.setSoldeConge(source.getSoldeConge());
+        dest.setCabinetMedicaleId(source.getCabinetMedicaleId());
+    }
+
+    // === MAPPER POUR MÉDECIN COMPLET ===
+    public static Medecin mapMedecinComplet(ResultSet rs) throws SQLException {
+        // Créer le médecin directement
+        Medecin medecin = new Medecin();
+
+        // Copier les propriétés Utilisateur
+        Utilisateur utilisateur = mapUtilisateur(rs);
+        copierProprietesUtilisateur(medecin, utilisateur);
+
+        // Propriétés Staff
+        medecin.setSalaire(getDoubleSafe(rs, "salaire"));
+        medecin.setPrime(getDoubleSafe(rs, "prime"));
+        medecin.setDateRecrutement(getLocalDateSafe(rs, "date_recrutement"));
+        medecin.setSoldeConge(getIntegerSafe(rs, "solde_conge"));
+
+        // Cabinet médical
+
+
+            medecin.setCabinetMedicaleId(getLongSafe(rs, "cabinet_medicale_id"));
+
+
+        // Propriétés spécifiques Médecin
+        medecin.setSpecialite(rs.getString("specialite"));
+
+        return medecin;
+    }
+
+    // === MAPPER POUR SECRÉTAIRE COMPLET ===
+    public static Secretaire mapSecretaireComplet(ResultSet rs) throws SQLException {
+        // Créer la secrétaire directement
+        Secretaire secretaire = new Secretaire();
+
+        // Copier les propriétés Utilisateur
+        Utilisateur utilisateur = mapUtilisateur(rs);
+        copierProprietesUtilisateur(secretaire, utilisateur);
+
+        // Propriétés Staff
+        secretaire.setSalaire(getDoubleSafe(rs, "salaire"));
+        secretaire.setPrime(getDoubleSafe(rs, "prime"));
+        secretaire.setDateRecrutement(getLocalDateSafe(rs, "date_recrutement"));
+        secretaire.setSoldeConge(getIntegerSafe(rs, "solde_conge"));
+
+        // Cabinet médical
+        secretaire.setCabinetMedicaleId(getLongSafe(rs, "cabinet_medicale_id"));
+
+
+        // Propriétés spécifiques Secrétaire
+        secretaire.setNumCNSS(rs.getString("num_cnss"));
+        secretaire.setCommission(getDoubleSafe(rs, "commission"));
+
+        return secretaire;
+    }
+
+    // === MAPPER POUR MÉDECIN DIRECT (sans jointure) ===
+    public static Medecin mapMedecinDirect(ResultSet rs) throws SQLException {
+        Medecin medecin = new Medecin();
+        medecin.setIdUser(getLong(rs, "id"));
+        medecin.setSpecialite(rs.getString("specialite"));
+        return medecin;
+    }
+
+    // === MAPPER POUR SECRÉTAIRE DIRECT (sans jointure) ===
+    public static Secretaire mapSecretaireDirect(ResultSet rs) throws SQLException {
+        Secretaire secretaire = new Secretaire();
+        secretaire.setIdUser(getLong(rs, "id"));
+        secretaire.setNumCNSS(rs.getString("num_cnss"));
+        secretaire.setCommission(getDoubleSafe(rs, "commission"));
+        return secretaire;
+    }
+
+    // === MAPPER GÉNÉRIQUE POUR DÉTECTER LE TYPE ===
+    public static Utilisateur mapStaffGenerique(ResultSet rs) throws SQLException {
+        boolean isMedecin = rs.getString("specialite") != null;
+        boolean isSecretaire = rs.getString("num_cnss") != null;
+
+        if (isMedecin) {
+            return mapMedecinComplet(rs);
+        } else if (isSecretaire) {
+            return mapSecretaireComplet(rs);
+        }
+
+        // Si ni médecin ni secrétaire, retourner juste un Utilisateur
+        return mapUtilisateur(rs);
+    }
+
+
+
+
+
+    private static Long getLong(ResultSet rs, String column) throws SQLException {
+        return rs.getLong(column);
+    }
+
+    private static Long getLongSafe(ResultSet rs, String column) throws SQLException {
+        long value = rs.getLong(column);
+        return rs.wasNull() ? null : value;
+    }
+
+    private static Double getDoubleSafe(ResultSet rs, String column) throws SQLException {
+        double value = rs.getDouble(column);
+        return rs.wasNull() ? null : value;
+    }
+
+    private static Integer getIntegerSafe(ResultSet rs, String column) throws SQLException {
+        int value = rs.getInt(column);
+        return rs.wasNull() ? null : value;
+    }
+
+    private static LocalDate getLocalDateSafe(ResultSet rs, String column) throws SQLException {
+        java.sql.Date date = rs.getDate(column);
+        return date != null ? date.toLocalDate() : null;
+    }
+
+    private static LocalDateTime getLocalDateTimeSafe(ResultSet rs, String column) throws SQLException {
+        java.sql.Timestamp timestamp = rs.getTimestamp(column);
+        return timestamp != null ? timestamp.toLocalDateTime() : null;
+    }
+
+    private static LocalDateTime getLocalDateTime(ResultSet rs, String column) throws SQLException {
+        java.sql.Timestamp timestamp = rs.getTimestamp(column);
+        return timestamp.toLocalDateTime();
+    }
+
+    // ========== MAPPER POUR DOSSIER MÉDICAL ==========
+    public static DossierMedicale mapDossierMedicale(ResultSet rs) throws SQLException {
+        DossierMedicale dossier = new DossierMedicale();
+        dossier.setIdDM(rs.getLong("idDM"));
+        var dateCreation = rs.getDate("dateDecreation");
+        if (dateCreation != null) {
+            dossier.setDateDeCreation(dateCreation.toLocalDate());
+        }
+        
+        // Mapping des IDs des relations pour éviter les nulls lors des updates
+        Long patientId = getLongSafe(rs, "patient_id");
+        if (patientId != null) {
+            Patient patient = new Patient();
+            patient.setId_Patient(patientId);
+            dossier.setPatient(patient);
+        }
+        
+        Long medecinId = getLongSafe(rs, "medecin_id");
+        if (medecinId != null) {
+            Medecin medecin = new Medecin();
+            medecin.setIdUser(medecinId);
+            dossier.setMedecin(medecin);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) dossier.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) dossier.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        dossier.setCreePar(rs.getString("created_by"));
+        dossier.setModifiePar(rs.getString("updated_by"));
+        return dossier;
+    }
+
+    // ========== MAPPER POUR CONSULTATION ==========
+    public static Consultation mapConsultation(ResultSet rs) throws SQLException {
+        Consultation consultation = new Consultation();
+        consultation.setIdConsultation(rs.getLong("id_consultation"));
+        var date = rs.getDate("date");
+        if (date != null) {
+            consultation.setDate(date.toLocalDate());
+        }
+        String statutStr = rs.getString("statut");
+        if (statutStr != null) {
+            consultation.setStatut(StatutConsultation.valueOf(statutStr));
+        }
+        consultation.setObservationMedecin(rs.getString("observation_medecin"));
+        
+        // Mapping de l'ID du dossier médical
+        Long dossierId = getLongSafe(rs, "dossier_medicale_id");
+        if (dossierId != null) {
+            DossierMedicale dossier = new DossierMedicale();
+            dossier.setIdDM(dossierId);
+            consultation.setDossierMedicale(dossier);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) consultation.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) consultation.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        consultation.setCreePar(rs.getString("created_by"));
+        consultation.setModifiePar(rs.getString("updated_by"));
+        return consultation;
+    }
+
+    // ========== MAPPER POUR INTERVENTION MÉDECIN ==========
+    public static InterventionMedecin mapInterventionMedecin(ResultSet rs) throws SQLException {
+        InterventionMedecin intervention = new InterventionMedecin();
+        intervention.setIdIM(rs.getLong("id_im"));
+        intervention.setPrixDePatient(rs.getDouble("prix_de_patient"));
+        int numDent = rs.getInt("num_dent");
+        intervention.setNumDent(rs.wasNull() ? null : numDent);
+        
+        // Mapping des IDs des relations
+        Long consultationId = getLongSafe(rs, "consultation_id");
+        if (consultationId != null) {
+            Consultation consultation = new Consultation();
+            consultation.setIdConsultation(consultationId);
+            intervention.setConsultation(consultation);
+        }
+        
+        Long acteId = getLongSafe(rs, "acte_id");
+        if (acteId != null) {
+            Acte acte = new Acte();
+            acte.setIdActe(acteId);
+            intervention.setActe(acte);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) intervention.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) intervention.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        intervention.setCreePar(rs.getString("created_by"));
+        intervention.setModifiePar(rs.getString("updated_by"));
+        return intervention;
+    }
+
+    // ========== MAPPER POUR PRESCRIPTION ==========
+    public static Prescription mapPrescription(ResultSet rs) throws SQLException {
+        Prescription prescription = new Prescription();
+        prescription.setIdPr(rs.getLong("idPr"));
+        prescription.setQuantité(rs.getInt("quantite"));
+        prescription.setFréquence(rs.getString("frequence"));
+        prescription.setDuréeEnJours(rs.getInt("dureeEnjours"));
+        
+        // Mapping des IDs des relations
+        Long medicamentId = getLongSafe(rs, "medicament_id");
+        if (medicamentId != null) {
+            Medicament medicament = new Medicament();
+            medicament.setIdMct(medicamentId);
+            prescription.setMedicament(medicament);
+        }
+        
+        Long ordonnanceId = getLongSafe(rs, "ordonnance_id");
+        if (ordonnanceId != null) {
+            Ordonnance ordonnance = new Ordonnance();
+            ordonnance.setIdOrd(ordonnanceId);
+            prescription.setOrdonnance(ordonnance);
+        }
+
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) prescription.setDateCreation(LocalDate.from(dc.toLocalDateTime()));
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) prescription.setDateDerniereModification(LocalDate.from(dl.toLocalDateTime()));
+        prescription.setCreePar(rs.getString("created_by"));
+        prescription.setModifiePar(rs.getString("updated_by"));
+        return prescription;
     }
 }

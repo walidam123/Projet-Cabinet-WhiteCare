@@ -2602,7 +2602,7 @@ antecedents_id</ColNames>
     <column id="654" parent="357" name="libelle">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StoredType>varchar(80)|0s</StoredType>
+      <StoredType>enum(&apos;ADMIN&apos;, &apos;MEDECIN&apos;, &apos;SECRETAIRE&apos;)|0e</StoredType>
     </column>
     <column id="655" parent="357" name="creation_date">
       <DefaultExpression>current_timestamp()</DefaultExpression>
@@ -2893,6 +2893,7 @@ antecedents_id</ColNames>
       <StoredType>varchar(40)|0s</StoredType>
     </column>
     <column id="716" parent="362" name="sexe">
+      <NotNull>1</NotNull>
       <Position>8</Position>
       <StoredType>enum(&apos;HOMME&apos;, &apos;FEMME&apos;)|0e</StoredType>
     </column>

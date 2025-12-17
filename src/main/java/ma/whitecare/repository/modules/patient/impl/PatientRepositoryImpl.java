@@ -78,7 +78,7 @@ public class PatientRepositoryImpl implements PatientRepository {
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    p.setIdEntite(keys.getLong(1));
+                    p.setId_Patient(keys.getLong(1));
                 }
             }
         } catch (SQLException e) {

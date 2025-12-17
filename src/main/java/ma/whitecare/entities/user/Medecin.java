@@ -13,7 +13,7 @@ import ma.whitecare.entities.agenda.AgendaMensuel;
 @SuperBuilder
 public class Medecin extends Staff{
     private String specialite;
-    private AgendaMensuel agendaDocteur;
+
 
 
 
@@ -22,10 +22,9 @@ public class Medecin extends Staff{
     @Override
     public String toString() {
         return String.format(
-                "Médecin{%s, spécialité='%s', agenda=%s,salaire=%s}",
+                "Médecin{%s, spécialité='%s', salaire=%s}",
                 super.toString(), // Appel du toString() de Utilisateur
                 specialite != null ? specialite : "N/A",
-                agendaDocteur != null ? "disponible" : "non configuré",
                 getSalaire() != null ? String.format("+%.2f MAD", getSalaire()) : "+0.00 MAD"
         );
     }

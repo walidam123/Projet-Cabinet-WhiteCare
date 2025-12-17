@@ -1,5 +1,6 @@
 package ma.whitecare.entities.patient;
 
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.NiveauDeRisque;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 
-@Data @AllArgsConstructor @NoArgsConstructor @Builder
+@Data @AllArgsConstructor @NoArgsConstructor @SuperBuilder
 public class Antecedents extends BaseEntity {
     private Long id_Antecedent;
     private String nom;

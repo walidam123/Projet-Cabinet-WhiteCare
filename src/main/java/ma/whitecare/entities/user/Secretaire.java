@@ -24,6 +24,7 @@ public class Secretaire extends Staff {
                 numCNSS != null ? numCNSS : "N/A",
                 commission != null ? commission : 0.0,
                 getSalaire() != null ? String.format("+%.2f MAD", getSalaire()) : "+0.00 MAD"
+
         );
     }
 

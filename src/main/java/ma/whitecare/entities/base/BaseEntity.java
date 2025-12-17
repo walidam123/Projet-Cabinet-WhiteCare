@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity {
     protected Long idEntite;
     protected LocalDate dateCreation;
-    protected LocalDateTime dateDerniereModification;
+    protected LocalDate dateDerniereModification;
     protected String modifiePar;
     protected String creePar;
 }
