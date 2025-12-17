@@ -11,7 +11,6 @@ import ma.whitecare.repository.modules.UserManager.api.RoleRepository;
 import ma.whitecare.repository.modules.UserManager.api.UtilisateurRepository;
 import ma.whitecare.service.modules.UserManager.api.UserService;
 
-import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -83,7 +82,7 @@ public class UserServiceImpl implements UserService {
         // Validation
         List<String> errors = UserValidator.validateUpdateUser(userDTO);
         if (!errors.isEmpty()) {
-            throw new ValidationException(String.join(", ", errors));
+            throw new IllegalArgumentException(String.join(", ", errors));
         }
 
         // Mettre à jour les champs
@@ -307,7 +306,7 @@ public class UserServiceImpl implements UserService {
         // Valider le nouveau mot de passe
         List<String> errors = UserValidator.validatePassword(newPassword);
         if (!errors.isEmpty()) {
-            throw new ValidationException(String.join(", ", errors));
+            throw new IllegalArgumentException(String.join(", ", errors));
         }
 
 
@@ -401,7 +400,7 @@ public class UserServiceImpl implements UserService {
     public void validateUserData(CreateUserDTO userDTO) {
         List<String> errors = UserValidator.validateCreateUser(userDTO);
         if (!errors.isEmpty()) {
-            throw new ValidationException(String.join(", ", errors));
+            throw new IllegalArgumentException(String.join(", ", errors));
         }
     }
 
@@ -436,7 +435,7 @@ public class UserServiceImpl implements UserService {
         // Validation
         List<String> errors = UserValidator.validateUpdateProfile(profileDTO);
         if (!errors.isEmpty()) {
-            throw new ValidationException(String.join(", ", errors));
+            throw new IllegalArgumentException(String.join(", ", errors));
         }
 
         // Mettre à jour les champs

@@ -12,7 +12,6 @@ import ma.whitecare.repository.modules.ordonnance.api.OrdonnanceRepository;
 import ma.whitecare.repository.modules.medicament.api.MedicamentRepository;
 import ma.whitecare.service.modules.dossierMedical.api.PrescriptionService;
 
-import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,35 +43,35 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         // Vérifier que l'ordonnance existe
         if (prescription.getOrdonnance() == null || prescription.getOrdonnance().getIdOrd() == null) {
-            throw new ValidationException("L'ordonnance est requise pour créer une prescription");
+            throw new IllegalArgumentException("L'ordonnance est requise pour créer une prescription");
         }
         Ordonnance ordonnance = ordonnanceRepository.findById(prescription.getOrdonnance().getIdOrd());
         if (ordonnance == null) {
-            throw new ValidationException("L'ordonnance avec l'ID " + prescription.getOrdonnance().getIdOrd() + " n'existe pas");
+            throw new IllegalArgumentException("L'ordonnance avec l'ID " + prescription.getOrdonnance().getIdOrd() + " n'existe pas");
         }
 
         // Vérifier que le médicament existe
         if (prescription.getMedicament() == null || prescription.getMedicament().getIdMct() == null) {
-            throw new ValidationException("Le médicament est requis pour créer une prescription");
+            throw new IllegalArgumentException("Le médicament est requis pour créer une prescription");
         }
         Medicament medicament = medicamentRepository.findById(prescription.getMedicament().getIdMct());
         if (medicament == null) {
-            throw new ValidationException("Le médicament avec l'ID " + prescription.getMedicament().getIdMct() + " n'existe pas");
+            throw new IllegalArgumentException("Le médicament avec l'ID " + prescription.getMedicament().getIdMct() + " n'existe pas");
         }
 
         // Valider la quantité
         if (prescription.getQuantité() <= 0) {
-            throw new ValidationException("La quantité doit être positive");
+            throw new IllegalArgumentException("La quantité doit être positive");
         }
 
         // Valider la durée
         if (prescription.getDuréeEnJours() <= 0) {
-            throw new ValidationException("La durée en jours doit être positive");
+            throw new IllegalArgumentException("La durée en jours doit être positive");
         }
 
         // Valider la fréquence
         if (prescription.getFréquence() == null || prescription.getFréquence().trim().isEmpty()) {
-            throw new ValidationException("La fréquence est requise");
+            throw new IllegalArgumentException("La fréquence est requise");
         }
 
         // Set audit fields
@@ -88,7 +87,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public PrescriptionDTO updatePrescription(Long prescriptionId, UpdatePrescriptionDTO dto) {
         Prescription existingPrescription = prescriptionRepository.findById(prescriptionId);
         if (existingPrescription == null) {
-            throw new ValidationException("Prescription non trouvée avec l'ID: " + prescriptionId);
+            throw new IllegalArgumentException("Prescription non trouvée avec l'ID: " + prescriptionId);
         }
 
         // Mettre à jour l'entité depuis le DTO
@@ -107,7 +106,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public void deletePrescription(Long prescriptionId) {
         if (!existsById(prescriptionId)) {
-            throw new ValidationException("Prescription non trouvée avec l'ID: " + prescriptionId);
+            throw new IllegalArgumentException("Prescription non trouvée avec l'ID: " + prescriptionId);
         }
         prescriptionRepository.deleteById(prescriptionId);
     }
@@ -116,7 +115,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public PrescriptionDTO getPrescriptionById(Long prescriptionId) {
         Prescription prescription = prescriptionRepository.findById(prescriptionId);
         if (prescription == null) {
-            throw new ValidationException("Prescription non trouvée avec l'ID: " + prescriptionId);
+            throw new IllegalArgumentException("Prescription non trouvée avec l'ID: " + prescriptionId);
         }
         return convertToDTO(prescription);
     }
@@ -131,7 +130,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<PrescriptionDTO> findByOrdonnanceId(Long ordonnanceId) {
         if (ordonnanceId == null) {
-            throw new ValidationException("L'ID de l'ordonnance ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de l'ordonnance ne peut pas être null");
         }
         return prescriptionRepository.findByOrdonnanceId(ordonnanceId).stream()
                 .map(this::convertToDTO)
@@ -141,7 +140,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<PrescriptionDTO> findByMedicamentId(Long medicamentId) {
         if (medicamentId == null) {
-            throw new ValidationException("L'ID du médicament ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du médicament ne peut pas être null");
         }
         return prescriptionRepository.findByMedicamentId(medicamentId).stream()
                 .map(this::convertToDTO)
@@ -151,7 +150,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<PrescriptionDTO> findByDureeSuperieure(Integer dureeMin) {
         if (dureeMin == null || dureeMin <= 0) {
-            throw new ValidationException("La durée minimale doit être positive");
+            throw new IllegalArgumentException("La durée minimale doit être positive");
         }
         return prescriptionRepository.findByDureeSuperieure(dureeMin).stream()
                 .map(this::convertToDTO)
@@ -161,7 +160,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<PrescriptionDTO> findByOrdonnanceAndMedicament(Long ordonnanceId, Long medicamentId) {
         if (ordonnanceId == null || medicamentId == null) {
-            throw new ValidationException("L'ID de l'ordonnance et l'ID du médicament sont requis");
+            throw new IllegalArgumentException("L'ID de l'ordonnance et l'ID du médicament sont requis");
         }
         return prescriptionRepository.findByOrdonnanceAndMedicament(ordonnanceId, medicamentId).stream()
                 .map(this::convertToDTO)
@@ -171,7 +170,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public Double calculateCoutTotalOrdonnance(Long ordonnanceId) {
         if (ordonnanceId == null) {
-            throw new ValidationException("L'ID de l'ordonnance ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de l'ordonnance ne peut pas être null");
         }
         return prescriptionRepository.calculateCoutTotalOrdonnance(ordonnanceId);
     }
@@ -192,7 +191,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public long countByOrdonnanceId(Long ordonnanceId) {
         if (ordonnanceId == null) {
-            throw new ValidationException("L'ID de l'ordonnance ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de l'ordonnance ne peut pas être null");
         }
         return prescriptionRepository.countByOrdonnanceId(ordonnanceId);
     }
@@ -200,7 +199,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public long countByMedicamentId(Long medicamentId) {
         if (medicamentId == null) {
-            throw new ValidationException("L'ID du médicament ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du médicament ne peut pas être null");
         }
         return prescriptionRepository.countByMedicamentId(medicamentId);
     }
@@ -208,7 +207,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<PrescriptionDTO> getPrescriptionsActives(Long patientId) {
         if (patientId == null) {
-            throw new ValidationException("L'ID du patient ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du patient ne peut pas être null");
         }
         
         // Récupérer le dossier médical du patient
@@ -253,7 +252,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<PrescriptionDTO> getHistoriquePrescriptions(Long patientId) {
         if (patientId == null) {
-            throw new ValidationException("L'ID du patient ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du patient ne peut pas être null");
         }
         
         // Récupérer le dossier médical du patient
@@ -298,13 +297,13 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         // Charger l'ordonnance
         Ordonnance ordonnance = ordonnanceRepository.findById(dto.getOrdonnanceId());
         if (ordonnance == null) {
-            throw new ValidationException("L'ordonnance avec l'ID " + dto.getOrdonnanceId() + " n'existe pas");
+            throw new IllegalArgumentException("L'ordonnance avec l'ID " + dto.getOrdonnanceId() + " n'existe pas");
         }
 
         // Charger le médicament
         Medicament medicament = medicamentRepository.findById(dto.getMedicamentId());
         if (medicament == null) {
-            throw new ValidationException("Le médicament avec l'ID " + dto.getMedicamentId() + " n'existe pas");
+            throw new IllegalArgumentException("Le médicament avec l'ID " + dto.getMedicamentId() + " n'existe pas");
         }
 
         // Construire l'entité
@@ -337,7 +336,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         if (dto.getMedicamentId() != null) {
             Medicament medicament = medicamentRepository.findById(dto.getMedicamentId());
             if (medicament == null) {
-                throw new ValidationException("Le médicament avec l'ID " + dto.getMedicamentId() + " n'existe pas");
+                throw new IllegalArgumentException("Le médicament avec l'ID " + dto.getMedicamentId() + " n'existe pas");
             }
             entity.setMedicament(medicament);
         }
@@ -346,7 +345,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         if (dto.getOrdonnanceId() != null) {
             Ordonnance ordonnance = ordonnanceRepository.findById(dto.getOrdonnanceId());
             if (ordonnance == null) {
-                throw new ValidationException("L'ordonnance avec l'ID " + dto.getOrdonnanceId() + " n'existe pas");
+                throw new IllegalArgumentException("L'ordonnance avec l'ID " + dto.getOrdonnanceId() + " n'existe pas");
             }
             entity.setOrdonnance(ordonnance);
         }
@@ -370,7 +369,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     // ========== VALIDATION PRIVÉE ==========
     private void validatePrescription(Prescription prescription) {
         if (prescription == null) {
-            throw new ValidationException("La prescription ne peut pas être null");
+            throw new IllegalArgumentException("La prescription ne peut pas être null");
         }
     }
 }

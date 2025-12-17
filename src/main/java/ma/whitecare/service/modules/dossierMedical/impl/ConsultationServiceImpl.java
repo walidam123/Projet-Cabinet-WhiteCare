@@ -18,7 +18,6 @@ import ma.whitecare.repository.modules.dossierMedical.api.PrescriptionRepository
 import ma.whitecare.repository.modules.ordonnance.api.OrdonnanceRepository;
 import ma.whitecare.service.modules.dossierMedical.api.ConsultationService;
 
-import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +73,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     public ConsultationDTO updateConsultation(Long consultationId, UpdateConsultationDTO dto) {
         Consultation existingConsultation = consultationRepository.findById(consultationId);
         if (existingConsultation == null) {
-            throw new ValidationException("Consultation non trouvée avec l'ID: " + consultationId);
+            throw new IllegalArgumentException("Consultation non trouvée avec l'ID: " + consultationId);
         }
 
         // Mettre à jour l'entité depuis le DTO
@@ -93,7 +92,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public void deleteConsultation(Long consultationId) {
         if (!existsById(consultationId)) {
-            throw new ValidationException("Consultation non trouvée avec l'ID: " + consultationId);
+            throw new IllegalArgumentException("Consultation non trouvée avec l'ID: " + consultationId);
         }
         consultationRepository.deleteById(consultationId);
     }
@@ -102,7 +101,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     public ConsultationDTO getConsultationById(Long consultationId) {
         Consultation consultation = consultationRepository.findById(consultationId);
         if (consultation == null) {
-            throw new ValidationException("Consultation non trouvée avec l'ID: " + consultationId);
+            throw new IllegalArgumentException("Consultation non trouvée avec l'ID: " + consultationId);
         }
         return convertToDTO(consultation);
     }
@@ -117,7 +116,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public List<ConsultationDTO> findByDossierMedicalId(Long dossierId) {
         if (dossierId == null) {
-            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du dossier médical ne peut pas être null");
         }
         return consultationRepository.findByDossierMedicalId(dossierId).stream()
                 .map(this::convertToDTO)
@@ -127,7 +126,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public List<ConsultationDTO> findByStatut(StatutConsultation statut) {
         if (statut == null) {
-            throw new ValidationException("Le statut ne peut pas être null");
+            throw new IllegalArgumentException("Le statut ne peut pas être null");
         }
         return consultationRepository.findByStatut(statut).stream()
                 .map(this::convertToDTO)
@@ -137,7 +136,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public List<ConsultationDTO> findByDate(LocalDate date) {
         if (date == null) {
-            throw new ValidationException("La date ne peut pas être null");
+            throw new IllegalArgumentException("La date ne peut pas être null");
         }
         return consultationRepository.findByDate(date).stream()
                 .map(this::convertToDTO)
@@ -147,10 +146,10 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public List<ConsultationDTO> findByDateBetween(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null) {
-            throw new ValidationException("Les dates de début et de fin sont requises");
+            throw new IllegalArgumentException("Les dates de début et de fin sont requises");
         }
         if (startDate.isAfter(endDate)) {
-            throw new ValidationException("La date de début doit être antérieure à la date de fin");
+            throw new IllegalArgumentException("La date de début doit être antérieure à la date de fin");
         }
         return consultationRepository.findByDateBetween(startDate, endDate).stream()
                 .map(this::convertToDTO)
@@ -160,7 +159,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public List<ConsultationDTO> findByDossierAndDate(Long dossierId, LocalDate date) {
         if (dossierId == null || date == null) {
-            throw new ValidationException("L'ID du dossier médical et la date sont requis");
+            throw new IllegalArgumentException("L'ID du dossier médical et la date sont requis");
         }
         return consultationRepository.findByDossierAndDate(dossierId, date).stream()
                 .map(this::convertToDTO)
@@ -170,20 +169,20 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public void changeStatut(Long consultationId, StatutConsultation nouveauStatut) {
         if (nouveauStatut == null) {
-            throw new ValidationException("Le nouveau statut ne peut pas être null");
+            throw new IllegalArgumentException("Le nouveau statut ne peut pas être null");
         }
         Consultation consultation = consultationRepository.findById(consultationId);
         if (consultation == null) {
-            throw new ValidationException("Consultation non trouvée avec l'ID: " + consultationId);
+            throw new IllegalArgumentException("Consultation non trouvée avec l'ID: " + consultationId);
         }
 
         // Validation des transitions de statut
         StatutConsultation ancienStatut = consultation.getStatut();
         if (ancienStatut == StatutConsultation.TERMINEE && nouveauStatut != StatutConsultation.TERMINEE) {
-            throw new ValidationException("Une consultation terminée ne peut pas changer de statut");
+            throw new IllegalArgumentException("Une consultation terminée ne peut pas changer de statut");
         }
         if (ancienStatut == StatutConsultation.ANNULEE && nouveauStatut != StatutConsultation.ANNULEE) {
-            throw new ValidationException("Une consultation annulée ne peut pas changer de statut");
+            throw new IllegalArgumentException("Une consultation annulée ne peut pas changer de statut");
         }
 
         consultation.setStatut(nouveauStatut);
@@ -207,7 +206,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public long countByStatut(StatutConsultation statut) {
         if (statut == null) {
-            throw new ValidationException("Le statut ne peut pas être null");
+            throw new IllegalArgumentException("Le statut ne peut pas être null");
         }
         return consultationRepository.countByStatut(statut);
     }
@@ -215,7 +214,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public long countByDossierMedicalId(Long dossierId) {
         if (dossierId == null) {
-            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du dossier médical ne peut pas être null");
         }
         return consultationRepository.countByDossierMedicalId(dossierId);
     }
@@ -231,12 +230,12 @@ public class ConsultationServiceImpl implements ConsultationService {
     @Override
     public ConsultationCompleteDTO getConsultationComplete(Long consultationId) {
         if (consultationId == null) {
-            throw new ValidationException("L'ID de la consultation ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de la consultation ne peut pas être null");
         }
         
         Consultation consultation = consultationRepository.findById(consultationId);
         if (consultation == null) {
-            throw new ValidationException("Consultation non trouvée avec l'ID: " + consultationId);
+            throw new IllegalArgumentException("Consultation non trouvée avec l'ID: " + consultationId);
         }
         
         // Convertir la consultation de base en DTO
@@ -271,7 +270,7 @@ public class ConsultationServiceImpl implements ConsultationService {
         // Charger le dossier médical
         DossierMedicale dossier = dossierMedicalRepository.findById(dto.getDossierMedicalId());
         if (dossier == null) {
-            throw new ValidationException("Le dossier médical avec l'ID " + dto.getDossierMedicalId() + " n'existe pas");
+            throw new IllegalArgumentException("Le dossier médical avec l'ID " + dto.getDossierMedicalId() + " n'existe pas");
         }
 
         // Construire l'entité
@@ -304,7 +303,7 @@ public class ConsultationServiceImpl implements ConsultationService {
         if (dto.getDossierMedicalId() != null) {
             DossierMedicale dossier = dossierMedicalRepository.findById(dto.getDossierMedicalId());
             if (dossier == null) {
-                throw new ValidationException("Le dossier médical avec l'ID " + dto.getDossierMedicalId() + " n'existe pas");
+                throw new IllegalArgumentException("Le dossier médical avec l'ID " + dto.getDossierMedicalId() + " n'existe pas");
             }
             entity.setDossierMedicale(dossier);
         }
@@ -373,7 +372,7 @@ public class ConsultationServiceImpl implements ConsultationService {
     // ========== VALIDATION PRIVÉE ==========
     private void validateConsultation(Consultation consultation) {
         if (consultation == null) {
-            throw new ValidationException("La consultation ne peut pas être null");
+            throw new IllegalArgumentException("La consultation ne peut pas être null");
         }
     }
 }

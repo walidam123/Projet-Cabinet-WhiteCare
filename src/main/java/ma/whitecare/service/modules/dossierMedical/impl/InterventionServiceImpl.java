@@ -12,7 +12,6 @@ import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalReposito
 import ma.whitecare.repository.modules.actes.api.ActeRepository;
 import ma.whitecare.service.modules.dossierMedical.api.InterventionService;
 
-import javax.validation.ValidationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,30 +43,30 @@ public class InterventionServiceImpl implements InterventionService {
 
         // Vérifier que la consultation existe
         if (intervention.getConsultation() == null || intervention.getConsultation().getIdConsultation() == null) {
-            throw new ValidationException("La consultation est requise pour créer une intervention");
+            throw new IllegalArgumentException("La consultation est requise pour créer une intervention");
         }
         Consultation consultation = consultationRepository.findById(intervention.getConsultation().getIdConsultation());
         if (consultation == null) {
-            throw new ValidationException("La consultation avec l'ID " + intervention.getConsultation().getIdConsultation() + " n'existe pas");
+            throw new IllegalArgumentException("La consultation avec l'ID " + intervention.getConsultation().getIdConsultation() + " n'existe pas");
         }
 
         // Vérifier que l'acte existe
         if (intervention.getActe() == null || intervention.getActe().getIdActe() == null) {
-            throw new ValidationException("L'acte est requis pour créer une intervention");
+            throw new IllegalArgumentException("L'acte est requis pour créer une intervention");
         }
         Acte acte = acteRepository.findById(intervention.getActe().getIdActe());
         if (acte == null) {
-            throw new ValidationException("L'acte avec l'ID " + intervention.getActe().getIdActe() + " n'existe pas");
+            throw new IllegalArgumentException("L'acte avec l'ID " + intervention.getActe().getIdActe() + " n'existe pas");
         }
 
         // Valider le prix
         if (intervention.getPrixDePatient() == null || intervention.getPrixDePatient() < 0) {
-            throw new ValidationException("Le prix de l'intervention doit être positif ou nul");
+            throw new IllegalArgumentException("Le prix de l'intervention doit être positif ou nul");
         }
 
         // Valider le numéro de dent si fourni
         if (intervention.getNumDent() != null && (intervention.getNumDent() < 1 || intervention.getNumDent() > 32)) {
-            throw new ValidationException("Le numéro de dent doit être entre 1 et 32");
+            throw new IllegalArgumentException("Le numéro de dent doit être entre 1 et 32");
         }
 
         // Set audit fields
@@ -83,7 +82,7 @@ public class InterventionServiceImpl implements InterventionService {
     public InterventionDTO updateIntervention(Long interventionId, UpdateInterventionDTO dto) {
         InterventionMedecin existingIntervention = interventionRepository.findById(interventionId);
         if (existingIntervention == null) {
-            throw new ValidationException("Intervention non trouvée avec l'ID: " + interventionId);
+            throw new IllegalArgumentException("Intervention non trouvée avec l'ID: " + interventionId);
         }
 
         // Mettre à jour l'entité depuis le DTO
@@ -102,7 +101,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public void deleteIntervention(Long interventionId) {
         if (!existsById(interventionId)) {
-            throw new ValidationException("Intervention non trouvée avec l'ID: " + interventionId);
+            throw new IllegalArgumentException("Intervention non trouvée avec l'ID: " + interventionId);
         }
         interventionRepository.deleteById(interventionId);
     }
@@ -111,7 +110,7 @@ public class InterventionServiceImpl implements InterventionService {
     public InterventionDTO getInterventionById(Long interventionId) {
         InterventionMedecin intervention = interventionRepository.findById(interventionId);
         if (intervention == null) {
-            throw new ValidationException("Intervention non trouvée avec l'ID: " + interventionId);
+            throw new IllegalArgumentException("Intervention non trouvée avec l'ID: " + interventionId);
         }
         return convertToDTO(intervention);
     }
@@ -126,7 +125,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public List<InterventionDTO> findByConsultationId(Long consultationId) {
         if (consultationId == null) {
-            throw new ValidationException("L'ID de la consultation ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de la consultation ne peut pas être null");
         }
         return interventionRepository.findByConsultationId(consultationId).stream()
                 .map(this::convertToDTO)
@@ -136,7 +135,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public List<InterventionDTO> findByActeId(Long acteId) {
         if (acteId == null) {
-            throw new ValidationException("L'ID de l'acte ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de l'acte ne peut pas être null");
         }
         return interventionRepository.findByActeId(acteId).stream()
                 .map(this::convertToDTO)
@@ -146,10 +145,10 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public List<InterventionDTO> findByNumDent(Integer numDent) {
         if (numDent == null) {
-            throw new ValidationException("Le numéro de dent ne peut pas être null");
+            throw new IllegalArgumentException("Le numéro de dent ne peut pas être null");
         }
         if (numDent < 1 || numDent > 32) {
-            throw new ValidationException("Le numéro de dent doit être entre 1 et 32");
+            throw new IllegalArgumentException("Le numéro de dent doit être entre 1 et 32");
         }
         return interventionRepository.findByNumDent(numDent).stream()
                 .map(this::convertToDTO)
@@ -159,7 +158,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public List<InterventionDTO> findByConsultationAndActe(Long consultationId, Long acteId) {
         if (consultationId == null || acteId == null) {
-            throw new ValidationException("L'ID de la consultation et l'ID de l'acte sont requis");
+            throw new IllegalArgumentException("L'ID de la consultation et l'ID de l'acte sont requis");
         }
         return interventionRepository.findByConsultationAndActe(consultationId, acteId).stream()
                 .map(this::convertToDTO)
@@ -169,7 +168,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public Double calculateTotalByConsultation(Long consultationId) {
         if (consultationId == null) {
-            throw new ValidationException("L'ID de la consultation ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de la consultation ne peut pas être null");
         }
         return interventionRepository.calculateTotalByConsultation(consultationId);
     }
@@ -190,7 +189,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public long countByConsultationId(Long consultationId) {
         if (consultationId == null) {
-            throw new ValidationException("L'ID de la consultation ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de la consultation ne peut pas être null");
         }
         return interventionRepository.countByConsultationId(consultationId);
     }
@@ -198,7 +197,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public long countByActeId(Long acteId) {
         if (acteId == null) {
-            throw new ValidationException("L'ID de l'acte ne peut pas être null");
+            throw new IllegalArgumentException("L'ID de l'acte ne peut pas être null");
         }
         return interventionRepository.countByActeId(acteId);
     }
@@ -206,12 +205,12 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public Map<Integer, List<InterventionDTO>> getHistoriqueDentaire(Long dossierId) {
         if (dossierId == null) {
-            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du dossier médical ne peut pas être null");
         }
         
         // Vérifier que le dossier existe
         if (dossierMedicalRepository.findById(dossierId) == null) {
-            throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
+            throw new IllegalArgumentException("Dossier médical non trouvé avec l'ID: " + dossierId);
         }
         
         // Récupérer toutes les consultations du dossier
@@ -237,12 +236,12 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public Double getCoutTotalPatient(Long dossierId) {
         if (dossierId == null) {
-            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+            throw new IllegalArgumentException("L'ID du dossier médical ne peut pas être null");
         }
         
         // Vérifier que le dossier existe
         if (dossierMedicalRepository.findById(dossierId) == null) {
-            throw new ValidationException("Dossier médical non trouvé avec l'ID: " + dossierId);
+            throw new IllegalArgumentException("Dossier médical non trouvé avec l'ID: " + dossierId);
         }
         
         // Récupérer toutes les consultations du dossier
@@ -265,13 +264,13 @@ public class InterventionServiceImpl implements InterventionService {
         // Charger la consultation
         Consultation consultation = consultationRepository.findById(dto.getConsultationId());
         if (consultation == null) {
-            throw new ValidationException("La consultation avec l'ID " + dto.getConsultationId() + " n'existe pas");
+            throw new IllegalArgumentException("La consultation avec l'ID " + dto.getConsultationId() + " n'existe pas");
         }
 
         // Charger l'acte
         Acte acte = acteRepository.findById(dto.getActeId());
         if (acte == null) {
-            throw new ValidationException("L'acte avec l'ID " + dto.getActeId() + " n'existe pas");
+            throw new IllegalArgumentException("L'acte avec l'ID " + dto.getActeId() + " n'existe pas");
         }
 
         // Construire l'entité
@@ -298,7 +297,7 @@ public class InterventionServiceImpl implements InterventionService {
         if (dto.getActeId() != null) {
             Acte acte = acteRepository.findById(dto.getActeId());
             if (acte == null) {
-                throw new ValidationException("L'acte avec l'ID " + dto.getActeId() + " n'existe pas");
+                throw new IllegalArgumentException("L'acte avec l'ID " + dto.getActeId() + " n'existe pas");
             }
             entity.setActe(acte);
         }
@@ -307,7 +306,7 @@ public class InterventionServiceImpl implements InterventionService {
         if (dto.getConsultationId() != null) {
             Consultation consultation = consultationRepository.findById(dto.getConsultationId());
             if (consultation == null) {
-                throw new ValidationException("La consultation avec l'ID " + dto.getConsultationId() + " n'existe pas");
+                throw new IllegalArgumentException("La consultation avec l'ID " + dto.getConsultationId() + " n'existe pas");
             }
             entity.setConsultation(consultation);
         }
@@ -331,7 +330,7 @@ public class InterventionServiceImpl implements InterventionService {
     // ========== VALIDATION PRIVÉE ==========
     private void validateIntervention(InterventionMedecin intervention) {
         if (intervention == null) {
-            throw new ValidationException("L'intervention ne peut pas être null");
+            throw new IllegalArgumentException("L'intervention ne peut pas être null");
         }
     }
 }
