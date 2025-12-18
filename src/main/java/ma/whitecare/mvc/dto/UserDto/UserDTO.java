@@ -1,4 +1,4 @@
-package ma.whitecare.mvc.dto;
+package ma.whitecare.mvc.dto.UserDto;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.enums.Sexe;
 
-import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

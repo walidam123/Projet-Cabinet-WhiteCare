@@ -1,5 +1,6 @@
 package ma.whitecare.repository.test;
 
+import ma.whitecare.entities.cabinet.CabinetMedicale;
 import ma.whitecare.entities.financial.Charges;
 import ma.whitecare.repository.modules.cabinet.api.ChargesRepository;
 import ma.whitecare.repository.modules.cabinet.impl.ChargesRepositoryImpl;
@@ -33,13 +34,16 @@ public class ChargesRepositoryTest {
 
     public static void testCharges(){
         // 1. TEST CREATE
+
+        CabinetMedicale cabinettest=new CabinetMedicale();
+        cabinettest.setId(testCabinetId);
         System.out.println("1. 📝 Test création charge...");
         Charges charge = Charges.builder()
                 .titre("Achat matériel médical")
                 .description("Stéthoscopes et thermomètres")
                 .montant(2500.50)
                 .date(LocalDateTime.now())
-                .cabinetMedicaleId(testCabinetId)
+                .Cabinet(cabinettest)
                 .creePar("test_user")
                 .modifiePar("test_user")
                 .build();

@@ -1,6 +1,6 @@
 package ma.whitecare.common.validators;
 
-import ma.whitecare.mvc.dto.CreateSecretaireDTO;
+import ma.whitecare.mvc.dto.UserDto.CreateSecretaireDTO;
 
 
 import java.util.ArrayList;

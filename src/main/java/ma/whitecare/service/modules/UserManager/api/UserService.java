@@ -3,7 +3,7 @@ package ma.whitecare.service.modules.UserManager.api;
 import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.user.Utilisateur;
-import ma.whitecare.mvc.dto.*;
+import ma.whitecare.mvc.dto.UserDto.*;
 
 import java.util.List;
 import java.util.Optional;

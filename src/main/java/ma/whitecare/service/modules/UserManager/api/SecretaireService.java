@@ -1,10 +1,10 @@
 package ma.whitecare.service.modules.UserManager.api;
 
 import ma.whitecare.entities.user.Secretaire;
-import ma.whitecare.mvc.dto.CreateSecretaireDTO;
-import ma.whitecare.mvc.dto.SecretaireDTO;
-import ma.whitecare.mvc.dto.SecretaireStatisticsDTO;
-import ma.whitecare.mvc.dto.UpdateSecretaireDTO;
+import ma.whitecare.mvc.dto.UserDto.CreateSecretaireDTO;
+import ma.whitecare.mvc.dto.UserDto.SecretaireDTO;
+import ma.whitecare.mvc.dto.UserDto.SecretaireStatisticsDTO;
+import ma.whitecare.mvc.dto.UserDto.UpdateSecretaireDTO;
 
 import java.util.List;
 

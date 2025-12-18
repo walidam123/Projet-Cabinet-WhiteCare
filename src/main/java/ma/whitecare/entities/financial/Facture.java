@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.StatutFacture;
 import ma.whitecare.entities.medical.Consultation;
@@ -14,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Facture extends BaseEntity {
     private Long idFature;
     private Double totaleFacture;

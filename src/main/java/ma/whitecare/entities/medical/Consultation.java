@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.appointment.RDV;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.StatutConsultation;
@@ -14,7 +15,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class Consultation extends BaseEntity {
 
     private Long idConsultation;
@@ -31,7 +32,28 @@ public class Consultation extends BaseEntity {
 
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Consultation)) return false;
+        Consultation that = (Consultation) o;
+        return idConsultation != null && idConsultation.equals(that.idConsultation);
+    }
+
+    @Override
     public int hashCode() {
-        return idConsultation!= null ? idConsultation.hashCode() : 0;
+        return idConsultation != null ? idConsultation.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return """
+            Consultation {
+                id = %d,
+                date = %s,
+                statut = %s,
+                interventionsCount = %d
+            }
+            """.formatted(idConsultation, Date, statut,
+                interventionMedecinList == null ? 0 : interventionMedecinList.size());
     }
 }

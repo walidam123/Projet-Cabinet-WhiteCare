@@ -13,7 +13,7 @@ import ma.whitecare.entities.agenda.AgendaMensuel;
 @SuperBuilder
 public class Medecin extends Staff{
     private String specialite;
-
+    private AgendaMensuel agendaMensuel;
 
 
 

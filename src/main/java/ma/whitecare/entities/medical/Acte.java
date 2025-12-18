@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @AllArgsConstructor
@@ -20,20 +21,31 @@ public class Acte extends BaseEntity {
     private String categorie;
 
     private Double prixDeBase;
-    private List<Long> interventionMedecinlist=null;
+    List<InterventionMedecin> interventions = new ArrayList<>();
 
     @Override
-    public String toString() {
-        return "Acte{" +
-                ", idActe=" + idActe +
-                ", libelle='" + libelle + '\'' +
-                ", categorie='" + categorie + '\'' +
-                ", prixDeBase=" + prixDeBase +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Acte)) return false;
+        Acte that = (Acte) o;
+        return idActe != null && idActe.equals(that.idActe);
     }
 
     @Override
     public int hashCode() {
         return idActe != null ? idActe.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return """
+            Acte {
+                id = %d,
+                libelle = '%s',
+                categorie = '%s',
+                prixBase = %.2f,
+                interventionsCount = %d
+            }
+            """.formatted(idActe, libelle, categorie, prixDeBase != null ? prixDeBase : 0.0, interventions == null ? 0 : interventions.size());
     }
 }

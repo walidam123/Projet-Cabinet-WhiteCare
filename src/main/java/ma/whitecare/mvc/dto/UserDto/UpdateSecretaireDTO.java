@@ -1,9 +1,7 @@
-package ma.whitecare.mvc.dto;
+package ma.whitecare.mvc.dto.UserDto;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 @Data
 @SuperBuilder

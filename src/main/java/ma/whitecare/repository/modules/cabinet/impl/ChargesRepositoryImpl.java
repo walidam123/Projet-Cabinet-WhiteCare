@@ -50,7 +50,7 @@ public class ChargesRepositoryImpl implements ChargesRepository {
             ps.setString(2, newElement.getDescription());
             ps.setDouble(3, newElement.getMontant());
             ps.setTimestamp(4, Timestamp.valueOf(newElement.getDate()));
-            ps.setLong(5, newElement.getCabinetMedicaleId());
+            ps.setLong(5, newElement.getCabinet().getId());
             ps.setString(6, newElement.getCreePar());
             ps.setString(7, newElement.getModifiePar());
 
@@ -74,7 +74,7 @@ public class ChargesRepositoryImpl implements ChargesRepository {
             ps.setString(2, newValuesElement.getDescription());
             ps.setDouble(3, newValuesElement.getMontant());
             ps.setTimestamp(4, Timestamp.valueOf(newValuesElement.getDate()));
-            ps.setLong(5, newValuesElement.getCabinetMedicaleId());
+            ps.setLong(5, newValuesElement.getCabinet().getId());
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setString(7, newValuesElement.getModifiePar());
             ps.setLong(8, newValuesElement.getId());

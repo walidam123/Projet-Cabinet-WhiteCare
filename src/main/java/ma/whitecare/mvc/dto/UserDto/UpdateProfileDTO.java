@@ -1,4 +1,4 @@
-package ma.whitecare.mvc.dto;
+package ma.whitecare.mvc.dto.UserDto;
 
 import lombok.*;
 import ma.whitecare.entities.enums.Sexe;

@@ -6,7 +6,7 @@ import ma.whitecare.common.validators.UserValidator;
 import ma.whitecare.entities.enums.LibelleRole;
 import ma.whitecare.entities.enums.Sexe;
 import ma.whitecare.entities.user.Utilisateur;
-import ma.whitecare.mvc.dto.*;
+import ma.whitecare.mvc.dto.UserDto.*;
 import ma.whitecare.repository.modules.UserManager.api.RoleRepository;
 import ma.whitecare.repository.modules.UserManager.api.UtilisateurRepository;
 import ma.whitecare.service.modules.UserManager.api.UserService;

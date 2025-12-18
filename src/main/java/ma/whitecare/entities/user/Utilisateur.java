@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.Sexe;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data @AllArgsConstructor @NoArgsConstructor @SuperBuilder
@@ -25,16 +26,32 @@ public    class  Utilisateur extends BaseEntity {
     protected LocalDate LastLoginDate;
     protected LocalDate dateNaissance;
     protected Boolean actif;
-
+    private List<Role> roles = new ArrayList<>();
 
     @Override
     public String toString() {
-        return String.format(
-                "Utilisateur{id=%d, nom='%s', email='%s', login='%s'}",
-                idUser != null ? idUser : 0,
-                nom != null ? nom : "N/A",
-                email != null ? email : "N/A",
-                login != null ? login : "N/A"
-        );
+        return """
+            Utilisateur {
+                id = %d,
+                nom = '%s',
+                email = '%s',
+                login = '%s',
+                rolesCount = %d
+            }
+            """.formatted(idUser, nom, email, login, roles == null ? 0 : roles.size());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Utilisateur)) return false;
+        Utilisateur that = (Utilisateur) o;
+        return idUser != null && idUser.equals(that.idUser);
+    }
+
+    @Override
+    public int hashCode() {
+        return idUser != null ? idUser.hashCode() : 0;
+    }
+
 }

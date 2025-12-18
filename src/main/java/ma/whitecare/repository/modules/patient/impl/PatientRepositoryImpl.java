@@ -45,14 +45,13 @@ public class PatientRepositoryImpl implements PatientRepository {
     @Override
     public void create(Patient p) {
         String sql = """
-        INSERT INTO patient(nom, prenom, dateDeNaissance, sexe, adresse, telephone, email, assurance, 
-                           creation_date, last_modification_date, created_by, updated_by)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
-        """;
+    INSERT INTO patient(nom, prenom, dateDeNaissance, sexe, adresse, telephone, email, assurance, 
+                       creation_date, last_modification_date, created_by, updated_by)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+    """;
         try (Connection c = SessionFactory.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Vérifiez l'ordre exact des paramètres
             ps.setString(1, p.getNom());
             ps.setString(2, p.getPrenom());
 
@@ -68,7 +67,6 @@ public class PatientRepositoryImpl implements PatientRepository {
             ps.setString(7, p.getEmail());
             ps.setString(8, p.getAssurance() != null ? p.getAssurance().name() : Assurance.AUCUNE.name());
 
-            // Gestion des dates et utilisateurs
             Timestamp now = new Timestamp(System.currentTimeMillis());
             ps.setTimestamp(9, now);
             ps.setTimestamp(10, now);
@@ -76,15 +74,18 @@ public class PatientRepositoryImpl implements PatientRepository {
             ps.setString(12, p.getModifiePar() != null ? p.getModifiePar() : "system");
 
             ps.executeUpdate();
+
+            // ✅ Récupérer l’ID généré et le mettre dans l’objet Patient
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    p.setId_Patient(keys.getLong(1));
+                    p.setId_Patient(keys.getLong(1)); // CORRECTION ICI
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erreur lors de la création du patient: " + e.getMessage(), e);
         }
     }
+
 
     @Override
     public void update(Patient p) {
