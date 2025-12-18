@@ -13,6 +13,7 @@ import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalReposito
 import ma.whitecare.repository.modules.patient.api.PatientRepository;
 import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
 import ma.whitecare.service.modules.dossierMedical.api.DossierMedicalService;
+import ma.whitecare.common.exceptions.dossierMedicalExceptions.*;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -46,7 +47,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
 
         // Vérifier l'unicité : un patient ne peut avoir qu'un seul dossier médical
         if (existsByPatientId(dto.getPatientId())) {
-            throw new IllegalArgumentException("Un dossier médical existe déjà pour ce patient");
+            throw new DuplicateDossierMedicalException(dto.getPatientId());
         }
 
         // Définir la date de création si non fournie
@@ -67,7 +68,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     public DossierMedicalDTO updateDossierMedical(Long dossierId, UpdateDossierMedicalDTO dto) {
         DossierMedicale existingDossier = dossierMedicalRepository.findById(dossierId);
         if (existingDossier == null) {
-            throw new IllegalArgumentException("Dossier médical non trouvé avec l'ID: " + dossierId);
+            throw new DossierMedicalNotFoundException(dossierId);
         }
 
         // Mettre à jour l'entité depuis le DTO
@@ -86,7 +87,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public void deleteDossierMedical(Long dossierId) {
         if (!existsById(dossierId)) {
-            throw new IllegalArgumentException("Dossier médical non trouvé avec l'ID: " + dossierId);
+            throw new DossierMedicalNotFoundException(dossierId);
         }
         dossierMedicalRepository.deleteById(dossierId);
     }
@@ -95,7 +96,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     public DossierMedicalDTO getDossierMedicalById(Long dossierId) {
         DossierMedicale dossier = dossierMedicalRepository.findById(dossierId);
         if (dossier == null) {
-            throw new IllegalArgumentException("Dossier médical non trouvé avec l'ID: " + dossierId);
+            throw new DossierMedicalNotFoundException(dossierId);
         }
         return convertToDTO(dossier);
     }
@@ -110,7 +111,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public List<DossierMedicalDTO> findByPatientId(Long patientId) {
         if (patientId == null) {
-            throw new IllegalArgumentException("L'ID du patient ne peut pas être null");
+            throw new ValidationException("L'ID du patient ne peut pas être null");
         }
         return dossierMedicalRepository.findByPatientId(patientId).stream()
                 .map(this::convertToDTO)
@@ -120,7 +121,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public List<DossierMedicalDTO> findByMedecinId(Long medecinId) {
         if (medecinId == null) {
-            throw new IllegalArgumentException("L'ID du médecin ne peut pas être null");
+            throw new ValidationException("L'ID du médecin ne peut pas être null");
         }
         return dossierMedicalRepository.findByMedecinId(medecinId).stream()
                 .map(this::convertToDTO)
@@ -130,7 +131,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public List<DossierMedicalDTO> findByDateCreation(LocalDate date) {
         if (date == null) {
-            throw new IllegalArgumentException("La date ne peut pas être null");
+            throw new ValidationException("La date ne peut pas être null");
         }
         return dossierMedicalRepository.findByDateCreation(date).stream()
                 .map(this::convertToDTO)
@@ -140,10 +141,10 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public List<DossierMedicalDTO> findByDateCreationBetween(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Les dates de début et de fin sont requises");
+            throw new ValidationException("Les dates de début et de fin sont requises");
         }
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("La date de début doit être antérieure à la date de fin");
+            throw new InvalidDateRangeException("La date de début doit être antérieure à la date de fin");
         }
         return dossierMedicalRepository.findByDateCreationBetween(startDate, endDate).stream()
                 .map(this::convertToDTO)
@@ -174,7 +175,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public long countByPatientId(Long patientId) {
         if (patientId == null) {
-            throw new IllegalArgumentException("L'ID du patient ne peut pas être null");
+            throw new ValidationException("L'ID du patient ne peut pas être null");
         }
         return dossierMedicalRepository.countByPatientId(patientId);
     }
@@ -182,7 +183,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public long countByMedecinId(Long medecinId) {
         if (medecinId == null) {
-            throw new IllegalArgumentException("L'ID du médecin ne peut pas être null");
+            throw new ValidationException("L'ID du médecin ne peut pas être null");
         }
         return dossierMedicalRepository.countByMedecinId(medecinId);
     }
@@ -190,12 +191,12 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public ConsultationDTO getDerniereConsultation(Long dossierId) {
         if (dossierId == null) {
-            throw new IllegalArgumentException("L'ID du dossier médical ne peut pas être null");
+            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
         }
         
         // Vérifier que le dossier existe
         if (!existsById(dossierId)) {
-            throw new IllegalArgumentException("Dossier médical non trouvé avec l'ID: " + dossierId);
+            throw new DossierMedicalNotFoundException(dossierId);
         }
         
         // Récupérer toutes les consultations du dossier, triées par date décroissante
@@ -216,7 +217,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     @Override
     public List<ConsultationDTO> getHistoriqueCompletPatient(Long patientId) {
         if (patientId == null) {
-            throw new IllegalArgumentException("L'ID du patient ne peut pas être null");
+            throw new ValidationException("L'ID du patient ne peut pas être null");
         }
         
         // Récupérer le dossier médical du patient
@@ -239,13 +240,13 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         // Charger le patient
         Patient patient = patientRepository.findById(dto.getPatientId());
         if (patient == null) {
-            throw new IllegalArgumentException("Le patient avec l'ID " + dto.getPatientId() + " n'existe pas");
+            throw new RelatedEntityNotFoundException("patient", dto.getPatientId());
         }
 
         // Charger le médecin
         Medecin medecin = medecinRepository.findById(dto.getMedecinId());
         if (medecin == null) {
-            throw new IllegalArgumentException("Le médecin avec l'ID " + dto.getMedecinId() + " n'existe pas");
+            throw new RelatedEntityNotFoundException("médecin", dto.getMedecinId());
         }
 
         // Construire l'entité
@@ -266,7 +267,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         if (dto.getPatientId() != null) {
             Patient patient = patientRepository.findById(dto.getPatientId());
             if (patient == null) {
-                throw new IllegalArgumentException("Le patient avec l'ID " + dto.getPatientId() + " n'existe pas");
+                throw new RelatedEntityNotFoundException("patient", dto.getPatientId());
             }
             entity.setPatient(patient);
         }
@@ -275,7 +276,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
         if (dto.getMedecinId() != null) {
             Medecin medecin = medecinRepository.findById(dto.getMedecinId());
             if (medecin == null) {
-                throw new IllegalArgumentException("Le médecin avec l'ID " + dto.getMedecinId() + " n'existe pas");
+                throw new RelatedEntityNotFoundException("médecin", dto.getMedecinId());
             }
             entity.setMedecin(medecin);
         }
@@ -312,7 +313,7 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     // ========== VALIDATION PRIVÉE ==========
     private void validateDossierMedical(DossierMedicale dossierMedical) {
         if (dossierMedical == null) {
-            throw new IllegalArgumentException("Le dossier médical ne peut pas être null");
+            throw new ValidationException("Le dossier médical ne peut pas être null");
         }
         // La validation des dates est gérée dans les méthodes spécifiques
     }

@@ -29,4 +29,3 @@ public class ConsultationCompleteDTO {
     private List<InterventionDTO> interventions;
     private List<PrescriptionDTO> prescriptions;
 }
-
