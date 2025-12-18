@@ -76,6 +76,13 @@ public class TestDossierMedicalService {
             DossierMedicalDTO createdDossier = dossierService.createDossierMedical(createDTO);
             System.out.println("✓ Dossier médical créé avec ID: " + createdDossier.getIdDM());
             System.out.println("  Date de création: " + createdDossier.getDateDeCreation());
+            
+            // Pause pour montrer le dossier créé dans la base de données
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
             // 5. TEST 2: Récupération par ID
             System.out.println("\n=== Test 2: Récupération par ID ===");
@@ -148,6 +155,14 @@ public class TestDossierMedicalService {
 
             // 13. TEST 10: Mise à jour
             System.out.println("\n=== Test 10: Mise à jour ===");
+            
+            // Pause pour montrer le dossier avant la mise à jour
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
             UpdateDossierMedicalDTO updateDTO = UpdateDossierMedicalDTO.builder()
                     .dateDeCreation(LocalDate.now().minusDays(1))
                     .build();
@@ -181,7 +196,7 @@ public class TestDossierMedicalService {
             // 16. TEST 13: Suppression
             System.out.println("\n=== Test 13: Suppression ===");
             try {
-                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+                Thread.sleep(7000); // Attendre 7 secondes que les processus en cours se terminent
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

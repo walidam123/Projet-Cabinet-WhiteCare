@@ -149,6 +149,13 @@ public class TestPrescriptionService {
             System.out.println("  Quantité: " + created.getQuantité());
             System.out.println("  Fréquence: " + created.getFréquence());
             System.out.println("  Durée: " + created.getDuréeEnJours() + " jours");
+            
+            // Pause pour montrer la prescription créée dans la base de données
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
             // 5. TEST 3: Récupération par ID
             System.out.println("\n=== Test 3: Récupération par ID ===");
@@ -222,6 +229,14 @@ public class TestPrescriptionService {
 
             // 13. TEST 11: Mise à jour
             System.out.println("\n=== Test 11: Mise à jour ===");
+            
+            // Pause pour montrer la prescription avant la mise à jour
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
             UpdatePrescriptionDTO updateDTO = UpdatePrescriptionDTO.builder()
                     .quantité(3)
                     .fréquence("3 fois par jour")
@@ -259,7 +274,7 @@ public class TestPrescriptionService {
             // 16. TEST 14: Suppression
             System.out.println("\n=== Test 14: Suppression ===");
             try {
-                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+                Thread.sleep(7000); // Attendre 7 secondes que les processus en cours se terminent
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

@@ -128,6 +128,13 @@ public class TestInterventionService {
             System.out.println("✓ Intervention créée avec ID: " + created.getIdIM());
             System.out.println("  Prix: " + created.getPrixDePatient() + " MAD");
             System.out.println("  Dent: " + created.getNumDent());
+            
+            // Pause pour montrer l'intervention créée dans la base de données
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
             // 5. TEST 3: Récupération par ID
             System.out.println("\n=== Test 3: Récupération par ID ===");
@@ -198,6 +205,14 @@ public class TestInterventionService {
 
             // 13. TEST 11: Mise à jour
             System.out.println("\n=== Test 11: Mise à jour ===");
+            
+            // Pause pour montrer l'intervention avant la mise à jour
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
             UpdateInterventionDTO updateDTO = UpdateInterventionDTO.builder()
                     .prixDePatient(600.0)
                     .numDent(17)
@@ -227,7 +242,7 @@ public class TestInterventionService {
             // 16. TEST 14: Suppression
             System.out.println("\n=== Test 14: Suppression ===");
             try {
-                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+                Thread.sleep(7000); // Attendre 7 secondes que les processus en cours se terminent
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

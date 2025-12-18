@@ -152,7 +152,7 @@ public class TestUserServiceSimple {
             // 14. TEST 13: Suppression
             System.out.println("\nTest 13: Suppression d'utilisateur");
             try {
-                Thread.sleep(20000); // Attendre 20 secondes que les processus en cours se terminent
+                Thread.sleep(7000); // Attendre 7 secondes que les processus en cours se terminent
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
