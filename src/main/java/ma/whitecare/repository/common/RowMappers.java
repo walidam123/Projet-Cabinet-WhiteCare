@@ -168,6 +168,28 @@ public final class RowMappers {
         return MedicamentRow;
     }
 
+    public static Ordonnance mapOrdonnance(ResultSet rs) throws SQLException {
+        Ordonnance ordonnanceRow = new Ordonnance();
+        
+        ordonnanceRow.setIdOrd(rs.getLong("idOrd"));
+        var date = rs.getDate("date");
+        if (date != null) {
+            ordonnanceRow.setDate(date.toLocalDate());
+        }
+        
+        // Note: Les relations Consultation et DossierMedicale ne sont pas chargées ici
+        // Elles seront chargées séparément si nécessaire
+        
+        var dc = rs.getTimestamp("creation_date");
+        if (dc != null) ordonnanceRow.setDateCreation(dc.toLocalDateTime().toLocalDate());
+        var dl = rs.getTimestamp("last_modification_date");
+        if (dl != null) ordonnanceRow.setDateDerniereModification(dl.toLocalDateTime().toLocalDate());
+        ordonnanceRow.setCreePar(rs.getString("created_by"));
+        ordonnanceRow.setModifiePar(rs.getString("updated_by"));
+        
+        return ordonnanceRow;
+    }
+
     public static Charges mapCharge(ResultSet rs) throws SQLException {
         Charges ChargesRow = new Charges();
 
