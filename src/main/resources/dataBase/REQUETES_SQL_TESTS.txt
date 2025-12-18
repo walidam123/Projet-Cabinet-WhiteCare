@@ -1,0 +1,464 @@
+-- ============================================================================
+-- REQUÊTES SQL POUR REMPLIR LA BASE DE DONNÉES POUR LES TESTS
+-- ============================================================================
+-- Ce fichier contient toutes les requêtes SQL nécessaires pour tester
+-- les services ChargesService et RevenuesService ainsi que les autres modules
+-- ============================================================================
+-- 
+-- INSTRUCTIONS:
+-- 1. Assurez-vous que la base de données "Whitecare" existe
+-- 2. Exécutez d'abord le fichier schema.sql pour créer les tables
+-- 3. Exécutez ce fichier section par section dans l'ordre
+-- 4. Pour les mots de passe, utilisez votre application Java pour générer
+--    les hash BCrypt ou créez les utilisateurs via UserService
+-- ============================================================================
+
+USE Whitecare;
+
+-- ============================================================================
+-- 1. NETTOYAGE DES DONNÉES EXISTANTES (OPTIONNEL)
+-- ============================================================================
+-- ATTENTION: Ces commandes suppriment toutes les données !
+-- Décommentez seulement si vous voulez repartir de zéro
+
+-- SET FOREIGN_KEY_CHECKS = 0;
+-- TRUNCATE TABLE charges;
+-- TRUNCATE TABLE revenues;
+-- TRUNCATE TABLE medecin;
+-- TRUNCATE TABLE secretaire;
+-- TRUNCATE TABLE staff;
+-- TRUNCATE TABLE utilisateur_role;
+-- TRUNCATE TABLE utilisateur;
+-- TRUNCATE TABLE cabinet_medicale;
+-- SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================================
+-- 2. INSERTION DES RÔLES
+-- ============================================================================
+
+INSERT INTO role (libelle, creation_date, last_modification_date, created_by, updated_by) VALUES
+('ADMIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system'),
+('MEDECIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system'),
+('SECRETAIRE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system')
+ON DUPLICATE KEY UPDATE libelle = libelle;
+
+-- ============================================================================
+-- 3. INSERTION DU CABINET MÉDICAL
+-- ============================================================================
+
+INSERT INTO cabinet_medicale (
+    nom, email, logo, adresse, cin, tel1, tel2, siteweb, instagram, facebook, description,
+    creation_date, last_modification_date, created_by, updated_by
+) VALUES (
+    'Cabinet WhiteCare',
+    'contact@whitecare.ma',
+    'logo_whitecare.png',
+    '123 Avenue Mohammed V, Casablanca',
+    'RC123456',
+    '0522123456',
+    '0522123457',
+    'www.whitecare.ma',
+    '@whitecare_ma',
+    'WhiteCareMaroc',
+    'Cabinet dentaire moderne offrant des soins de qualité',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'system',
+    'system'
+)
+ON DUPLICATE KEY UPDATE nom = nom;
+
+-- ============================================================================
+-- 4. INSERTION DES UTILISATEURS
+-- ============================================================================
+-- IMPORTANT: Les mots de passe doivent être hashés avec BCrypt
+-- Option 1: Utilisez votre application Java pour créer les utilisateurs
+-- Option 2: Générez les hash avec cette commande Java:
+--   BCrypt.hashpw("Password123!", BCrypt.gensalt(7))
+-- 
+-- Pour tous les utilisateurs, le mot de passe est: Password123!
+-- 
+-- NOTE: Remplacez les hash ci-dessous par des hash valides générés par votre app
+
+-- Utilisateur Admin
+INSERT INTO utilisateur (
+    nom, prenom, email, adresse, cin, tel, sexe, login, password_hash,
+    date_naissance, actif, creation_date, last_modification_date, created_by, updated_by
+) VALUES (
+    'Admin',
+    'System',
+    'admin@whitecare.ma',
+    '123 Avenue Mohammed V, Casablanca',
+    'AD123456',
+    '0522000001',
+    'HOMME',
+    'admin',
+    '$2a$07$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUV',
+    '1980-01-01',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'system',
+    'system'
+)
+ON DUPLICATE KEY UPDATE login = login;
+
+-- Médecin 1
+INSERT INTO utilisateur (
+    nom, prenom, email, adresse, cin, tel, sexe, login, password_hash,
+    date_naissance, actif, creation_date, last_modification_date, created_by, updated_by
+) VALUES (
+    'Alami',
+    'Ahmed',
+    'ahmed.alami@whitecare.ma',
+    '45 Rue Hassan II, Casablanca',
+    'ME123456',
+    '0612345678',
+    'HOMME',
+    'ahmed.alami',
+    '$2a$07$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUV',
+    '1975-05-15',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'system',
+    'system'
+)
+ON DUPLICATE KEY UPDATE login = login;
+
+-- Médecin 2
+INSERT INTO utilisateur (
+    nom, prenom, email, adresse, cin, tel, sexe, login, password_hash,
+    date_naissance, actif, creation_date, last_modification_date, created_by, updated_by
+) VALUES (
+    'Benali',
+    'Fatima',
+    'fatima.benali@whitecare.ma',
+    '78 Boulevard Zerktouni, Casablanca',
+    'ME234567',
+    '0612345679',
+    'FEMME',
+    'fatima.benali',
+    '$2a$07$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUV',
+    '1982-08-20',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'system',
+    'system'
+)
+ON DUPLICATE KEY UPDATE login = login;
+
+-- Secrétaire 1
+INSERT INTO utilisateur (
+    nom, prenom, email, adresse, cin, tel, sexe, login, password_hash,
+    date_naissance, actif, creation_date, last_modification_date, created_by, updated_by
+) VALUES (
+    'Idrissi',
+    'Khadija',
+    'khadija.idrissi@whitecare.ma',
+    '12 Rue Allal Ben Abdellah, Casablanca',
+    'SE123456',
+    '0612345680',
+    'FEMME',
+    'khadija.idrissi',
+    '$2a$07$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUV',
+    '1990-03-10',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'system',
+    'system'
+)
+ON DUPLICATE KEY UPDATE login = login;
+
+-- Secrétaire 2
+INSERT INTO utilisateur (
+    nom, prenom, email, adresse, cin, tel, sexe, login, password_hash,
+    date_naissance, actif, creation_date, last_modification_date, created_by, updated_by
+) VALUES (
+    'Tazi',
+    'Youssef',
+    'youssef.tazi@whitecare.ma',
+    '56 Avenue des FAR, Casablanca',
+    'SE234567',
+    '0612345681',
+    'HOMME',
+    'youssef.tazi',
+    '$2a$07$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUV',
+    '1988-11-25',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'system',
+    'system'
+)
+ON DUPLICATE KEY UPDATE login = login;
+
+-- ============================================================================
+-- 5. ASSIGNATION DES RÔLES AUX UTILISATEURS
+-- ============================================================================
+
+-- Admin
+INSERT INTO utilisateur_role (utilisateur_id, role_id) 
+SELECT u.id, r.id 
+FROM utilisateur u, role r 
+WHERE u.login = 'admin' AND r.libelle = 'ADMIN'
+ON DUPLICATE KEY UPDATE utilisateur_id = utilisateur_id;
+
+-- Médecins
+INSERT INTO utilisateur_role (utilisateur_id, role_id) 
+SELECT u.id, r.id 
+FROM utilisateur u, role r 
+WHERE u.login IN ('ahmed.alami', 'fatima.benali') AND r.libelle = 'MEDECIN'
+ON DUPLICATE KEY UPDATE utilisateur_id = utilisateur_id;
+
+-- Secrétaires
+INSERT INTO utilisateur_role (utilisateur_id, role_id) 
+SELECT u.id, r.id 
+FROM utilisateur u, role r 
+WHERE u.login IN ('khadija.idrissi', 'youssef.tazi') AND r.libelle = 'SECRETAIRE'
+ON DUPLICATE KEY UPDATE utilisateur_id = utilisateur_id;
+
+-- ============================================================================
+-- 6. INSERTION DES STAFF
+-- ============================================================================
+
+-- Staff pour Médecin 1
+INSERT INTO staff (id, salaire, prime, date_recrutement, solde_conge, cabinet_medicale_id)
+SELECT u.id, 25000.00, 3000.00, '2020-01-15', 25, c.id
+FROM utilisateur u, cabinet_medicale c
+WHERE u.login = 'ahmed.alami' AND c.nom = 'Cabinet WhiteCare'
+ON DUPLICATE KEY UPDATE salaire = VALUES(salaire), prime = VALUES(prime);
+
+-- Staff pour Médecin 2
+INSERT INTO staff (id, salaire, prime, date_recrutement, solde_conge, cabinet_medicale_id)
+SELECT u.id, 28000.00, 3500.00, '2019-06-10', 30, c.id
+FROM utilisateur u, cabinet_medicale c
+WHERE u.login = 'fatima.benali' AND c.nom = 'Cabinet WhiteCare'
+ON DUPLICATE KEY UPDATE salaire = VALUES(salaire), prime = VALUES(prime);
+
+-- Staff pour Secrétaire 1
+INSERT INTO staff (id, salaire, prime, date_recrutement, solde_conge, cabinet_medicale_id)
+SELECT u.id, 8000.00, 500.00, '2021-03-01', 20, c.id
+FROM utilisateur u, cabinet_medicale c
+WHERE u.login = 'khadija.idrissi' AND c.nom = 'Cabinet WhiteCare'
+ON DUPLICATE KEY UPDATE salaire = VALUES(salaire), prime = VALUES(prime);
+
+-- Staff pour Secrétaire 2
+INSERT INTO staff (id, salaire, prime, date_recrutement, solde_conge, cabinet_medicale_id)
+SELECT u.id, 8500.00, 600.00, '2020-09-15', 22, c.id
+FROM utilisateur u, cabinet_medicale c
+WHERE u.login = 'youssef.tazi' AND c.nom = 'Cabinet WhiteCare'
+ON DUPLICATE KEY UPDATE salaire = VALUES(salaire), prime = VALUES(prime);
+
+-- ============================================================================
+-- 7. INSERTION DES MÉDECINS
+-- ============================================================================
+
+INSERT INTO medecin (id, specialite)
+SELECT u.id, 'Dentisterie générale'
+FROM utilisateur u
+WHERE u.login = 'ahmed.alami'
+ON DUPLICATE KEY UPDATE specialite = VALUES(specialite);
+
+INSERT INTO medecin (id, specialite)
+SELECT u.id, 'Orthodontie'
+FROM utilisateur u
+WHERE u.login = 'fatima.benali'
+ON DUPLICATE KEY UPDATE specialite = VALUES(specialite);
+
+-- ============================================================================
+-- 8. INSERTION DES SECRÉTAIRES
+-- ============================================================================
+
+INSERT INTO secretaire (id, num_cnss, commission)
+SELECT u.id, 'CNSS123456', 2.5
+FROM utilisateur u
+WHERE u.login = 'khadija.idrissi'
+ON DUPLICATE KEY UPDATE num_cnss = VALUES(num_cnss), commission = VALUES(commission);
+
+INSERT INTO secretaire (id, num_cnss, commission)
+SELECT u.id, 'CNSS234567', 3.0
+FROM utilisateur u
+WHERE u.login = 'youssef.tazi'
+ON DUPLICATE KEY UPDATE num_cnss = VALUES(num_cnss), commission = VALUES(commission);
+
+-- ============================================================================
+-- 9. INSERTION DES CHARGES (DÉPENSES)
+-- ============================================================================
+-- Ces charges permettront de tester toutes les fonctionnalités du service
+
+INSERT INTO charges (
+    titre, description, montant, date, cabinet_medicale_id,
+    creation_date, last_modification_date, created_by, updated_by
+)
+SELECT 
+    charges_data.titre, charges_data.description, charges_data.montant, charges_data.date, c.id,
+    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system'
+FROM (
+    SELECT 
+        'Achat matériel médical' AS titre,
+        'Stéthoscopes, tensiomètres et thermomètres' AS description,
+        15000.00 AS montant,
+        DATE_SUB(NOW(), INTERVAL 5 DAY) AS date
+    UNION ALL SELECT 'Maintenance équipements', 'Réparation et entretien des équipements dentaires', 8500.50, DATE_SUB(NOW(), INTERVAL 10 DAY)
+    UNION ALL SELECT 'Fournitures de bureau', 'Papeterie, enveloppes, cartouches d''encre', 2500.75, DATE_SUB(NOW(), INTERVAL 15 DAY)
+    UNION ALL SELECT 'Loyer cabinet', 'Loyer mensuel du cabinet médical', 12000.00, DATE_SUB(NOW(), INTERVAL 20 DAY)
+    UNION ALL SELECT 'Électricité et eau', 'Factures d''utilitaires du mois', 3500.00, DATE_SUB(NOW(), INTERVAL 25 DAY)
+    UNION ALL SELECT 'Achat médicaments', 'Stock de médicaments et produits pharmaceutiques', 18000.00, DATE_SUB(NOW(), INTERVAL 35 DAY)
+    UNION ALL SELECT 'Formation personnel', 'Formation continue pour le personnel médical', 12000.00, DATE_SUB(NOW(), INTERVAL 40 DAY)
+    UNION ALL SELECT 'Assurance professionnelle', 'Prime d''assurance responsabilité civile', 8500.00, DATE_SUB(NOW(), INTERVAL 45 DAY)
+    UNION ALL SELECT 'Nettoyage et hygiène', 'Services de nettoyage professionnel', 4500.00, DATE_SUB(NOW(), INTERVAL 50 DAY)
+    UNION ALL SELECT 'Publicité et marketing', 'Campagne publicitaire et réseaux sociaux', 6000.00, DATE_SUB(NOW(), INTERVAL 55 DAY)
+    UNION ALL SELECT 'Achat fauteuil dentaire', 'Nouveau fauteuil dentaire ergonomique', 45000.00, DATE_SUB(NOW(), INTERVAL 90 DAY)
+    UNION ALL SELECT 'Rénovation salle d''attente', 'Peinture et mobilier pour salle d''attente', 25000.00, DATE_SUB(NOW(), INTERVAL 120 DAY)
+    UNION ALL SELECT 'Système informatique', 'Achat de nouveaux ordinateurs et logiciels', 35000.00, DATE_SUB(NOW(), INTERVAL 150 DAY)
+) AS charges_data
+CROSS JOIN cabinet_medicale c
+WHERE c.nom = 'Cabinet WhiteCare';
+
+-- ============================================================================
+-- 10. INSERTION DES REVENUS (RECETTES)
+-- ============================================================================
+
+INSERT INTO revenues (
+    titre, description, montant, date, cabinet_medicale_id,
+    creation_date, last_modification_date, created_by, updated_by
+)
+SELECT 
+    revenues_data.titre, revenues_data.description, revenues_data.montant, revenues_data.date, c.id,
+    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system'
+FROM (
+    SELECT 'Consultation générale' AS titre, 'Consultation dentaire standard' AS description, 300.00 AS montant, DATE_SUB(NOW(), INTERVAL 2 DAY) AS date
+    UNION ALL SELECT 'Consultation orthodontie', 'Consultation spécialisée en orthodontie', 500.00, DATE_SUB(NOW(), INTERVAL 3 DAY)
+    UNION ALL SELECT 'Détartrage', 'Nettoyage et détartrage dentaire', 250.00, DATE_SUB(NOW(), INTERVAL 4 DAY)
+    UNION ALL SELECT 'Soin carie', 'Traitement d''une carie dentaire', 400.00, DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT 'Blanchiment dentaire', 'Traitement de blanchiment des dents', 1500.00, DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL SELECT 'Consultation générale', 'Consultation dentaire standard', 300.00, DATE_SUB(NOW(), INTERVAL 8 DAY)
+    UNION ALL SELECT 'Extraction dentaire', 'Extraction d''une dent de sagesse', 600.00, DATE_SUB(NOW(), INTERVAL 9 DAY)
+    UNION ALL SELECT 'Consultation orthodontie', 'Consultation spécialisée en orthodontie', 500.00, DATE_SUB(NOW(), INTERVAL 11 DAY)
+    UNION ALL SELECT 'Détartrage', 'Nettoyage et détartrage dentaire', 250.00, DATE_SUB(NOW(), INTERVAL 12 DAY)
+    UNION ALL SELECT 'Pose couronne', 'Pose d''une couronne dentaire', 2000.00, DATE_SUB(NOW(), INTERVAL 13 DAY)
+    UNION ALL SELECT 'Consultation générale', 'Consultation dentaire standard', 300.00, DATE_SUB(NOW(), INTERVAL 32 DAY)
+    UNION ALL SELECT 'Soin carie', 'Traitement d''une carie dentaire', 400.00, DATE_SUB(NOW(), INTERVAL 33 DAY)
+    UNION ALL SELECT 'Consultation orthodontie', 'Consultation spécialisée en orthodontie', 500.00, DATE_SUB(NOW(), INTERVAL 34 DAY)
+    UNION ALL SELECT 'Blanchiment dentaire', 'Traitement de blanchiment des dents', 1500.00, DATE_SUB(NOW(), INTERVAL 36 DAY)
+    UNION ALL SELECT 'Détartrage', 'Nettoyage et détartrage dentaire', 250.00, DATE_SUB(NOW(), INTERVAL 37 DAY)
+    UNION ALL SELECT 'Extraction dentaire', 'Extraction d''une dent de sagesse', 600.00, DATE_SUB(NOW(), INTERVAL 38 DAY)
+    UNION ALL SELECT 'Pose couronne', 'Pose d''une couronne dentaire', 2000.00, DATE_SUB(NOW(), INTERVAL 39 DAY)
+    UNION ALL SELECT 'Consultation générale', 'Consultation dentaire standard', 300.00, DATE_SUB(NOW(), INTERVAL 41 DAY)
+    UNION ALL SELECT 'Soin carie', 'Traitement d''une carie dentaire', 400.00, DATE_SUB(NOW(), INTERVAL 42 DAY)
+    UNION ALL SELECT 'Consultation orthodontie', 'Consultation spécialisée en orthodontie', 500.00, DATE_SUB(NOW(), INTERVAL 43 DAY)
+    UNION ALL SELECT 'Blanchiment dentaire', 'Traitement de blanchiment des dents', 1500.00, DATE_SUB(NOW(), INTERVAL 85 DAY)
+    UNION ALL SELECT 'Pose couronne', 'Pose d''une couronne dentaire', 2000.00, DATE_SUB(NOW(), INTERVAL 86 DAY)
+    UNION ALL SELECT 'Consultation générale', 'Consultation dentaire standard', 300.00, DATE_SUB(NOW(), INTERVAL 87 DAY)
+    UNION ALL SELECT 'Extraction dentaire', 'Extraction d''une dent de sagesse', 600.00, DATE_SUB(NOW(), INTERVAL 88 DAY)
+    UNION ALL SELECT 'Détartrage', 'Nettoyage et détartrage dentaire', 250.00, DATE_SUB(NOW(), INTERVAL 89 DAY)
+) AS revenues_data
+CROSS JOIN cabinet_medicale c
+WHERE c.nom = 'Cabinet WhiteCare';
+
+-- ============================================================================
+-- 11. VÉRIFICATION DES DONNÉES INSÉRÉES
+-- ============================================================================
+
+-- Afficher le nombre d'enregistrements par table
+SELECT 'Cabinet' AS TableName, COUNT(*) AS Nombre FROM cabinet_medicale
+UNION ALL
+SELECT 'Utilisateurs', COUNT(*) FROM utilisateur
+UNION ALL
+SELECT 'Staff', COUNT(*) FROM staff
+UNION ALL
+SELECT 'Médecins', COUNT(*) FROM medecin
+UNION ALL
+SELECT 'Secrétaires', COUNT(*) FROM secretaire
+UNION ALL
+SELECT 'Charges', COUNT(*) FROM charges
+UNION ALL
+SELECT 'Revenus', COUNT(*) FROM revenues;
+
+-- Afficher le total des charges
+SELECT 
+    'Total Charges' AS Type,
+    COUNT(*) AS Nombre,
+    SUM(montant) AS Total_MAD,
+    MIN(date) AS Date_Min,
+    MAX(date) AS Date_Max
+FROM charges
+WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1);
+
+-- Afficher le total des revenus
+SELECT 
+    'Total Revenus' AS Type,
+    COUNT(*) AS Nombre,
+    SUM(montant) AS Total_MAD,
+    AVG(montant) AS Moyenne_MAD,
+    MIN(date) AS Date_Min,
+    MAX(date) AS Date_Max
+FROM revenues
+WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1);
+
+-- Afficher le solde (Revenus - Charges)
+SELECT 
+    (SELECT COALESCE(SUM(montant), 0) FROM revenues WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1)) -
+    (SELECT COALESCE(SUM(montant), 0) FROM charges WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1)) AS Solde_MAD;
+
+-- ============================================================================
+-- 12. REQUÊTES UTILES POUR LES TESTS
+-- ============================================================================
+
+-- Récupérer l'ID du cabinet
+SELECT id, nom FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare';
+
+-- Récupérer toutes les charges du cabinet
+SELECT id, titre, montant, date 
+FROM charges 
+WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1)
+ORDER BY date DESC;
+
+-- Récupérer tous les revenus du cabinet
+SELECT id, titre, montant, date 
+FROM revenues 
+WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1)
+ORDER BY date DESC;
+
+-- Calculer le total des charges des 30 derniers jours
+SELECT SUM(montant) AS Total_Charges_30j
+FROM charges
+WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1)
+AND date >= DATE_SUB(NOW(), INTERVAL 30 DAY);
+
+-- Calculer le total des revenus des 30 derniers jours
+SELECT SUM(montant) AS Total_Revenus_30j
+FROM revenues
+WHERE cabinet_medicale_id = (SELECT id FROM cabinet_medicale WHERE nom = 'Cabinet WhiteCare' LIMIT 1)
+AND date >= DATE_SUB(NOW(), INTERVAL 30 DAY);
+
+-- ============================================================================
+-- FIN DU FICHIER
+-- ============================================================================
+-- 
+-- NOTES IMPORTANTES:
+-- 
+-- 1. MOTS DE PASSE:
+--    - Tous les utilisateurs ont le mot de passe: Password123!
+--    - Les hash BCrypt dans ce fichier sont des exemples
+--    - RECOMMANDATION: Créez les utilisateurs via votre application Java
+--      qui hash automatiquement les mots de passe, OU générez les hash
+--      avec: BCrypt.hashpw("Password123!", BCrypt.gensalt(7))
+-- 
+-- 2. ID DU CABINET:
+--    - Le script utilise des sous-requêtes pour trouver l'ID du cabinet
+--    - Si vous connaissez l'ID (généralement 1), vous pouvez le remplacer
+-- 
+-- 3. DATES:
+--    - Toutes les dates sont générées dynamiquement avec DATE_SUB(NOW(), ...)
+--    - Les charges et revenus sont répartis sur plusieurs périodes pour les tests
+-- 
+-- 4. DONNÉES DE TEST:
+--    - 13 charges (total: ~180,000 MAD)
+--    - 25 revenus (total: ~12,000 MAD)
+--    - 2 médecins, 2 secrétaires, 1 admin
+-- 
+-- ============================================================================

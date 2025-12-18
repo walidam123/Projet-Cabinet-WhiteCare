@@ -1,0 +1,639 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    DOCUMENTATION LOGIQUE - WHITECARE                         ║
+║              Gestion des Charges et Revenues du Cabinet                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 TABLE DES MATIÈRES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ARCHITECTURE GÉNÉRALE
+2. ENTITÉS (ENTITIES)
+3. VALIDATEURS (VALIDATORS)
+4. EXCEPTIONS (EXCEPTIONS)
+5. REPOSITORIES (ACCÈS AUX DONNÉES)
+6. SERVICES (LOGIQUE MÉTIER)
+7. TESTS
+8. FLUX DE DONNÉES COMPLET
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ARCHITECTURE GÉNÉRALE
+═══════════════════════════════════════════════════════════════════════════════
+
+L'application suit une architecture en couches (Layered Architecture) :
+
+┌─────────────────────────────────────────────────────────────┐
+│                    COUCHE PRÉSENTATION (MVC)                │
+│              (Interface utilisateur - Swing)                 │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                    COUCHE SERVICE                           │
+│         (Logique métier + Validation)                        │
+│  - ChargesService / RevenuesService                         │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                    COUCHE REPOSITORY                         │
+│            (Accès aux données - JDBC)                       │
+│  - ChargesRepository / RevenuesRepository                   │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                    BASE DE DONNÉES (MySQL)                  │
+│              Tables: charges, revenues                      │
+└─────────────────────────────────────────────────────────────┘
+
+PRINCIPE : Chaque couche ne communique qu'avec la couche inférieure
+           (Dependency Inversion Principle - DIP)
+
+═══════════════════════════════════════════════════════════════════════════════
+2. ENTITÉS (ENTITIES)
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Fichier: src/main/java/ma/whitecare/entities/financial/Charges.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DESCRIPTION:
+    Représente une charge (dépense) du cabinet médical.
+
+ATTRIBUTS:
+    - id (Long) : Identifiant unique de la charge
+    - titre (String) : Titre de la charge (ex: "Achat matériel")
+    - description (String) : Description détaillée (optionnelle)
+    - montant (Double) : Montant de la charge en MAD
+    - date (LocalDateTime) : Date et heure de la charge
+    - cabinetMedicaleId (Long) : ID du cabinet concerné
+    - Hérite de BaseEntity : dateCreation, dateDerniereModification, etc.
+
+RÈGLES MÉTIER:
+    - Le montant doit être positif
+    - La date ne peut pas être dans le futur
+    - Le titre est obligatoire (3-100 caractères)
+
+UTILISATION:
+    Charges charge = Charges.builder()
+        .titre("Achat équipement")
+        .montant(5000.0)
+        .date(LocalDateTime.now())
+        .cabinetMedicaleId(1L)
+        .build();
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/entities/financial/Revenues.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DESCRIPTION:
+    Représente un revenu (recette) du cabinet médical.
+
+ATTRIBUTS:
+    - id (Long) : Identifiant unique du revenu
+    - titre (String) : Titre du revenu (ex: "Consultation")
+    - description (String) : Description détaillée (optionnelle)
+    - montant (Double) : Montant du revenu en MAD
+    - date (LocalDateTime) : Date et heure du revenu
+    - cabinetMedicaleId (Long) : ID du cabinet concerné
+    - Hérite de BaseEntity : dateCreation, dateDerniereModification, etc.
+
+RÈGLES MÉTIER:
+    - Le montant doit être positif
+    - La date ne peut pas être dans le futur
+    - Le titre est obligatoire (3-100 caractères)
+
+UTILISATION:
+    Revenues revenue = Revenues.builder()
+        .titre("Consultation")
+        .montant(300.0)
+        .date(LocalDateTime.now())
+        .cabinetMedicaleId(1L)
+        .build();
+
+═══════════════════════════════════════════════════════════════════════════════
+3. VALIDATEURS (VALIDATORS)
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Fichier: src/main/java/ma/whitecare/common/validators/ChargesValidator.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Valide les données d'une charge avant leur traitement.
+
+MÉTHODES PRINCIPALES:
+
+1. validateCharge(Charges charge) → List<String>
+   - Retourne une liste d'erreurs de validation
+   - Vérifie: titre, description, montant, date, cabinetId
+   - Utilisée pour collecter toutes les erreurs avant de les lever
+
+2. validateChargeForUpdate(Charges charge) → List<String>
+   - Même validation + vérification de l'ID
+   - L'ID est obligatoire pour une mise à jour
+
+3. validateChargeOrThrow(Charges charge) → void
+   - Valide et lève InvalidChargeException si erreurs
+   - Utilisée dans les services pour validation rapide
+
+4. validateChargeForUpdateOrThrow(Charges charge) → void
+   - Valide pour mise à jour et lève exception si erreurs
+
+RÈGLES DE VALIDATION:
+    ✓ Titre: 3-100 caractères, obligatoire
+    ✓ Description: max 255 caractères (optionnelle)
+    ✓ Montant: > 0, max 999 999 999.99
+    ✓ Date: non nulle, pas dans le futur
+    ✓ CabinetId: positif, obligatoire
+
+EXEMPLE D'UTILISATION:
+    // Dans le service
+    ChargesValidator.validateChargeOrThrow(charge);
+    // Si erreur → InvalidChargeException levée automatiquement
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/common/validators/RevenuesValidator.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Valide les données d'un revenu avant leur traitement.
+
+MÉTHODES PRINCIPALES:
+    Même structure que ChargesValidator mais pour Revenues:
+    - validateRevenue()
+    - validateRevenueForUpdate()
+    - validateRevenueOrThrow()
+    - validateRevenueForUpdateOrThrow()
+
+RÈGLES DE VALIDATION:
+    Identiques à ChargesValidator
+
+═══════════════════════════════════════════════════════════════════════════════
+4. EXCEPTIONS (EXCEPTIONS)
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Fichier: src/main/java/ma/whitecare/common/exceptions/ChargesNotFoundException.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Exception levée quand une charge n'est pas trouvée.
+
+QUAND EST-ELLE LEVÉE:
+    - Lors de la récupération d'une charge par ID inexistant
+    - Lors de la mise à jour/suppression d'une charge inexistante
+
+EXEMPLE:
+    Charges charge = chargesService.getChargeById(999L);
+    // → ChargesNotFoundException: "Charge non trouvée avec l'ID: 999"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/common/exceptions/InvalidChargeException.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Exception levée quand les données d'une charge sont invalides.
+
+ATTRIBUTS:
+    - validationErrors (List<String>) : Liste de toutes les erreurs
+
+QUAND EST-ELLE LEVÉE:
+    - Titre vide ou invalide
+    - Montant négatif ou nul
+    - Date dans le futur
+    - CabinetId invalide
+    - Toute autre règle de validation violée
+
+EXEMPLE:
+    Charges charge = Charges.builder()
+        .titre("")  // Vide → Erreur
+        .montant(-100.0)  // Négatif → Erreur
+        .build();
+    chargesService.createCharge(charge);
+    // → InvalidChargeException avec liste d'erreurs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/common/exceptions/RevenuesNotFoundException.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Exception levée quand un revenu n'est pas trouvé.
+
+Même principe que ChargesNotFoundException mais pour Revenues.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/common/exceptions/InvalidRevenueException.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Exception levée quand les données d'un revenu sont invalides.
+
+Même principe que InvalidChargeException mais pour Revenues.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/common/exceptions/CabinetNotFoundException.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Exception levée quand un cabinet médical n'est pas trouvé.
+
+QUAND EST-ELLE LEVÉE:
+    - Lors de la création d'une charge/revenu avec un cabinetId inexistant
+    - Lors de la récupération d'un cabinet par ID inexistant
+
+═══════════════════════════════════════════════════════════════════════════════
+5. REPOSITORIES (ACCÈS AUX DONNÉES)
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Fichier: src/main/java/ma/whitecare/repository/modules/cabinet/api/ChargesRepository.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Interface définissant les opérations d'accès aux données pour les charges.
+
+MÉTHODES (hérite de CrudRepository<Charges, Long>):
+    - findAll() → List<Charges>
+    - findById(Long id) → Charges
+    - create(Charges charge) → void
+    - update(Charges charge) → void
+    - delete(Charges charge) → void
+    - deleteById(Long id) → void
+
+MÉTHODES SPÉCIFIQUES:
+    - findByCabinetMedicaleId(Long cabinetId) → List<Charges>
+    - findByTitreContainingIgnoreCase(String titre) → List<Charges>
+    - findByDescriptionContainingIgnoreCase(String desc) → List<Charges>
+    - findByTitreAndCabinetId(String titre, Long cabinetId) → Optional<Charges>
+    - calculateTotalCharges(Long cabinetId) → Double
+    - calculateTotalChargesByPeriod(...) → Double
+    - calculateTotalChargesByTitre(...) → Double
+    - countChargesByCabinet(Long cabinetId) → Long
+    - countChargesByPeriod(...) → Long
+    - findChargesByCabinetAndPeriod(...) → List<Charges>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/repository/modules/cabinet/impl/ChargesRepositoryImpl.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Implémentation concrète de ChargesRepository utilisant JDBC.
+
+FONCTIONNEMENT:
+
+1. CONNEXION À LA BASE:
+   Connection c = SessionFactory.getInstance().getConnection();
+   // SessionFactory gère le pool de connexions
+
+2. EXÉCUTION DES REQUÊTES:
+   - Utilise PreparedStatement pour éviter les injections SQL
+   - Utilise RowMappers pour convertir ResultSet → Entité
+
+3. EXEMPLE (create):
+   String sql = "INSERT INTO charges (titre, description, montant, date, ...) 
+                 VALUES (?, ?, ?, ?, ...)";
+   PreparedStatement ps = c.prepareStatement(sql, RETURN_GENERATED_KEYS);
+   ps.setString(1, charge.getTitre());
+   ps.setDouble(3, charge.getMontant());
+   // ...
+   ps.executeUpdate();
+   // Récupère l'ID généré
+   ResultSet rs = ps.getGeneratedKeys();
+   if (rs.next()) charge.setId(rs.getLong(1));
+
+4. GESTION DES ERREURS:
+   catch (SQLException e) { throw new RuntimeException(e); }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/repository/modules/cabinet/api/RevenuesRepository.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Interface définissant les opérations d'accès aux données pour les revenus.
+
+MÉTHODES:
+    Similaires à ChargesRepository mais pour Revenues.
+    + calculateAverageRevenue(Long cabinetId) → Double
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/repository/modules/cabinet/impl/RevenuesRepositoryImpl.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Implémentation concrète de RevenuesRepository utilisant JDBC.
+
+FONCTIONNEMENT:
+    Identique à ChargesRepositoryImpl mais pour la table "revenues".
+
+═══════════════════════════════════════════════════════════════════════════════
+6. SERVICES (LOGIQUE MÉTIER)
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Fichier: src/main/java/ma/whitecare/service/modules/caisse/api/ChargesService.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Interface définissant les opérations métier pour les charges.
+
+MÉTHODES:
+    - createCharge(Charges charge) → Charges
+    - getChargeById(Long id) → Charges
+    - getAllCharges() → List<Charges>
+    - updateCharge(Charges charge) → Charges
+    - deleteCharge(Long id) → void
+    - getChargesByCabinet(Long cabinetId) → List<Charges>
+    - searchChargesByTitre(String titre) → List<Charges>
+    - searchChargesByDescription(String desc) → List<Charges>
+    - calculateTotalCharges(Long cabinetId) → Double
+    - calculateTotalChargesByPeriod(...) → Double
+    - calculateTotalChargesByTitre(...) → Double
+    - countChargesByCabinet(Long cabinetId) → Long
+    - countChargesByPeriod(...) → Long
+    - getChargesByCabinetAndPeriod(...) → List<Charges>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/service/modules/caisse/impl/ChargesServiceImpl.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Implémentation de la logique métier pour les charges.
+
+DEPENDANCES (Injection par constructeur):
+    - ChargesRepository : pour l'accès aux données
+    - CabinetMedicaleRepository : pour valider l'existence du cabinet
+
+FONCTIONNEMENT DÉTAILLÉ:
+
+1. CREATE CHARGE:
+   ┌─────────────────────────────────────────────────────────┐
+   │ 1. Validation des données (ChargesValidator)          │
+   │    → Lève InvalidChargeException si erreur             │
+   ├─────────────────────────────────────────────────────────┤
+   │ 2. Vérification existence du cabinet                   │
+   │    → Lève CabinetNotFoundException si inexistant       │
+   ├─────────────────────────────────────────────────────────┤
+   │ 3. Création via repository                             │
+   │    chargesRepository.create(charge)                     │
+   ├─────────────────────────────────────────────────────────┤
+   │ 4. Retour de la charge avec ID généré                  │
+   └─────────────────────────────────────────────────────────┘
+
+2. GET BY ID:
+   ┌─────────────────────────────────────────────────────────┐
+   │ 1. Validation ID (positif)                           │
+   │    → Lève InvalidChargeException si invalide           │
+   ├─────────────────────────────────────────────────────────┤
+   │ 2. Recherche via repository                            │
+   │    Charges charge = chargesRepository.findById(id)     │
+   ├─────────────────────────────────────────────────────────┤
+   │ 3. Vérification existence                              │
+   │    → Lève ChargesNotFoundException si null             │
+   ├─────────────────────────────────────────────────────────┤
+   │ 4. Retour de la charge                                 │
+   └─────────────────────────────────────────────────────────┘
+
+3. UPDATE CHARGE:
+   ┌─────────────────────────────────────────────────────────┐
+   │ 1. Validation pour mise à jour                        │
+   │    (inclut vérification ID)                            │
+   ├─────────────────────────────────────────────────────────┤
+   │ 2. Vérification existence charge                       │
+   │    getChargeById(charge.getId())                       │
+   ├─────────────────────────────────────────────────────────┤
+   │ 3. Si cabinetId modifié, vérifier nouveau cabinet     │
+   ├─────────────────────────────────────────────────────────┤
+   │ 4. Mise à jour via repository                          │
+   │    chargesRepository.update(charge)                    │
+   └─────────────────────────────────────────────────────────┘
+
+4. DELETE CHARGE:
+   ┌─────────────────────────────────────────────────────────┐
+   │ 1. Vérification existence (getChargeById)              │
+   ├─────────────────────────────────────────────────────────┤
+   │ 2. Suppression via repository                          │
+   │    chargesRepository.deleteById(id)                    │
+   └─────────────────────────────────────────────────────────┘
+
+5. CALCULATIONS:
+   ┌─────────────────────────────────────────────────────────┐
+   │ 1. Validation cabinetId                                │
+   ├─────────────────────────────────────────────────────────┤
+   │ 2. Validation plage de dates (si applicable)          │
+   │    → startDate < endDate                                │
+   ├─────────────────────────────────────────────────────────┤
+   │ 3. Appel repository pour calcul                         │
+   │    Double total = repository.calculateTotal(...)      │
+   ├─────────────────────────────────────────────────────────┤
+   │ 4. Retour (0.0 si null)                                │
+   └─────────────────────────────────────────────────────────┘
+
+MÉTHODES PRIVÉES (Helpers):
+    - validateCabinetExists(Long cabinetId)
+      → Vérifie l'existence et la validité du cabinet
+    
+    - validateDateRange(LocalDateTime start, LocalDateTime end)
+      → Vérifie que start < end et que les dates sont non nulles
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/service/modules/caisse/api/RevenuesService.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Interface définissant les opérations métier pour les revenus.
+
+MÉTHODES:
+    Similaires à ChargesService mais pour Revenues.
+    + calculateAverageRevenue(Long cabinetId) → Double
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/service/modules/caisse/impl/RevenuesServiceImpl.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Implémentation de la logique métier pour les revenus.
+
+FONCTIONNEMENT:
+    Identique à ChargesServiceImpl mais pour Revenues.
+    Utilise RevenuesValidator et RevenuesRepository.
+
+═══════════════════════════════════════════════════════════════════════════════
+7. TESTS
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Fichier: src/main/java/ma/whitecare/service/test/ChargesServiceTest.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Tests complets du service ChargesService.
+
+PHASES DE TEST:
+
+1. INITIALISATION:
+   - Création des repositories et services
+
+2. TESTS DE VALIDATION:
+   - Charge valide → doit réussir
+   - Titre vide → doit lever InvalidChargeException
+   - Montant négatif → doit lever InvalidChargeException
+   - Date future → doit lever InvalidChargeException
+
+3. TESTS CRUD:
+   - CREATE: Création d'une charge
+   - READ: Récupération par ID et toutes les charges
+   - UPDATE: Mise à jour d'une charge
+   - DELETE: Suppression d'une charge
+
+4. TESTS DE RECHERCHE:
+   - Recherche par cabinet
+   - Recherche par titre
+   - Recherche par description
+
+5. TESTS DE CALCUL:
+   - Calcul total charges
+   - Calcul total par période
+   - Calcul total par titre
+   - Comptage charges
+   - Comptage par période
+
+6. TESTS D'EXCEPTIONS:
+   - Charge non trouvée
+   - Cabinet non trouvé
+   - ID invalide
+   - Plage de dates invalide
+
+7. NETTOYAGE:
+   - Suppression des données de test
+
+EXÉCUTION:
+    java ChargesServiceTest
+    // Affiche les résultats de chaque test avec ✅ ou ❌
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 Fichier: src/main/java/ma/whitecare/service/test/RevenuesServiceTest.java
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROLE:
+    Tests complets du service RevenuesService.
+
+FONCTIONNEMENT:
+    Identique à ChargesServiceTest mais pour Revenues.
+    + Test de calcul de moyenne (calculateAverageRevenue)
+
+═══════════════════════════════════════════════════════════════════════════════
+8. FLUX DE DONNÉES COMPLET
+═══════════════════════════════════════════════════════════════════════════════
+
+EXEMPLE: Création d'une charge
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 1: Interface Utilisateur (Swing)                                │
+│   Utilisateur remplit le formulaire et clique sur "Enregistrer"       │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 2: Service (ChargesServiceImpl.createCharge)                      │
+│                                                                         │
+│   1. Validation des données:                                          │
+│      ChargesValidator.validateChargeOrThrow(charge)                    │
+│      → Vérifie titre, montant, date, cabinetId                        │
+│      → Si erreur: lève InvalidChargeException                        │
+│                                                                         │
+│   2. Vérification cabinet:                                            │
+│      validateCabinetExists(cabinetId)                                 │
+│      → cabinetRepository.existsById(cabinetId)                        │
+│      → Si inexistant: lève CabinetNotFoundException                  │
+│                                                                         │
+│   3. Création:                                                        │
+│      chargesRepository.create(charge)                                  │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 3: Repository (ChargesRepositoryImpl.create)                    │
+│                                                                         │
+│   1. Connexion à la base:                                             │
+│      Connection c = SessionFactory.getInstance().getConnection()    │
+│                                                                         │
+│   2. Préparation requête SQL:                                         │
+│      String sql = "INSERT INTO charges (...) VALUES (?, ?, ...)"    │
+│      PreparedStatement ps = c.prepareStatement(sql, ...)              │
+│                                                                         │
+│   3. Paramètres:                                                      │
+│      ps.setString(1, charge.getTitre())                              │
+│      ps.setDouble(3, charge.getMontant())                             │
+│      ps.setTimestamp(4, Timestamp.valueOf(charge.getDate()))         │
+│      ...                                                               │
+│                                                                         │
+│   4. Exécution:                                                       │
+│      ps.executeUpdate()                                               │
+│                                                                         │
+│   5. Récupération ID généré:                                          │
+│      ResultSet rs = ps.getGeneratedKeys()                            │
+│      if (rs.next()) charge.setId(rs.getLong(1))                      │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 4: Base de Données (MySQL)                                      │
+│   INSERT INTO charges (...) VALUES (...)                              │
+│   → Enregistrement dans la table "charges"                           │
+│   → Génération de l'ID auto-incrémenté                                │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 5: Retour au Service                                              │
+│   → Charge retournée avec ID généré                                    │
+└───────────────────────┬───────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 6: Retour à l'Interface                                          │
+│   → Affichage du message de succès                                     │
+│   → Mise à jour de la liste des charges                               │
+└─────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+9. POINTS IMPORTANTS À RETENIR
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ SÉPARATION DES RESPONSABILITÉS:
+  - Entities: Structure des données
+  - Validators: Validation des règles métier
+  - Exceptions: Gestion des erreurs
+  - Repositories: Accès aux données (JDBC)
+  - Services: Logique métier + orchestration
+
+✓ VALIDATION EN CASCADE:
+  - Service valide via Validator
+  - Validator retourne liste d'erreurs
+  - Si erreurs → Exception levée avec détails
+
+✓ GESTION DES ERREURS:
+  - Exceptions spécifiques par type d'erreur
+  - Messages clairs pour le débogage
+  - Propagation depuis Repository → Service → Interface
+
+✓ INJECTION DE DÉPENDANCES:
+  - Services reçoivent Repositories via constructeur
+  - Facilite les tests (mock possible)
+  - Respect du principe DIP
+
+✓ TRANSACTIONS:
+  - Actuellement gérées au niveau Repository
+  - Chaque opération = 1 transaction
+  - Pas de rollback automatique (à améliorer si nécessaire)
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DE LA DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
