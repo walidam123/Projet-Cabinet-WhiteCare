@@ -14,7 +14,7 @@ import static ma.whitecare.repository.common.RowMappers.mapResultSetToMedicament
 public class MedicamentRepositoryImpl implements MedicamentRepository {
     @Override
     public List<Medicament> findAll() {
-        String sql = "SELECT * FROM Medicament ORDER BY nom";
+        String sql = "SELECT * FROM medicament ORDER BY nom";
         List<Medicament> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -29,7 +29,7 @@ public class MedicamentRepositoryImpl implements MedicamentRepository {
 
     @Override
     public Medicament findById(Long id) {
-        String sql = "SELECT * FROM Medicament WHERE idMct = ?";
+        String sql = "SELECT * FROM medicament WHERE idMct = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
