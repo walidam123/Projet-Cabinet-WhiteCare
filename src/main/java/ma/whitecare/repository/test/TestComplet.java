@@ -12,43 +12,29 @@ import ma.whitecare.entities.medical.*;
 import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.user.Medecin;
+import ma.whitecare.conf.ApplicationContext;
 import ma.whitecare.repository.modules.actes.api.ActeRepository;
-import ma.whitecare.repository.modules.actes.impl.ActeRepositoryImpl;
 import ma.whitecare.repository.modules.agenda.api.AgendaRepository;
-import ma.whitecare.repository.modules.agenda.impl.AgendaRepositoryImpl;
 import ma.whitecare.repository.modules.cabinet.api.CabinetMedicaleRepository;
 import ma.whitecare.repository.modules.cabinet.api.ChargesRepository;
-import ma.whitecare.repository.modules.cabinet.impl.CabinetMedicaleRepositoryImpl;
-import ma.whitecare.repository.modules.cabinet.impl.ChargesRepositoryImpl;
 import ma.whitecare.repository.modules.certificat.api.CertificatRepository;
-import ma.whitecare.repository.modules.certificat.impl.CertificatRepositoryImpl;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.InterventionRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.PrescriptionRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.SituationFinanciereRepository;
-import ma.whitecare.repository.modules.dossierMedical.impl.ConsultationRepositoryImpl;
-import ma.whitecare.repository.modules.dossierMedical.impl.DossierMedicalRepositoryImpl;
-import ma.whitecare.repository.modules.dossierMedical.impl.InterventionRepositoryImpl;
-import ma.whitecare.repository.modules.dossierMedical.impl.PrescriptionRepositoryImpl;
-import ma.whitecare.repository.modules.dossierMedical.impl.SituationFinanciereRepositoryImpl;
 import ma.whitecare.repository.modules.facture.FactureRepository;
-import ma.whitecare.repository.modules.facture.FactureRepositoryImpl;
 import ma.whitecare.repository.modules.Medicament.MedicamentRepository;
-import ma.whitecare.repository.modules.Medicament.MedicamentRepositoryImpl;
 import ma.whitecare.repository.modules.Ordonnance.OrdonnanceRepository;
-import ma.whitecare.repository.modules.Ordonnance.OrdonnanceRepositoryImpl;
 import ma.whitecare.repository.modules.patient.api.AntecedentRepository;
 import ma.whitecare.repository.modules.patient.api.PatientRepository;
-import ma.whitecare.repository.modules.patient.impl.AntecedentRepositoryImpl;
-import ma.whitecare.repository.modules.patient.impl.PatientRepositoryImpl;
 import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
 import ma.whitecare.repository.modules.UserManager.api.RoleRepository;
-import ma.whitecare.repository.modules.UserManager.impl.MedecinRepositoryImpl;
-import ma.whitecare.repository.modules.UserManager.impl.RoleRepositoryImpl;
 import ma.whitecare.entities.user.Role;
 import ma.whitecare.entities.user.Utilisateur;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -80,38 +66,40 @@ public class TestComplet {
     private static RoleRepository roleRepository;
 
     // IDs créés pour les relations
-    private static Long cabinetId=1l;
-    private static Long chargeId=1l;
-    private static Long medecinId=1l;
-    private static Long patientId=1l;
-    private static Long antecedentId=1l;
-    private static Long dossierId=1l;
-    private static Long consultationId=1l;
-    private static Long interventionId=1l;
-    private static Long certificatId=1l;
-    private static Long ordonnanceId=1l;
-    private static Long prescriptionId=1l;
-    private static Long factureId=1l;
-    private static Long situationFinanciereId=1l;
-    private static Long medicamentId=1l;
-    private static Long acteId=1l;
-    private static Long agendaId=1l;
-    private static Long roleMedecinId=1l;
-    private static Long roleAdminId=1l;
-    private static Long antecedent2Id=1l;
+    private static Long cabinetId;
+    private static Long chargeId;
+    private static Long medecinId;
+    private static Long patientId;
+    private static Long antecedentId;
+    private static Long dossierId;
+    private static Long consultationId;
+    private static Long interventionId;
+    private static Long certificatId;
+    private static Long ordonnanceId;
+    private static Long prescriptionId;
+    private static Long factureId;
+    private static Long situationFinanciereId;
+    private static Long medicamentId;
+    private static Long acteId;
+    private static Long agendaId;
+    private static Long roleMedecinId;
+    private static Long roleAdminId;
+    private static Long antecedent2Id;
 
     public static void main(String[] args) {
         System.out.println("=== DÉBUT DU TEST COMPLET ===\n");
+
+
 
         // Initialisation des repositories
         initializeRepositories();
 
         try {
             // 1. INSERT PROCESS - Création de toutes les entités
-            //insertProcess();
+            insertProcess();
 
             // 2. SELECT PROCESS - Recherche et affichage
-            selectProcess();
+            //selectProcess();
 
             // 3. UPDATE PROCESS - Mise à jour
             //updateProcess();
@@ -121,31 +109,62 @@ public class TestComplet {
 
             System.out.println("\n=== FIN DU TEST COMPLET - SUCCÈS ===");
         } catch (Exception e) {
-            System.err.println("ERREUR lors du test: " + e.getMessage());
+            // Vérifier si c'est une SQLException encapsulée dans une RuntimeException
+            Throwable cause = e.getCause();
+            if (cause instanceof SQLException) {
+                SQLException sqlEx = (SQLException) cause;
+                System.err.println("\n❌ ERREUR SQL lors du test:");
+                System.err.println("Message: " + sqlEx.getMessage());
+                if (sqlEx.getCause() != null) {
+                    System.err.println("Cause: " + sqlEx.getCause().getMessage());
+                }
+                System.err.println("\nVérifiez:");
+                System.err.println("  - Que MySQL est démarré");
+                System.err.println("  - Que la base de données 'WhiteCare' existe");
+                System.err.println("  - Que les tables sontservices que jai cree  créées (exécutez schema.sql)");
+            } else {
+                System.err.println("\n❌ ERREUR lors du test: " + e.getMessage());
+            }
             e.printStackTrace();
+        } finally {
+            // Fermer proprement la connexion via ApplicationContext
+            try {
+                ApplicationContext.getInstance().closeConnection();
+            } catch (Exception e) {
+                // Ignorer les erreurs de fermeture
+            }
         }
     }
 
+
+
     private static void initializeRepositories() {
-        System.out.println("Initialisation des repositories...");
-        cabinetRepository = new CabinetMedicaleRepositoryImpl();
-        chargesRepository = new ChargesRepositoryImpl();
-        medecinRepository = new MedecinRepositoryImpl();
-        patientRepository = new PatientRepositoryImpl();
-        antecedentRepository = new AntecedentRepositoryImpl();
-        dossierRepository = new DossierMedicalRepositoryImpl();
-        consultationRepository = new ConsultationRepositoryImpl();
-        interventionRepository = new InterventionRepositoryImpl();
-        certificatRepository = new CertificatRepositoryImpl();
-        ordonnanceRepository = new OrdonnanceRepositoryImpl();
-        prescriptionRepository = new PrescriptionRepositoryImpl();
-        factureRepository = new FactureRepositoryImpl();
-        situationFinanciereRepository = new SituationFinanciereRepositoryImpl();
-        medicamentRepository = new MedicamentRepositoryImpl();
-        acteRepository = new ActeRepositoryImpl();
-        agendaRepository = new AgendaRepositoryImpl();
-        roleRepository = new RoleRepositoryImpl();
-        System.out.println("✓ Repositories initialisés\n");
+        System.out.println("Initialisation des repositories via ApplicationContext...");
+        
+        // Récupérer l'instance d'ApplicationContext
+        ApplicationContext context = ApplicationContext.getInstance();
+        
+        // Charger tous les repositories depuis ApplicationContext (sans utiliser 'new')
+        // Utilisation de getBean(Class<T>) pour récupération par interface
+        cabinetRepository = context.getBean(CabinetMedicaleRepository.class);
+        chargesRepository = context.getBean(ChargesRepository.class);
+        medecinRepository = context.getBean(MedecinRepository.class);
+        patientRepository = context.getBean(PatientRepository.class);
+        antecedentRepository = context.getBean(AntecedentRepository.class);
+        dossierRepository = context.getBean(DossierMedicalRepository.class);
+        consultationRepository = context.getBean(ConsultationRepository.class);
+        interventionRepository = context.getBean(InterventionRepository.class);
+        certificatRepository = context.getBean(CertificatRepository.class);
+        ordonnanceRepository = context.getBean(OrdonnanceRepository.class);
+        prescriptionRepository = context.getBean(PrescriptionRepository.class);
+        factureRepository = context.getBean(FactureRepository.class);
+        situationFinanciereRepository = context.getBean(SituationFinanciereRepository.class);
+        medicamentRepository = context.getBean(MedicamentRepository.class);
+        acteRepository = context.getBean(ActeRepository.class);
+        agendaRepository = context.getBean(AgendaRepository.class);
+        roleRepository = context.getBean(RoleRepository.class);
+        
+        System.out.println("✓ " + context.getBeanNames().size() + " repository(s) initialisé(s) depuis ApplicationContext et beans.properties\n");
     }
 
     private static void insertProcess() {
@@ -156,13 +175,14 @@ public class TestComplet {
         CabinetMedicale cabinet = CabinetMedicale.builder()
                 .nom("Cabinet Dentaire Dr. Smith")
                 .email("contact@cabinet-smith.ma")
-                .adresse("123 Avenue Mohammed V, Casablanca")
+                .adresse("123 A Casablanca")
                 .cin("C123456")
                 .tel1("0522123456")
                 .tel2("0522123457")
+                .logo("testetst")
                 .siteWeb("www.cabinet-smith.ma")
                 .instagram("@cabinet_smith")
-                .facebook("CabinetSmithDental")
+                .facebook("CmithDental")
                 .description("Cabinet dentaire moderne avec équipements de pointe")
                 .creePar("system")
                 .modifiePar("system")
@@ -193,8 +213,8 @@ public class TestComplet {
         Medecin medecin = Medecin.builder()
                 .nom("Smith")
                 .prenom("John")
-                .email("john.smith@cabinet.ma")
-                .adresse("456 Boulevard Zerktouni, Casablanca")
+                .email("j.smith@cabinet.ma")
+                .adresse("456 B , Casablanca")
                 .cin("M789012")
                 .tel("0522987654")
                 .sexe(Sexe.HOMME)
@@ -270,9 +290,9 @@ public class TestComplet {
         Patient patient = Patient.builder()
                 .nom("Alami")
                 .prenom("Ahmed")
-                .adresse("789 Rue Hassan II, Rabat")
+                .adresse("789 Rue , Rabat")
                 .telephone("0612345678")
-                .email("ahmed.alami@email.com")
+                .email("a.alami@email.com")
                 .dateNaissance(LocalDate.of(1990, 3, 20))
                 .sexe(Sexe.HOMME)
                 .assurance(Assurance.CNOPS)

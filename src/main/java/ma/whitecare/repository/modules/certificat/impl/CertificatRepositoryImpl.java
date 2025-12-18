@@ -55,7 +55,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
     @Override
     public void create(Certificat newElement) {
         String sql = "INSERT INTO certificat (date_debut, date_fin, duree, note_medecin, " +
-                "dossier_medicale_id, consultation_id, created_by, updated_by) " +
+                "dossier_medicale_id, consulation_id, created_by, updated_by) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
@@ -93,7 +93,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
     @Override
     public void update(Certificat newValuesElement) {
         String sql = "UPDATE certificat SET date_debut = ?, date_fin = ?, duree = ?, " +
-                "note_medecin = ?, dossier_medicale_id = ?, consultation_id = ?, " +
+                "note_medecin = ?, dossier_medicale_id = ?, consulation_id = ?, " +
                 "updated_by = ?, last_modification_date = CURRENT_TIMESTAMP " +
                 "WHERE id_certif = ?";
 
@@ -163,7 +163,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
 
     @Override
     public List<Certificat> findByConsultationId(Long consultationId) {
-        String sql = "SELECT * FROM certificat WHERE consultation_id = ? ORDER BY date_debut DESC";
+        String sql = "SELECT * FROM certificat WHERE consulation_id = ? ORDER BY date_debut DESC";
         List<Certificat> out = new ArrayList<>();
 
         try (Connection c = SessionFactory.getInstance().getConnection();
