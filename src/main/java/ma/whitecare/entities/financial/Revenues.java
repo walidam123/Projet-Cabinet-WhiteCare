@@ -22,7 +22,6 @@ public class Revenues extends BaseEntity {
     private Double montant;
     private LocalDateTime date;
 
-
     private CabinetMedicale Cabinet;
 
 

@@ -29,7 +29,7 @@ public class RevenuesServiceImpl implements RevenuesService {
         RevenuesValidator.validateRevenueOrThrow(revenue);
 
         // Vérifier que le cabinet existe
-        validateCabinetExists(revenue.getCabinetMedicaleId());
+        validateCabinetExists(revenue.getCabinet().getId());
 
         // Créer le revenu
         revenuesRepository.create(revenue);
@@ -63,8 +63,8 @@ public class RevenuesServiceImpl implements RevenuesService {
         Revenues existingRevenue = getRevenueById(revenue.getId());
 
         // Vérifier que le cabinet existe si modifié
-        if (!existingRevenue.getCabinetMedicaleId().equals(revenue.getCabinetMedicaleId())) {
-            validateCabinetExists(revenue.getCabinetMedicaleId());
+        if (!existingRevenue.getCabinet().getId().equals(revenue.getCabinet().getId())) {
+            validateCabinetExists(revenue.getCabinet().getId());
         }
 
         // Mettre à jour le revenu

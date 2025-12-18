@@ -47,9 +47,9 @@ public class RevenuesValidator {
         }
 
         // Validation du cabinet médical
-        if (revenue.getCabinetMedicaleId() == null) {
+        if (revenue.getCabinet().getId() == null) {
             errors.add("L'ID du cabinet médical est obligatoire");
-        } else if (revenue.getCabinetMedicaleId() <= 0) {
+        } else if (revenue.getCabinet().getId() <= 0) {
             errors.add("L'ID du cabinet médical doit être positif");
         }
 

@@ -3,6 +3,7 @@ package ma.whitecare.service.test;
 import ma.whitecare.common.exceptions.CabinetNotFoundException;
 import ma.whitecare.common.exceptions.ChargesNotFoundException;
 import ma.whitecare.common.exceptions.InvalidChargeException;
+import ma.whitecare.entities.cabinet.CabinetMedicale;
 import ma.whitecare.entities.financial.Charges;
 import ma.whitecare.repository.modules.cabinet.api.CabinetMedicaleRepository;
 import ma.whitecare.repository.modules.cabinet.api.ChargesRepository;
@@ -80,13 +81,17 @@ public class ChargesServiceTest {
     }
 
     private static void testValidation() {
+        // Créer un objet CabinetMedicale pour les tests
+        CabinetMedicale testCabinet = new CabinetMedicale();
+        testCabinet.setId(TEST_CABINET_ID);
+        
         System.out.println("  → Test validation charge valide...");
         Charges validCharge = Charges.builder()
                 .titre("Test Charge")
                 .description("Description test")
                 .montant(100.0)
                 .date(LocalDateTime.now())
-                .cabinetMedicaleId(TEST_CABINET_ID)
+                .Cabinet(testCabinet)
                 .creePar("test_user")
                 .modifiePar("test_user")
                 .build();
@@ -100,7 +105,7 @@ public class ChargesServiceTest {
                     .titre("")
                     .montant(100.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(TEST_CABINET_ID)
+                    .Cabinet(testCabinet)
                     .build();
             chargesService.createCharge(invalidCharge);
             System.out.println("    ❌ Erreur: Devrait lever une exception");
@@ -114,7 +119,7 @@ public class ChargesServiceTest {
                     .titre("Test")
                     .montant(-100.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(TEST_CABINET_ID)
+                    .Cabinet(testCabinet)
                     .build();
             chargesService.createCharge(invalidCharge);
             System.out.println("    ❌ Erreur: Devrait lever une exception");
@@ -128,7 +133,7 @@ public class ChargesServiceTest {
                     .titre("Test")
                     .montant(100.0)
                     .date(LocalDateTime.now().plusDays(1))
-                    .cabinetMedicaleId(TEST_CABINET_ID)
+                    .Cabinet(testCabinet)
                     .build();
             chargesService.createCharge(invalidCharge);
             System.out.println("    ❌ Erreur: Devrait lever une exception");
@@ -138,6 +143,10 @@ public class ChargesServiceTest {
     }
 
     private static void testCRUD() {
+        // Créer un objet CabinetMedicale pour les tests
+        CabinetMedicale testCabinet = new CabinetMedicale();
+        testCabinet.setId(TEST_CABINET_ID);
+        
         // CREATE
         System.out.println("  → Test création charge...");
         Charges newCharge = Charges.builder()
@@ -145,7 +154,7 @@ public class ChargesServiceTest {
                 .description("Achat de nouveaux équipements médicaux")
                 .montant(5000.75)
                 .date(LocalDateTime.now())
-                .cabinetMedicaleId(TEST_CABINET_ID)
+                .Cabinet(testCabinet)
                 .creePar("test_user")
                 .modifiePar("test_user")
                 .build();
@@ -234,11 +243,13 @@ public class ChargesServiceTest {
 
         System.out.println("  → Test exception cabinet non trouvé...");
         try {
+            CabinetMedicale invalidCabinet = new CabinetMedicale();
+            invalidCabinet.setId(999999L);
             Charges invalidCharge = Charges.builder()
                     .titre("Test")
                     .montant(100.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(999999L)
+                    .Cabinet(invalidCabinet)
                     .build();
             chargesService.createCharge(invalidCharge);
             System.out.println("    ❌ Erreur: Devrait lever une exception");

@@ -3,6 +3,7 @@ package ma.whitecare.service.test;
 import ma.whitecare.common.exceptions.CabinetNotFoundException;
 import ma.whitecare.common.exceptions.InvalidRevenueException;
 import ma.whitecare.common.exceptions.RevenuesNotFoundException;
+import ma.whitecare.entities.cabinet.CabinetMedicale;
 import ma.whitecare.entities.financial.Revenues;
 import ma.whitecare.repository.modules.cabinet.api.CabinetMedicaleRepository;
 import ma.whitecare.repository.modules.cabinet.api.RevenuesRepository;
@@ -19,7 +20,7 @@ public class RevenuesServiceTest {
     private static RevenuesService revenuesService;
     private static RevenuesRepository revenuesRepository;
     private static CabinetMedicaleRepository cabinetRepository;
-    private static final Long TEST_CABINET_ID = 1L;
+    private static final Long TEST_CABINET_ID = 2L;
     private static Revenues testRevenue;
 
     public static void main(String[] args) {
@@ -80,13 +81,16 @@ public class RevenuesServiceTest {
     }
 
     private static void testValidation() {
+        // Créer un objet CabinetMedicale pour les tests
+        CabinetMedicale testCabinet = new CabinetMedicale();
+        testCabinet.setId(TEST_CABINET_ID);
         System.out.println("  → Test validation revenu valide...");
         Revenues validRevenue = Revenues.builder()
                 .titre("Test Revenue")
                 .description("Description test")
                 .montant(200.0)
                 .date(LocalDateTime.now())
-                .cabinetMedicaleId(TEST_CABINET_ID)
+                .Cabinet(testCabinet)
                 .creePar("test_user")
                 .modifiePar("test_user")
                 .build();
@@ -100,7 +104,7 @@ public class RevenuesServiceTest {
                     .titre("")
                     .montant(200.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(TEST_CABINET_ID)
+                    .Cabinet(testCabinet)
                     .build();
             revenuesService.createRevenue(invalidRevenue);
             System.out.println("    ❌ Erreur: Devrait lever une exception");
@@ -114,7 +118,7 @@ public class RevenuesServiceTest {
                     .titre("Test")
                     .montant(-200.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(TEST_CABINET_ID)
+                    .Cabinet(testCabinet)
                     .build();
             revenuesService.createRevenue(invalidRevenue);
             System.out.println("    ❌ Erreur: Devrait lever une exception");
@@ -128,7 +132,7 @@ public class RevenuesServiceTest {
                     .titre("Test")
                     .montant(200.0)
                     .date(LocalDateTime.now().plusDays(1))
-                    .cabinetMedicaleId(TEST_CABINET_ID)
+                    .Cabinet(testCabinet)
                     .build();
             revenuesService.createRevenue(invalidRevenue);
             System.out.println("    ❌ Erreur: Devrait lever une exception");
@@ -139,13 +143,15 @@ public class RevenuesServiceTest {
 
     private static void testCRUD() {
         // CREATE
+        CabinetMedicale testCabinet = new CabinetMedicale();
+        testCabinet.setId(TEST_CABINET_ID);
         System.out.println("  → Test création revenu...");
         Revenues newRevenue = Revenues.builder()
                 .titre("Consultation spécialisée")
                 .description("Consultation cardiologie")
                 .montant(500.0)
                 .date(LocalDateTime.now())
-                .cabinetMedicaleId(TEST_CABINET_ID)
+                .Cabinet(testCabinet)
                 .creePar("test_user")
                 .modifiePar("test_user")
                 .build();
@@ -238,11 +244,13 @@ public class RevenuesServiceTest {
 
         System.out.println("  → Test exception cabinet non trouvé...");
         try {
+            CabinetMedicale testCabinet = new CabinetMedicale();
+            testCabinet.setId(9999L);
             Revenues invalidRevenue = Revenues.builder()
                     .titre("Test")
                     .montant(200.0)
                     .date(LocalDateTime.now())
-                    .cabinetMedicaleId(999999L)
+                    .Cabinet(testCabinet)
                     .build();
             revenuesService.createRevenue(invalidRevenue);
             System.out.println("    ❌ Erreur: Devrait lever une exception");

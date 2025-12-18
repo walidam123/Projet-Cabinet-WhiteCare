@@ -47,9 +47,9 @@ public class ChargesValidator {
         }
 
         // Validation du cabinet médical
-        if (charge.getCabinetMedicaleId() == null) {
+        if (charge.getCabinet().getId() == null) {
             errors.add("L'ID du cabinet médical est obligatoire");
-        } else if (charge.getCabinetMedicaleId() <= 0) {
+        } else if (charge.getCabinet().getId() <= 0) {
             errors.add("L'ID du cabinet médical doit être positif");
         }
 

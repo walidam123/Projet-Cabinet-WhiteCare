@@ -29,7 +29,7 @@ public class ChargesServiceImpl implements ChargesService {
         ChargesValidator.validateChargeOrThrow(charge);
 
         // Vérifier que le cabinet existe
-        validateCabinetExists(charge.getCabinetMedicaleId());
+        validateCabinetExists(charge.getCabinet().getId());
 
         // Créer la charge
         chargesRepository.create(charge);
@@ -63,8 +63,8 @@ public class ChargesServiceImpl implements ChargesService {
         Charges existingCharge = getChargeById(charge.getId());
 
         // Vérifier que le cabinet existe si modifié
-        if (!existingCharge.getCabinetMedicaleId().equals(charge.getCabinetMedicaleId())) {
-            validateCabinetExists(charge.getCabinetMedicaleId());
+        if (!existingCharge.getCabinet().getId().equals(charge.getCabinet().getId())) {
+            validateCabinetExists(charge.getCabinet().getId());
         }
 
         // Mettre à jour la charge
