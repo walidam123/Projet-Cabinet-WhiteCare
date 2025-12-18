@@ -227,10 +227,10 @@ idPatient BIGINT AUTO_INCREMENT PRIMARY KEY,
 nom VARCHAR(20),
 prenom VARCHAR(25) ,
 dateDeNaissance DATE,
-sexe ENUM{'HOMME','FEMME'} not null,
+sexe ENUM('HOMME','FEMME') not null,
 adresse VARCHAR(20),
 telephone VARCHAR(15),
-email Varchar(30)
+email Varchar(30),
 assurance ENUM('CNSS', 'CNOPS','PRIVEE','AUCUNE' )DEFAULT 'AUCUNE',
 creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      last_modification_date TIMESTAMP NULL,
@@ -359,7 +359,7 @@ CREATE TABLE if not exists certificat (
                                           last_modification_date TIMESTAMP NULL,
                                           created_by VARCHAR(64),
     updated_by VARCHAR(64),
-    CONSTRAINT fk_dc_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossiermedicale(idDm) ON DELETE CASCADE,
+    CONSTRAINT fk_dc_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDm) ON DELETE CASCADE,
     CONSTRAINT fk_cc_consultation FOREIGN KEY (consulation_id) REFERENCES consultation(id_consultation) ON DELETE CASCADE
     );
 
@@ -449,7 +449,7 @@ CREATE TABLE consultation (
                               last_modification_date TIMESTAMP NULL,
                               created_by VARCHAR(64),
                               updated_by VARCHAR(64),
-                            constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossiermedicale(idDm) ON DELETE CASCADE
+                            constraint fk_cd_dossierMedicale FOREIGN KEY (dossier_medicale_id) REFERENCES dossierMedicale(idDm) ON DELETE CASCADE
 
 );
 

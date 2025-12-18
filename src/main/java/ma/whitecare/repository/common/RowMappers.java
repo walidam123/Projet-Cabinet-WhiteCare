@@ -760,4 +760,51 @@ public final class RowMappers {
         
         return situationFinanciere;
     }
+
+    /**
+     * Mappe un ResultSet vers une entité Ordonnance
+     */
+    public static Ordonnance mapOrdonnance(ResultSet rs) throws SQLException {
+        Ordonnance ordonnance = new Ordonnance();
+        
+        // Champs primaires
+        ordonnance.setIdOrd(rs.getLong("idOrd"));
+        
+        // Date
+        java.sql.Date dateSql = rs.getDate("date");
+        if (dateSql != null) {
+            ordonnance.setDate(dateSql.toLocalDate());
+        }
+        
+        // Relations (créer des objets minimaux avec juste les IDs)
+        Long consultationId = getLongSafe(rs, "consultation_id");
+        if (consultationId != null) {
+            Consultation consultation = new Consultation();
+            consultation.setIdConsultation(consultationId);
+            ordonnance.setConsultation(consultation);
+        }
+        
+        Long dossierMedicaleId = getLongSafe(rs, "dossierMedicale_id");
+        if (dossierMedicaleId != null) {
+            DossierMedicale dossierMedicale = new DossierMedicale();
+            dossierMedicale.setIdDM(dossierMedicaleId);
+            ordonnance.setDossierMedicale(dossierMedicale);
+        }
+        
+        // Champs d'audit (BaseEntity)
+        Timestamp creationDate = rs.getTimestamp("creation_date");
+        if (creationDate != null) {
+            ordonnance.setDateCreation(creationDate.toLocalDateTime().toLocalDate());
+        }
+        
+        Timestamp modifDate = rs.getTimestamp("last_modification_date");
+        if (modifDate != null) {
+            ordonnance.setDateDerniereModification(modifDate.toLocalDateTime().toLocalDate());
+        }
+        
+        ordonnance.setCreePar(rs.getString("created_by"));
+        ordonnance.setModifiePar(rs.getString("updated_by"));
+        
+        return ordonnance;
+    }
 }
