@@ -1,0 +1,21 @@
+package ma.whitecare.mvc.dto.DossierMedicale;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ma.whitecare.entities.enums.StatutConsultation;
+
+import java.time.LocalDate;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateConsultationDTO {
+
+    private Long dossierMedicalId;
+    private LocalDate date;
+    private StatutConsultation statut;
+    private String observationMedecin;
+}

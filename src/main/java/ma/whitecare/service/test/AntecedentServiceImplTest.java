@@ -1,5 +1,6 @@
 package ma.whitecare.service.test;
 
+import ma.whitecare.common.exceptions.AntecedentNotFoundException;
 import ma.whitecare.entities.enums.NiveauDeRisque;
 import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.repository.modules.patient.api.AntecedentRepository;
@@ -29,18 +30,22 @@ public class AntecedentServiceImplTest {
             testFindPage();
             testDeleteAntecedentById(created.getId_Antecedent());
 
+            // Test exception
+            testAntecedentNotFound();
+
             System.out.println("\n=== TOUS LES TESTS ONT RÉUSSI ===");
         } catch (Exception e) {
             System.err.println("❌ Erreur pendant les tests : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private static Antecedents testCreateAntecedent() {
         System.out.println("=== TEST CREATE ANTECEDENT ===");
         Antecedents antecedent = new Antecedents();
-        antecedent.setNom("Diabete");
+        antecedent.setNom("Hypertension");
         antecedent.setCategorie("Maladie chronique");
-        antecedent.setNiveauDeRisque(NiveauDeRisque.ELEVE); // ✅ adapté à ton enum
+        antecedent.setNiveauDeRisque(NiveauDeRisque.MOYEN);
         antecedent.setCreePar("test_user");
         antecedent.setModifiePar("test_user");
 
@@ -65,7 +70,7 @@ public class AntecedentServiceImplTest {
     private static void testUpdateAntecedent(Long id) {
         System.out.println("=== TEST UPDATE ANTECEDENT ===");
         Antecedents antecedent = antecedentService.getAntecedentById(id);
-        antecedent.setNom("Diabete modifié");
+        antecedent.setNom("Hypertension modifiée");
         antecedentService.updateAntecedent(antecedent);
         System.out.println("✓ Antécédent modifié : " + antecedent);
     }
@@ -106,5 +111,14 @@ public class AntecedentServiceImplTest {
         System.out.println("=== TEST FIND PAGE ===");
         List<Antecedents> page = antecedentService.findPage(2, 0);
         page.forEach(a -> System.out.println("✓ " + a));
+    }
+
+    private static void testAntecedentNotFound() {
+        System.out.println("=== TEST ANTECEDENT NOT FOUND EXCEPTION ===");
+        try {
+            antecedentService.getAntecedentById(-1L); // ID inexistant
+        } catch (AntecedentNotFoundException e) {
+            System.out.println("✓ Exception bien lancée : " + e.getMessage());
+        }
     }
 }
