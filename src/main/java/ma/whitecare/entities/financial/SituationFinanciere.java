@@ -22,7 +22,7 @@ public class SituationFinanciere extends BaseEntity {
     private Long idSF;
     private Double totaleDesActes;
     private Double totalePaye;
-    private Double crédit;
+    private Double credit;
     private StatutSituationFinanciere statut;
     private EnPromo enPromo;
 

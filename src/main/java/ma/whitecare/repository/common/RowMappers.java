@@ -716,7 +716,7 @@ public final class RowMappers {
         situationFinanciere.setIdSF(rs.getLong("idSf"));
         situationFinanciere.setTotaleDesActes(getDoubleSafe(rs, "totale_des_actes"));
         situationFinanciere.setTotalePaye(getDoubleSafe(rs, "totale_paye"));
-        situationFinanciere.setCrédit(getDoubleSafe(rs, "credit"));
+        situationFinanciere.setCredit(getDoubleSafe(rs, "credit"));
         
         String statutStr = rs.getString("statut");
         if (statutStr != null) {

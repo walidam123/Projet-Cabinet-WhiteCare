@@ -77,9 +77,9 @@ public class ActeRepositoryImpl implements ActeRepository {
             ps.setString(2, newElement.getCategorie());
             ps.setDouble(3, newElement.getPrixDeBase() != null ? newElement.getPrixDeBase() : 0.0);
             ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            ps.setTimestamp(5, new Timestamp(System.currentTimeMillis() ));
-            ps.setString(6, newElement.getModifiePar());
-            ps.setString(7, newElement.getModifiePar());
+            ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            ps.setString(6, newElement.getCreePar() != null ? newElement.getCreePar() : "system");
+            ps.setString(7, newElement.getModifiePar() != null ? newElement.getModifiePar() : "system");
 
             int affectedRows = ps.executeUpdate();
 

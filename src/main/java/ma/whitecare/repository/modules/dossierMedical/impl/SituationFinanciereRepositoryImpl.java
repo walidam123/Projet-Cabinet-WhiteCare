@@ -59,7 +59,7 @@ public class SituationFinanciereRepositoryImpl implements SituationFinanciereRep
 
             ps.setDouble(1, situationFinanciere.getTotaleDesActes() != null ? situationFinanciere.getTotaleDesActes() : 0.0);
             ps.setDouble(2, situationFinanciere.getTotalePaye() != null ? situationFinanciere.getTotalePaye() : 0.0);
-            ps.setDouble(3, situationFinanciere.getCrédit() != null ? situationFinanciere.getCrédit() : 0.0);
+            ps.setDouble(3, situationFinanciere.getCredit() != null ? situationFinanciere.getCredit() : 0.0);
 
             if (situationFinanciere.getStatut() != null) {
                 ps.setString(4, situationFinanciere.getStatut().name());
@@ -110,7 +110,7 @@ public class SituationFinanciereRepositoryImpl implements SituationFinanciereRep
 
             ps.setDouble(1, situationFinanciere.getTotaleDesActes() != null ? situationFinanciere.getTotaleDesActes() : 0.0);
             ps.setDouble(2, situationFinanciere.getTotalePaye() != null ? situationFinanciere.getTotalePaye() : 0.0);
-            ps.setDouble(3, situationFinanciere.getCrédit() != null ? situationFinanciere.getCrédit() : 0.0);
+            ps.setDouble(3, situationFinanciere.getCredit() != null ? situationFinanciere.getCredit() : 0.0);
 
             if (situationFinanciere.getStatut() != null) {
                 ps.setString(4, situationFinanciere.getStatut().name());
