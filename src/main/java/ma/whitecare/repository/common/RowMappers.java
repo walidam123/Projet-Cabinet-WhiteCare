@@ -14,6 +14,7 @@ import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.enums.*;
 import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.entities.user.*;
+import ma.whitecare.entities.appointment.RDV;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -341,16 +342,25 @@ public final class RowMappers {
 
 
     public static AgendaMensuel mapAgendaMensuel(ResultSet rs) throws SQLException {
-        return AgendaMensuel.builder()
+        AgendaMensuel agenda = AgendaMensuel.builder()
                 .id(rs.getLong("id"))
                 .mois(Mois.valueOf(rs.getString("mois")))
                 .annee(rs.getInt("annee"))
-                .medecinId(rs.getLong("medecin_id"))
                 .dateCreation(LocalDate.from(rs.getTimestamp("creation_date").toLocalDateTime()))
                 .dateDerniereModification(LocalDate.from(rs.getTimestamp("last_modification_date").toLocalDateTime()))
                 .creePar(rs.getString("created_by"))
                 .modifiePar(rs.getString("updated_by"))
                 .build();
+        
+        // Créer un objet Medecin avec juste l'ID
+        Long medecinId = getLongSafe(rs, "medecin_id");
+        if (medecinId != null) {
+            Medecin medecin = new Medecin();
+            medecin.setIdUser(medecinId);
+            agenda.setMedecin(medecin);
+        }
+        
+        return agenda;
     }
 
     public static Jour mapJourAgenda(ResultSet rs) throws SQLException {
@@ -364,14 +374,21 @@ public final class RowMappers {
     }
 
     public static Creneau mapCreneauHoraire(ResultSet rs) throws SQLException {
-        return Creneau.builder()
+        Creneau creneau = Creneau.builder()
                 .id(rs.getLong("id"))
                 .heureDebut(rs.getTime("heure_debut").toLocalTime())
                 .heureFin(rs.getTime("heure_fin").toLocalTime())
                 .estDisponible(rs.getBoolean("est_disponible"))
                 .motifIndisponibilite(rs.getString("motif_indisponibilite"))
-                .rendezVousId(rs.getLong("rendez_vous_id"))
                 .build();
+        
+        // Gestion de rendez_vous_id qui peut être null
+        long rendezVousId = rs.getLong("rendez_vous_id");
+        if (!rs.wasNull()) {
+            creneau.setRendezVousId(rendezVousId);
+        }
+        
+        return creneau;
     }
 
     public static Role mapRole(ResultSet rs) throws SQLException {
@@ -806,5 +823,70 @@ public final class RowMappers {
         ordonnance.setModifiePar(rs.getString("updated_by"));
         
         return ordonnance;
+    }
+
+    public static RDV mapRDV(ResultSet rs) throws SQLException {
+        RDV rdv = new RDV();
+        
+        // Champs primaires
+        rdv.setIdRDV(rs.getLong("id_rdv"));
+        
+        // Date et heure
+        java.sql.Date dateSql = rs.getDate("date");
+        if (dateSql != null) {
+            rdv.setDate(dateSql.toLocalDate());
+        }
+        
+        java.sql.Time heureSql = rs.getTime("heure");
+        if (heureSql != null) {
+            rdv.setHeure(heureSql.toLocalTime());
+        }
+        
+        // Champs texte
+        rdv.setMotif(rs.getString("motif"));
+        rdv.setNoteMedecin(rs.getString("note_medecin"));
+        
+        // Statut
+        String statutStr = rs.getString("statut");
+        if (statutStr != null) {
+            try {
+                rdv.setStatut(StatutRendezVous.valueOf(statutStr));
+            } catch (IllegalArgumentException e) {
+                rdv.setStatut(StatutRendezVous.PLANIFIE);
+            }
+        } else {
+            rdv.setStatut(StatutRendezVous.PLANIFIE);
+        }
+        
+        // Relations (créer des objets minimaux avec juste les IDs)
+        Long consultationId = getLongSafe(rs, "consultation_id");
+        if (consultationId != null) {
+            Consultation consultation = new Consultation();
+            consultation.setIdConsultation(consultationId);
+            rdv.setConsultation(consultation);
+        }
+        
+        Long dossierMedicaleId = getLongSafe(rs, "dossier_medicale_id");
+        if (dossierMedicaleId != null) {
+            DossierMedicale dossierMedicale = new DossierMedicale();
+            dossierMedicale.setIdDM(dossierMedicaleId);
+            rdv.setDossierMedicale(dossierMedicale);
+        }
+        
+        // Champs d'audit (BaseEntity)
+        Timestamp creationDate = rs.getTimestamp("creation_date");
+        if (creationDate != null) {
+            rdv.setDateCreation(creationDate.toLocalDateTime().toLocalDate());
+        }
+        
+        Timestamp modifDate = rs.getTimestamp("last_modification_date");
+        if (modifDate != null) {
+            rdv.setDateDerniereModification(modifDate.toLocalDateTime().toLocalDate());
+        }
+        
+        rdv.setCreePar(rs.getString("created_by"));
+        rdv.setModifiePar(rs.getString("updated_by"));
+        
+        return rdv;
     }
 }

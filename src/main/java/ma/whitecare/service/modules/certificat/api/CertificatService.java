@@ -26,4 +26,7 @@ public interface CertificatService {
     // ========== CONVERSIONS ==========
     CertificatDTO convertToDTO(Certificat certificat);
     List<CertificatDTO> convertToDTOList(List<Certificat> certificats);
+
+    // ========== GÉNÉRATION PDF ==========
+    byte[] generatePDF(Long certificatId) throws java.io.IOException;
 }

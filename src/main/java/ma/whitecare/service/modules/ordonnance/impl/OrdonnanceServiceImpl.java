@@ -7,13 +7,18 @@ import ma.whitecare.common.validators.OrdonnanceValidator;
 import ma.whitecare.entities.medical.Consultation;
 import ma.whitecare.entities.medical.DossierMedicale;
 import ma.whitecare.entities.medical.Ordonnance;
+import ma.whitecare.entities.medical.Prescription;
 import ma.whitecare.mvc.dto.OrdannanceDto.CreateOrdonnanceDTO;
 import ma.whitecare.mvc.dto.OrdannanceDto.OrdonnanceDTO;
 import ma.whitecare.mvc.dto.OrdannanceDto.UpdateOrdonnanceDTO;
 
+import ma.whitecare.common.util.PDFGenerator;
 import ma.whitecare.repository.modules.Ordonnance.OrdonnanceRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
+import ma.whitecare.repository.modules.dossierMedical.api.PrescriptionRepository;
+import ma.whitecare.repository.modules.patient.api.PatientRepository;
+import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
 import ma.whitecare.service.modules.ordonnance.api.OrdonnanceService;
 
 import javax.validation.ValidationException;
@@ -187,6 +192,82 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
         return ordonnances.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    // ========== GÉNÉRATION PDF ==========
+
+    @Override
+    public byte[] generatePDF(Long ordonnanceId) throws java.io.IOException {
+        // Récupérer l'ordonnance
+        Ordonnance ordonnance = getOrdonnanceById(ordonnanceId);
+
+        // Récupérer le dossier médical et le patient
+        DossierMedicale dossier = null;
+        if (ordonnance.getDossierMedicale() != null && ordonnance.getDossierMedicale().getIdDM() != null) {
+            dossier = dossierMedicalRepository.findById(ordonnance.getDossierMedicale().getIdDM());
+        }
+
+        if (dossier == null || dossier.getPatient() == null) {
+            throw new IllegalArgumentException("Impossible de générer le PDF : informations du patient manquantes");
+        }
+
+        // Récupérer le patient complet
+        ma.whitecare.entities.patient.Patient patient = patientRepository.findById(
+                dossier.getPatient().getId_Patient());
+        if (patient == null) {
+            throw new IllegalArgumentException("Patient non trouvé");
+        }
+
+        // Récupérer le médecin
+        String medecinNom = "Non spécifié";
+        String medecinPrenom = "";
+        String specialite = null;
+        if (dossier.getMedecin() != null && dossier.getMedecin().getIdUser() != null) {
+            ma.whitecare.entities.user.Medecin medecin = medecinRepository.findById(
+                    dossier.getMedecin().getIdUser());
+            if (medecin != null) {
+                medecinNom = medecin.getNom() != null ? medecin.getNom() : "Non spécifié";
+                medecinPrenom = medecin.getPrenom() != null ? medecin.getPrenom() : "";
+                specialite = medecin.getSpecialite();
+            }
+        }
+
+        // Récupérer les prescriptions
+        java.util.List<ma.whitecare.entities.medical.Prescription> prescriptions = 
+                prescriptionRepository.findByOrdonnanceId(ordonnanceId);
+
+        // Convertir les prescriptions en PrescriptionInfo
+        java.util.List<PDFGenerator.PrescriptionInfo> prescriptionInfos = prescriptions.stream()
+                .map(p -> {
+                    String medicamentNom = "Non spécifié";
+                    if (p.getMedicament() != null && p.getMedicament().getIdMct() != null) {
+                        // Optionnel : récupérer le médicament complet si nécessaire
+                        medicamentNom = p.getMedicament().getNom() != null ? 
+                                p.getMedicament().getNom() : "Non spécifié";
+                    }
+                    return new PDFGenerator.PrescriptionInfo(
+                            medicamentNom,
+                            p.getQuantite(),
+                            p.getFrequence(),
+                            p.getDureeEnJours()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        // Générer le PDF
+        String dateOrdonnance = ordonnance.getDate() != null ?
+                ordonnance.getDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) :
+                "Non spécifiée";
+
+        return PDFGenerator.generateOrdonnancePDF(
+                patient.getNom() != null ? patient.getNom() : "",
+                patient.getPrenom() != null ? patient.getPrenom() : "",
+                medecinNom,
+                medecinPrenom,
+                specialite,
+                dateOrdonnance,
+                prescriptionInfos
+        );
     }
 
     // ========== MÉTHODES PRIVÉES ==========

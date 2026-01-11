@@ -3,20 +3,27 @@ package ma.whitecare.repository.test;
 import ma.whitecare.entities.agenda.AgendaMensuel;
 import ma.whitecare.entities.agenda.Creneau;
 import ma.whitecare.entities.agenda.Jour;
+import ma.whitecare.entities.appointment.RDV;
 import ma.whitecare.entities.cabinet.CabinetMedicale;
+import ma.whitecare.entities.cabinet.Statistiques;
 import ma.whitecare.entities.enums.*;
 import ma.whitecare.entities.financial.Charges;
 import ma.whitecare.entities.financial.Facture;
+import ma.whitecare.entities.financial.Revenues;
 import ma.whitecare.entities.financial.SituationFinanciere;
 import ma.whitecare.entities.medical.*;
 import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.entities.patient.Patient;
 import ma.whitecare.entities.user.Medecin;
+import ma.whitecare.entities.user.Secretaire;
+import ma.whitecare.entities.user.Staff;
+import ma.whitecare.entities.user.Utilisateur;
 import ma.whitecare.conf.ApplicationContext;
 import ma.whitecare.repository.modules.actes.api.ActeRepository;
 import ma.whitecare.repository.modules.agenda.api.AgendaRepository;
 import ma.whitecare.repository.modules.cabinet.api.CabinetMedicaleRepository;
 import ma.whitecare.repository.modules.cabinet.api.ChargesRepository;
+import ma.whitecare.repository.modules.cabinet.api.RevenuesRepository;
 import ma.whitecare.repository.modules.certificat.api.CertificatRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
@@ -28,10 +35,14 @@ import ma.whitecare.repository.modules.Medicament.MedicamentRepository;
 import ma.whitecare.repository.modules.Ordonnance.OrdonnanceRepository;
 import ma.whitecare.repository.modules.patient.api.AntecedentRepository;
 import ma.whitecare.repository.modules.patient.api.PatientRepository;
+import ma.whitecare.repository.modules.rdv.api.RDVRepository;
+import ma.whitecare.repository.modules.statistiques.api.StatistiqueRepository;
 import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
 import ma.whitecare.repository.modules.UserManager.api.RoleRepository;
+import ma.whitecare.repository.modules.UserManager.api.SecretaireRepository;
+import ma.whitecare.repository.modules.UserManager.api.StaffRepository;
+import ma.whitecare.repository.modules.UserManager.api.UtilisateurRepository;
 import ma.whitecare.entities.user.Role;
-import ma.whitecare.entities.user.Utilisateur;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,7 +60,11 @@ public class TestComplet {
     // Repositories
     private static CabinetMedicaleRepository cabinetRepository;
     private static ChargesRepository chargesRepository;
+    private static RevenuesRepository revenuesRepository;
     private static MedecinRepository medecinRepository;
+    private static SecretaireRepository secretaireRepository;
+    private static StaffRepository staffRepository;
+    private static UtilisateurRepository utilisateurRepository;
     private static PatientRepository patientRepository;
     private static AntecedentRepository antecedentRepository;
     private static DossierMedicalRepository dossierRepository;
@@ -64,11 +79,17 @@ public class TestComplet {
     private static ActeRepository acteRepository;
     private static AgendaRepository agendaRepository;
     private static RoleRepository roleRepository;
+    private static RDVRepository rdvRepository;
+    private static StatistiqueRepository statistiqueRepository;
 
     // IDs créés pour les relations
     private static Long cabinetId;
     private static Long chargeId;
+    private static Long revenueId;
     private static Long medecinId;
+    private static Long secretaireId;
+    private static Long staffId;
+    private static Long utilisateurId;
     private static Long patientId;
     private static Long antecedentId;
     private static Long dossierId;
@@ -85,6 +106,8 @@ public class TestComplet {
     private static Long roleMedecinId;
     private static Long roleAdminId;
     private static Long antecedent2Id;
+    private static Long rdvId;
+    private static Long statistiqueId;
 
     public static void main(String[] args) {
         System.out.println("=== DÉBUT DU TEST COMPLET ===\n");
@@ -99,10 +122,10 @@ public class TestComplet {
             insertProcess();
 
             // 2. SELECT PROCESS - Recherche et affichage
-            //selectProcess();
+            selectProcess();
 
             // 3. UPDATE PROCESS - Mise à jour
-            //updateProcess();
+            updateProcess();
 
             // 4. DELETE PROCESS - Suppression (optionnel, commenté pour garder les données)
             // deleteProcess();
@@ -290,7 +313,7 @@ public class TestComplet {
         Patient patient = Patient.builder()
                 .nom("Alami")
                 .prenom("Ahmed")
-                .adresse("789 Rue , Rabat")
+                .adresse("789 Rue,Rabat")
                 .telephone("0612345678")
                 .email("a.alami@email.com")
                 .dateNaissance(LocalDate.of(1990, 3, 20))
@@ -366,7 +389,7 @@ public class TestComplet {
         SituationFinanciere situationFinanciere = SituationFinanciere.builder()
                 .totaleDesActes(5000.0)
                 .totalePaye(2000.0)
-                .crédit(0.0)
+                .credit(0.0)
                 .statut(StatutSituationFinanciere.PARTIEL)
                 .enPromo(EnPromo.NON)
                 .creePar("system")
@@ -557,6 +580,89 @@ public class TestComplet {
             System.out.println("✓ Créneau ajouté au jour");
         }
 
+        // 19. Créer un Revenu
+        System.out.println("\n19. Création d'un Revenu...");
+        Revenues revenue = Revenues.builder()
+                .titre("Consultation patient")
+                .description("Revenu de consultation")
+                .montant(500.0)
+                .date(LocalDateTime.now())
+                .creePar("system")
+                .modifiePar("system")
+                .build();
+        CabinetMedicale cabinetRefRevenue = new CabinetMedicale();
+        cabinetRefRevenue.setId(cabinetId);
+        revenue.setCabinet(cabinetRefRevenue);
+        revenuesRepository.create(revenue);
+        revenueId = revenue.getId();
+        System.out.println("✓ Revenu créé avec ID: " + revenueId);
+
+        // 20. Créer un Secrétaire
+        System.out.println("\n20. Création d'un Secrétaire...");
+        Secretaire secretaire = Secretaire.builder()
+                .nom("Bennani")
+                .prenom("Fatima")
+                .email("f.bennani@cabinet.ma")
+                .adresse("789 C, Casablanca")
+                .cin("S456789")
+                .tel("0522111222")
+                .sexe(Sexe.FEMME)
+                .login("secretaire.fatima")
+                .motDePass("password123")
+                .dateNaissance(LocalDate.of(1995, 8, 10))
+                .actif(true)
+                .salaire(12000.0)
+                .prime(2000.0)
+                .dateRecrutement(LocalDate.of(2021, 3, 1))
+                .soldeConge(20)
+                .numCNSS("CNSS123456")
+                .commission(5.0)
+                .cabinetMedicaleId(cabinetId)
+                .creePar("system")
+                .modifiePar("system")
+                .build();
+        secretaireRepository.create(secretaire);
+        secretaireId = secretaire.getIdUser();
+        System.out.println("✓ Secrétaire créé avec ID: " + secretaireId);
+
+        // 21. Créer un RDV
+        System.out.println("\n21. Création d'un RDV...");
+        RDV rdv = RDV.builder()
+                .Date(LocalDate.now().plusDays(1))
+                .heure(LocalTime.of(10, 0))
+                .motif("Consultation de suivi")
+                .statut(StatutRendezVous.PLANIFIE)
+                .noteMedecin("Rendez-vous de routine")
+                .creePar("system")
+                .modifiePar("system")
+                .build();
+        DossierMedicale dossierRefRDV = new DossierMedicale();
+        dossierRefRDV.setIdDM(dossierId);
+        rdv.setDossierMedicale(dossierRefRDV);
+        Consultation consultationRefRDV = new Consultation();
+        consultationRefRDV.setIdConsultation(consultationId);
+        rdv.setConsultation(consultationRefRDV);
+        rdvRepository.create(rdv);
+        rdvId = rdv.getIdRDV();
+        System.out.println("✓ RDV créé avec ID: " + rdvId);
+
+        // 22. Créer une Statistique
+        System.out.println("\n22. Création d'une Statistique...");
+        Statistiques statistique = Statistiques.builder()
+                .nom("Nombre de consultations mensuelles")
+                .categorie(CategorieStatistique.CONSULTATIONS)
+                .chiffre(150.0)
+                .dateCalcul(LocalDate.now())
+                .creePar("system")
+                .modifiePar("system")
+                .build();
+        CabinetMedicale cabinetRefStat = new CabinetMedicale();
+        cabinetRefStat.setId(cabinetId);
+        statistique.setCabinet(cabinetRefStat);
+        statistiqueRepository.create(statistique);
+        statistiqueId = statistique.getId();
+        System.out.println("✓ Statistique créée avec ID: " + statistiqueId);
+
         System.out.println("\n=== FIN DU PROCESSUS D'INSERTION ===\n");
     }
 
@@ -665,6 +771,76 @@ public class TestComplet {
 
         Double coutOrdonnance = prescriptionRepository.calculateCoutTotalOrdonnance(ordonnanceId);
         System.out.println("✓ Coût total de l'ordonnance: " + coutOrdonnance + " MAD");
+
+        // 10. Tests RevenuesRepository
+        System.out.println("\n10. Tests RevenuesRepository...");
+        List<Revenues> revenues = revenuesRepository.findByCabinetMedicaleId(cabinetId);
+        System.out.println("✓ " + revenues.size() + " revenu(s) trouvé(s) pour le cabinet");
+        Double totalRevenues = revenuesRepository.calculateTotalRevenues(cabinetId);
+        System.out.println("✓ Total des revenus du cabinet: " + totalRevenues + " MAD");
+        Long countRevenues = revenuesRepository.countRevenuesByCabinet(cabinetId);
+        System.out.println("✓ Nombre de revenus: " + countRevenues);
+
+        // 11. Tests SecretaireRepository
+        System.out.println("\n11. Tests SecretaireRepository...");
+        List<Secretaire> secretaires = secretaireRepository.findAll();
+        System.out.println("✓ " + secretaires.size() + " secrétaire(s) trouvé(s)");
+        List<Secretaire> secretairesCabinet = secretaireRepository.findByCabinetId(cabinetId);
+        System.out.println("✓ " + secretairesCabinet.size() + " secrétaire(s) trouvé(s) pour le cabinet");
+        List<Secretaire> secretairesRDV = secretaireRepository.getSecretairesAvecRDVEnCours();
+        System.out.println("✓ " + secretairesRDV.size() + " secrétaire(s) avec RDV en cours");
+
+        // 12. Tests StaffRepository
+        System.out.println("\n12. Tests StaffRepository...");
+        List<Staff> staffs = staffRepository.findByCabinetMedicaleId(cabinetId);
+        System.out.println("✓ " + staffs.size() + " membre(s) du staff trouvé(s) pour le cabinet");
+        List<Medecin> medecinsCabinet = staffRepository.findMedecinsByCabinet(cabinetId);
+        System.out.println("✓ " + medecinsCabinet.size() + " médecin(s) trouvé(s) pour le cabinet");
+        List<Secretaire> secretairesStaff = staffRepository.findSecretairesByCabinet(cabinetId);
+        System.out.println("✓ " + secretairesStaff.size() + " secrétaire(s) trouvé(s) pour le cabinet");
+        Long countStaff = staffRepository.countStaffByCabinet(cabinetId);
+        System.out.println("✓ Nombre total de staff: " + countStaff);
+
+        // 13. Tests UtilisateurRepository
+        System.out.println("\n13. Tests UtilisateurRepository...");
+        List<Utilisateur> utilisateurs = utilisateurRepository.findAll();
+        System.out.println("✓ " + utilisateurs.size() + " utilisateur(s) trouvé(s)");
+        List<Utilisateur> utilisateursActifs = utilisateurRepository.findActifs();
+        System.out.println("✓ " + utilisateursActifs.size() + " utilisateur(s) actif(s)");
+        List<Utilisateur> medecinsUsers = utilisateurRepository.findMedecins();
+        System.out.println("✓ " + medecinsUsers.size() + " médecin(s) trouvé(s)");
+        List<Utilisateur> secretairesUsers = utilisateurRepository.findSecretaires();
+        System.out.println("✓ " + secretairesUsers.size() + " secrétaire(s) trouvé(s)");
+        long countUsers = utilisateurRepository.countAll();
+        System.out.println("✓ Nombre total d'utilisateurs: " + countUsers);
+
+        // 14. Tests RDVRepository
+        System.out.println("\n14. Tests RDVRepository...");
+        List<RDV> rdvs = rdvRepository.findAll();
+        System.out.println("✓ " + rdvs.size() + " RDV trouvé(s)");
+        List<RDV> rdvsConsultation = rdvRepository.findByConsultationId(consultationId);
+        System.out.println("✓ " + rdvsConsultation.size() + " RDV trouvé(s) pour la consultation");
+        List<RDV> rdvsDossier = rdvRepository.findByDossierMedicaleId(dossierId);
+        System.out.println("✓ " + rdvsDossier.size() + " RDV trouvé(s) pour le dossier médical");
+        List<RDV> rdvsStatut = rdvRepository.findByStatut(StatutRendezVous.PLANIFIE);
+        System.out.println("✓ " + rdvsStatut.size() + " RDV avec statut PLANIFIE");
+        List<RDV> rdvsDate = rdvRepository.findByDate(LocalDate.now().plusDays(1));
+        System.out.println("✓ " + rdvsDate.size() + " RDV trouvé(s) pour demain");
+        long countRDV = rdvRepository.countByStatut(StatutRendezVous.PLANIFIE);
+        System.out.println("✓ Nombre de RDV PLANIFIE: " + countRDV);
+        boolean existsRDV = rdvRepository.existsById(rdvId);
+        System.out.println("✓ RDV existe: " + existsRDV);
+
+        // 15. Tests StatistiqueRepository
+        System.out.println("\n15. Tests StatistiqueRepository...");
+        List<Statistiques> statistiques = statistiqueRepository.findAll();
+        System.out.println("✓ " + statistiques.size() + " statistique(s) trouvée(s)");
+        List<Statistiques> statsCabinet = statistiqueRepository.findByCabinetMedicaleId(cabinetId);
+        System.out.println("✓ " + statsCabinet.size() + " statistique(s) trouvée(s) pour le cabinet");
+        List<Statistiques> statsCategorie = statistiqueRepository.findByCategorie(CategorieStatistique.CONSULTATIONS);
+        System.out.println("✓ " + statsCategorie.size() + " statistique(s) de type CONSULTATIONS");
+        Double moyenne = statistiqueRepository.calculateMoyenneByCategorie(CategorieStatistique.CONSULTATIONS, cabinetId);
+        System.out.println("✓ Moyenne par catégorie: " + (moyenne != null ? moyenne : 0.0));
 
         System.out.println("\n=== FIN DU PROCESSUS DE SÉLECTION ===\n");
     }

@@ -52,7 +52,7 @@ public class AgendaRepositoryImpl implements AgendaRepository {
 
             ps.setString(1, newElement.getMois().name());
             ps.setInt(2, newElement.getAnnee());
-            ps.setObject(3, newElement.getMedecinId(), Types.BIGINT);
+            ps.setObject(3, newElement.getMedecin().getIdUser(), Types.BIGINT);
             ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
             ps.setString(6, newElement.getCreePar());
@@ -76,7 +76,7 @@ public class AgendaRepositoryImpl implements AgendaRepository {
 
             ps.setString(1, newValuesElement.getMois().name());
             ps.setInt(2, newValuesElement.getAnnee());
-            ps.setObject(3, newValuesElement.getMedecinId(), Types.BIGINT);
+            ps.setObject(3, newValuesElement.getMedecin().getIdUser(), Types.BIGINT);
             ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             ps.setString(5, newValuesElement.getModifiePar());
             ps.setLong(6, newValuesElement.getId());

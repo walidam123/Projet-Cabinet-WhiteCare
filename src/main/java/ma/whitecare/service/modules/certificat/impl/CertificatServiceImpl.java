@@ -11,9 +11,12 @@ import ma.whitecare.entities.medical.DossierMedicale;
 import ma.whitecare.mvc.dto.CertificatDto.CertificatDTO;
 import ma.whitecare.mvc.dto.CertificatDto.CreateCertificatDTO;
 import ma.whitecare.mvc.dto.CertificatDto.UpdateCertificatDTO;
+import ma.whitecare.common.util.PDFGenerator;
 import ma.whitecare.repository.modules.certificat.api.CertificatRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.ConsultationRepository;
 import ma.whitecare.repository.modules.dossierMedical.api.DossierMedicalRepository;
+import ma.whitecare.repository.modules.patient.api.PatientRepository;
+import ma.whitecare.repository.modules.UserManager.api.MedecinRepository;
 import ma.whitecare.service.modules.certificat.api.CertificatService;
 
 import javax.validation.ValidationException;
@@ -26,13 +29,19 @@ public class CertificatServiceImpl implements CertificatService {
     private final CertificatRepository certificatRepository;
     private final ConsultationRepository consultationRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
+    private final PatientRepository patientRepository;
+    private final MedecinRepository medecinRepository;
 
     public CertificatServiceImpl(CertificatRepository certificatRepository,
                                  ConsultationRepository consultationRepository,
-                                 DossierMedicalRepository dossierMedicalRepository) {
+                                 DossierMedicalRepository dossierMedicalRepository,
+                                 PatientRepository patientRepository,
+                                 MedecinRepository medecinRepository) {
         this.certificatRepository = certificatRepository;
         this.consultationRepository = consultationRepository;
         this.dossierMedicalRepository = dossierMedicalRepository;
+        this.patientRepository = patientRepository;
+        this.medecinRepository = medecinRepository;
     }
 
     // ========== CRUD CERTIFICATS ==========
@@ -217,6 +226,66 @@ public class CertificatServiceImpl implements CertificatService {
         return certificats.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    // ========== GÉNÉRATION PDF ==========
+
+    @Override
+    public byte[] generatePDF(Long certificatId) throws java.io.IOException {
+        // Récupérer le certificat
+        Certificat certificat = getCertificatById(certificatId);
+
+        // Récupérer le dossier médical et le patient
+        DossierMedicale dossier = null;
+        if (certificat.getDossierMedicale() != null && certificat.getDossierMedicale().getIdDM() != null) {
+            dossier = dossierMedicalRepository.findById(certificat.getDossierMedicale().getIdDM());
+        }
+
+        if (dossier == null || dossier.getPatient() == null) {
+            throw new IllegalArgumentException("Impossible de générer le PDF : informations du patient manquantes");
+        }
+
+        // Récupérer le patient complet
+        ma.whitecare.entities.patient.Patient patient = patientRepository.findById(
+                dossier.getPatient().getId_Patient());
+        if (patient == null) {
+            throw new IllegalArgumentException("Patient non trouvé");
+        }
+
+        // Récupérer le médecin
+        String medecinNom = "Non spécifié";
+        String medecinPrenom = "";
+        String specialite = null;
+        if (dossier.getMedecin() != null && dossier.getMedecin().getIdUser() != null) {
+            ma.whitecare.entities.user.Medecin medecin = medecinRepository.findById(
+                    dossier.getMedecin().getIdUser());
+            if (medecin != null) {
+                medecinNom = medecin.getNom() != null ? medecin.getNom() : "Non spécifié";
+                medecinPrenom = medecin.getPrenom() != null ? medecin.getPrenom() : "";
+                specialite = medecin.getSpecialite();
+            }
+        }
+
+        // Préparer les dates
+        String dateDebut = certificat.getDateDebut() != null ?
+                certificat.getDateDebut().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) :
+                "Non spécifiée";
+        String dateFin = certificat.getDateFin() != null ?
+                certificat.getDateFin().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) :
+                "Non spécifiée";
+
+        // Générer le PDF
+        return PDFGenerator.generateCertificatPDF(
+                patient.getNom() != null ? patient.getNom() : "",
+                patient.getPrenom() != null ? patient.getPrenom() : "",
+                medecinNom,
+                medecinPrenom,
+                specialite,
+                dateDebut,
+                dateFin,
+                certificat.getDuree(),
+                certificat.getNoteMedecin()
+        );
     }
 
     // ========== MÉTHODES PRIVÉES ==========

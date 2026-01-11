@@ -28,4 +28,7 @@ public interface OrdonnanceService {
     // ========== CONVERSIONS ==========
     OrdonnanceDTO convertToDTO(Ordonnance ordonnance);
     List<OrdonnanceDTO> convertToDTOList(List<Ordonnance> ordonnances);
+
+    // ========== GÉNÉRATION PDF ==========
+    byte[] generatePDF(Long ordonnanceId) throws java.io.IOException;
 }

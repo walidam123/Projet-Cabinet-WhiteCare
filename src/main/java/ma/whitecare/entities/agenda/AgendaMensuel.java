@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.Mois;
+import ma.whitecare.entities.user.Medecin;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class AgendaMensuel extends BaseEntity {
     private Mois mois;
     private int annee;
 
-    private Long medecinId;
+    private Medecin medecin;
 
 
     private List<Long> joursID;
@@ -30,11 +31,12 @@ public class AgendaMensuel extends BaseEntity {
     @Override
     public String toString() {
         return String.format(
-                "AgendaMensuel{id=%d, mois=%s, annee=%d}",
+                "AgendaMensuel{id=%d, mois=%s, annee=%d,Nom:%s,Prenom:%s}",
                 id != null ? id : 0,
                 mois != null ? mois.name() : "N/A",
-                annee != 0 ? annee : 0
-
+                annee != 0 ? annee : 0,
+                medecin.getNom(),
+                medecin.getPrenom()
 
 
                 );
