@@ -22,9 +22,8 @@ public class AgendaMensuel extends BaseEntity {
     private Long id;
     private Mois mois;
     private int annee;
-
+    private Long medecinId;
     private Medecin medecin;
-
 
     private List<Long> joursID;
 
@@ -38,11 +37,7 @@ public class AgendaMensuel extends BaseEntity {
                 medecin.getNom(),
                 medecin.getPrenom()
 
-
-                );
+        );
     }
-
-
-
 
 }

@@ -26,8 +26,8 @@ public class SecretaireServiceImpl implements SecretaireService {
     private final CabinetMedicaleRepository cabinetRepository;
 
     public SecretaireServiceImpl(SecretaireRepository secretaireRepository,
-                                 UserService userService,
-                                 CabinetMedicaleRepository cabinetRepository) {
+            UserService userService,
+            CabinetMedicaleRepository cabinetRepository) {
         this.secretaireRepository = secretaireRepository;
         this.userService = userService;
         this.cabinetRepository = cabinetRepository;
@@ -48,9 +48,6 @@ public class SecretaireServiceImpl implements SecretaireService {
 
         // Convertir DTO en entité
         Secretaire secretaire = convertToSecretaire(secretaireDTO);
-
-
-
 
         // Sauvegarder
         secretaireRepository.create(secretaire);
@@ -147,15 +144,11 @@ public class SecretaireServiceImpl implements SecretaireService {
         // À implémenter
     }
 
-
-
     @Override
     public void updateStatutDisponibilite(Long secretaireId, boolean disponible) {
         getSecretaireById(secretaireId);
         secretaireRepository.updateStatutDisponibilite(secretaireId, disponible);
     }
-
-
 
     @Override
     public List<Secretaire> findSecretairesDisponiblesByCabinet(Long cabinetId) {
@@ -173,8 +166,6 @@ public class SecretaireServiceImpl implements SecretaireService {
         return secretaireRepository.findByNomPrenom(nom, prenom);
     }
 
-
-
     @Override
     public List<Secretaire> findSecretairesWithPagination(int page, int size) {
         int offset = page * size;
@@ -183,12 +174,6 @@ public class SecretaireServiceImpl implements SecretaireService {
                 .limit(size)
                 .collect(Collectors.toList());
     }
-
-
-
-
-
-
 
     @Override
     public SecretaireStatisticsDTO getSecretaireStatisticsByCabinet(Long cabinetId) {
@@ -308,7 +293,12 @@ public class SecretaireServiceImpl implements SecretaireService {
         secretaire.setDateNaissance(dto.getDateNaissance());
         secretaire.setSexe(dto.getSexe());
         secretaire.setActif(dto.isActif());
-        secretaire.setMotDePass(dto.getPassword());
+        secretaire.setActif(dto.isActif());
+
+        // HASHAGE DU MOT DE PASSE (CORRECTION SÉCURITÉ)
+        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(dto.getPassword(),
+                org.mindrot.jbcrypt.BCrypt.gensalt());
+        secretaire.setMotDePass(hashedPassword);
 
         // Champs staff ✅
         secretaire.setSalaire(dto.getSalaire());
@@ -324,30 +314,42 @@ public class SecretaireServiceImpl implements SecretaireService {
         return secretaire;
     }
 
-
-
     private void updateSecretaireFields(Secretaire secretaire, UpdateSecretaireDTO dto) {
         // Champs utilisateur
-        if (dto.getNom() != null) secretaire.setNom(dto.getNom());
-        if (dto.getPrenom() != null) secretaire.setPrenom(dto.getPrenom());
-        if (dto.getEmail() != null) secretaire.setEmail(dto.getEmail());
-        if (dto.getTelephone() != null) secretaire.setTel(dto.getTelephone());
-        if (dto.getAdresse() != null) secretaire.setAdresse(dto.getAdresse());
-        if (dto.getDateNaissance() != null) secretaire.setDateNaissance(dto.getDateNaissance());
-        if (dto.getSexe() != null) secretaire.setSexe(dto.getSexe());
-        if (dto.getActif()) secretaire.setActif(dto.getActif());
+        if (dto.getNom() != null)
+            secretaire.setNom(dto.getNom());
+        if (dto.getPrenom() != null)
+            secretaire.setPrenom(dto.getPrenom());
+        if (dto.getEmail() != null)
+            secretaire.setEmail(dto.getEmail());
+        if (dto.getTelephone() != null)
+            secretaire.setTel(dto.getTelephone());
+        if (dto.getAdresse() != null)
+            secretaire.setAdresse(dto.getAdresse());
+        if (dto.getDateNaissance() != null)
+            secretaire.setDateNaissance(dto.getDateNaissance());
+        if (dto.getSexe() != null)
+            secretaire.setSexe(dto.getSexe());
+        if (dto.getActif())
+            secretaire.setActif(dto.getActif());
 
         // Champs staff
-        if (dto.getSalaire() != null) secretaire.setSalaire(dto.getSalaire());
-        if (dto.getPrime() != null) secretaire.setPrime(dto.getPrime());
-        if (dto.getDateRecrutement() != null) secretaire.setDateRecrutement(dto.getDateRecrutement());
-        if (dto.getSoldeConge() != null) secretaire.setSoldeConge(dto.getSoldeConge());
-        if (dto.getCabinetMedicaleId() != null) secretaire.setCabinetMedicaleId(dto.getCabinetMedicaleId());
+        if (dto.getSalaire() != null)
+            secretaire.setSalaire(dto.getSalaire());
+        if (dto.getPrime() != null)
+            secretaire.setPrime(dto.getPrime());
+        if (dto.getDateRecrutement() != null)
+            secretaire.setDateRecrutement(dto.getDateRecrutement());
+        if (dto.getSoldeConge() != null)
+            secretaire.setSoldeConge(dto.getSoldeConge());
+        if (dto.getCabinetMedicaleId() != null)
+            secretaire.setCabinetMedicaleId(dto.getCabinetMedicaleId());
 
         // Champs secrétaire
-        if (dto.getNumCNSS() != null) secretaire.setNumCNSS(dto.getNumCNSS());
-        if (dto.getCommission() != null) secretaire.setCommission(dto.getCommission());
+        if (dto.getNumCNSS() != null)
+            secretaire.setNumCNSS(dto.getNumCNSS());
+        if (dto.getCommission() != null)
+            secretaire.setCommission(dto.getCommission());
     }
-
 
 }

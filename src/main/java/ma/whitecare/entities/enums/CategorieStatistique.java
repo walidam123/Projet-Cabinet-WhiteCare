@@ -1,8 +1,9 @@
 package ma.whitecare.entities.enums;
 
 public enum CategorieStatistique {
+    CONSULTATIONS,
 
-    //  Statistiques Patients
+    // Statistiques Patients
     PATIENTS_NOUVEAUX,
     PATIENTS_ACTIFS,
     PATIENTS_FIDELES,
@@ -10,7 +11,7 @@ public enum CategorieStatistique {
     REPARTITION_GENRE,
     REPARTITION_ASSURANCE,
 
-    //  Statistiques Médicales
+    // Statistiques Médicales
     CONSULTATIONS_TOTALES,
     CONSULTATIONS_PAR_MEDECIN,
     TYPES_CONSULTATION,

@@ -359,9 +359,9 @@ public class ConsultationServiceImpl implements ConsultationService {
     private PrescriptionDTO convertPrescriptionToDTO(Prescription entity) {
         return PrescriptionDTO.builder()
                 .idPr(entity.getIdPr())
-                .quantité(entity.getQuantite())
-                .fréquence(entity.getFrequence())
-                .duréeEnJours(entity.getDureeEnJours())
+                .quantite(entity.getQuantite())
+                .frequence(entity.getFrequence())
+                .dureeEnJours(entity.getDureeEnJours())
                 .medicamentId(entity.getMedicament() != null ? entity.getMedicament().getIdMct() : null)
                 .ordonnanceId(entity.getOrdonnance() != null ? entity.getOrdonnance().getIdOrd() : null)
                 .dateCreation(entity.getDateCreation())

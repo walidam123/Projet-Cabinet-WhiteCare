@@ -1,10 +1,10 @@
 package ma.whitecare.entities.appointment;
 
-
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ma.whitecare.entities.base.BaseEntity;
 import ma.whitecare.entities.enums.StatutRendezVous;
 import ma.whitecare.entities.medical.Consultation;
@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class RDV extends BaseEntity {
     private Long idRDV;
     private LocalDate Date;
@@ -27,9 +27,9 @@ public class RDV extends BaseEntity {
     private StatutRendezVous statut;
     private String noteMedecin;
 
-
     private DossierMedicale dossierMedicale;
     private Consultation consultation;
+
     @Override
     public String toString() {
         return "RDV{" +
@@ -40,7 +40,11 @@ public class RDV extends BaseEntity {
                 ", statut=" + statut +
                 ", dossierMedicale=" + (dossierMedicale != null ? dossierMedicale.getIdDM() : "null") +
                 ", consultation=" + (consultation != null ? consultation.getIdConsultation() : "null") +
-                ", noteMedecin=" + (noteMedecin != null ? "'" + (noteMedecin.length() > 20 ? noteMedecin.substring(0, 20) + "..." : noteMedecin) + "'" : "null") +
+                ", noteMedecin="
+                + (noteMedecin != null
+                        ? "'" + (noteMedecin.length() > 20 ? noteMedecin.substring(0, 20) + "..." : noteMedecin) + "'"
+                        : "null")
+                +
                 '}';
     }
 

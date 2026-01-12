@@ -25,22 +25,21 @@ import java.util.stream.Collectors;
 
 public class MedecinServiceImpl implements MedecinService {
 
-
-
     private final MedecinRepository medecinRepository;
     private final UserService userService;
     private final CabinetMedicaleRepository cabinetRepository;
     private final StaffRepository staffRepository;
 
     public MedecinServiceImpl(MedecinRepository medecinRepository,
-                              UserService userService,
-                              CabinetMedicaleRepository cabinetRepository,
-                              StaffRepository staffRepository) {
+            UserService userService,
+            CabinetMedicaleRepository cabinetRepository,
+            StaffRepository staffRepository) {
         this.medecinRepository = medecinRepository;
         this.userService = userService;
         this.cabinetRepository = cabinetRepository;
         this.staffRepository = staffRepository;
     }
+
     @Override
     public Medecin createMedecin(CreateMedecinDTO medecinDTO) {
         // Validation des données
@@ -59,8 +58,6 @@ public class MedecinServiceImpl implements MedecinService {
 
         // Définir les valeurs par défaut
         setDefaultValues(medecin);
-
-
 
         // Sauvegarder le médecin
         medecinRepository.create(medecin);
@@ -178,13 +175,6 @@ public class MedecinServiceImpl implements MedecinService {
     public List<Medecin> findMedecinsBySpecialite(String specialite) {
         return medecinRepository.findBySpecialite(specialite);
     }
-
-
-
-
-
-
-
 
     @Override
     public void updateDisponibilite(Long medecinId, boolean disponible) {
@@ -337,7 +327,12 @@ public class MedecinServiceImpl implements MedecinService {
         medecin.setDateNaissance(dto.getDateNaissance());
         medecin.setSexe(dto.getSexe());
         medecin.setActif(dto.isActif());
-        medecin.setMotDePass(dto.getPassword());
+        medecin.setActif(dto.isActif());
+
+        // HASHAGE DU MOT DE PASSE (CORRECTION SÉCURITÉ)
+        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(dto.getPassword(),
+                org.mindrot.jbcrypt.BCrypt.gensalt());
+        medecin.setMotDePass(hashedPassword);
 
         // Champs staff (hérités de CreateStaffDTO) ✅
         medecin.setSalaire(dto.getSalaire());
@@ -351,7 +346,6 @@ public class MedecinServiceImpl implements MedecinService {
 
         return medecin;
     }
-
 
     private void setDefaultValues(Medecin medecin) {
         if (medecin.getDateRecrutement() == null) {
@@ -368,14 +362,22 @@ public class MedecinServiceImpl implements MedecinService {
     }
 
     private void updateUserFields(Medecin medecin, UpdateMedecinDTO dto) {
-        if (dto.getNom() != null) medecin.setNom(dto.getNom());
-        if (dto.getPrenom() != null) medecin.setPrenom(dto.getPrenom());
-        if (dto.getEmail() != null) medecin.setEmail(dto.getEmail());
-        if (dto.getTelephone() != null) medecin.setTel(dto.getTelephone());
-        if (dto.getAdresse() != null) medecin.setAdresse(dto.getAdresse());
-        if (dto.getDateNaissance() != null) medecin.setDateNaissance(dto.getDateNaissance());
-        if (dto.getSexe() != null) medecin.setSexe(dto.getSexe());
-        if (dto.getActif()) medecin.setActif(dto.getActif());
+        if (dto.getNom() != null)
+            medecin.setNom(dto.getNom());
+        if (dto.getPrenom() != null)
+            medecin.setPrenom(dto.getPrenom());
+        if (dto.getEmail() != null)
+            medecin.setEmail(dto.getEmail());
+        if (dto.getTelephone() != null)
+            medecin.setTel(dto.getTelephone());
+        if (dto.getAdresse() != null)
+            medecin.setAdresse(dto.getAdresse());
+        if (dto.getDateNaissance() != null)
+            medecin.setDateNaissance(dto.getDateNaissance());
+        if (dto.getSexe() != null)
+            medecin.setSexe(dto.getSexe());
+        if (dto.getActif())
+            medecin.setActif(dto.getActif());
     }
 
     private void updateMedecinSpecificFields(Medecin medecin, UpdateMedecinDTO dto) {
@@ -386,10 +388,15 @@ public class MedecinServiceImpl implements MedecinService {
     }
 
     private void updateStaffFields(Medecin medecin, UpdateMedecinDTO dto) {
-        if (dto.getSalaire() != null) medecin.setSalaire(dto.getSalaire());
-        if (dto.getPrime() != null) medecin.setPrime(dto.getPrime());
-        if (dto.getDateRecrutement() != null) medecin.setDateRecrutement(dto.getDateRecrutement());
-        if (dto.getSoldeConge() != null) medecin.setSoldeConge(dto.getSoldeConge());
-        if (dto.getCabinetMedicaleId() != null) medecin.setCabinetMedicaleId(dto.getCabinetMedicaleId());
+        if (dto.getSalaire() != null)
+            medecin.setSalaire(dto.getSalaire());
+        if (dto.getPrime() != null)
+            medecin.setPrime(dto.getPrime());
+        if (dto.getDateRecrutement() != null)
+            medecin.setDateRecrutement(dto.getDateRecrutement());
+        if (dto.getSoldeConge() != null)
+            medecin.setSoldeConge(dto.getSoldeConge());
+        if (dto.getCabinetMedicaleId() != null)
+            medecin.setCabinetMedicaleId(dto.getCabinetMedicaleId());
     }
 }

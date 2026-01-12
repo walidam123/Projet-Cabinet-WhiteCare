@@ -31,13 +31,22 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
     private final OrdonnanceRepository ordonnanceRepository;
     private final ConsultationRepository consultationRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
+    private final PrescriptionRepository prescriptionRepository;
+    private final PatientRepository patientRepository;
+    private final MedecinRepository medecinRepository;
 
     public OrdonnanceServiceImpl(OrdonnanceRepository ordonnanceRepository,
-                                 ConsultationRepository consultationRepository,
-                                 DossierMedicalRepository dossierMedicalRepository) {
+            ConsultationRepository consultationRepository,
+            DossierMedicalRepository dossierMedicalRepository,
+            PrescriptionRepository prescriptionRepository,
+            PatientRepository patientRepository,
+            MedecinRepository medecinRepository) {
         this.ordonnanceRepository = ordonnanceRepository;
         this.consultationRepository = consultationRepository;
         this.dossierMedicalRepository = dossierMedicalRepository;
+        this.prescriptionRepository = prescriptionRepository;
+        this.patientRepository = patientRepository;
+        this.medecinRepository = medecinRepository;
     }
 
     // ========== CRUD ORDONNANCES ==========
@@ -173,10 +182,10 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
         return OrdonnanceDTO.builder()
                 .idOrd(ordonnance.getIdOrd())
                 .date(ordonnance.getDate())
-                .dossierMedicaleId(ordonnance.getDossierMedicale() != null ? 
-                        ordonnance.getDossierMedicale().getIdDM() : null)
-                .consultationId(ordonnance.getConsultation() != null ? 
-                        ordonnance.getConsultation().getIdConsultation() : null)
+                .dossierMedicaleId(
+                        ordonnance.getDossierMedicale() != null ? ordonnance.getDossierMedicale().getIdDM() : null)
+                .consultationId(
+                        ordonnance.getConsultation() != null ? ordonnance.getConsultation().getIdConsultation() : null)
                 .dateCreation(ordonnance.getDateCreation())
                 .dateDerniereModification(ordonnance.getDateDerniereModification())
                 .creePar(ordonnance.getCreePar())
@@ -233,8 +242,8 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
         }
 
         // Récupérer les prescriptions
-        java.util.List<ma.whitecare.entities.medical.Prescription> prescriptions = 
-                prescriptionRepository.findByOrdonnanceId(ordonnanceId);
+        java.util.List<ma.whitecare.entities.medical.Prescription> prescriptions = prescriptionRepository
+                .findByOrdonnanceId(ordonnanceId);
 
         // Convertir les prescriptions en PrescriptionInfo
         java.util.List<PDFGenerator.PrescriptionInfo> prescriptionInfos = prescriptions.stream()
@@ -242,22 +251,21 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
                     String medicamentNom = "Non spécifié";
                     if (p.getMedicament() != null && p.getMedicament().getIdMct() != null) {
                         // Optionnel : récupérer le médicament complet si nécessaire
-                        medicamentNom = p.getMedicament().getNom() != null ? 
-                                p.getMedicament().getNom() : "Non spécifié";
+                        medicamentNom = p.getMedicament().getNom() != null ? p.getMedicament().getNom()
+                                : "Non spécifié";
                     }
                     return new PDFGenerator.PrescriptionInfo(
                             medicamentNom,
                             p.getQuantite(),
                             p.getFrequence(),
-                            p.getDureeEnJours()
-                    );
+                            p.getDureeEnJours());
                 })
                 .collect(Collectors.toList());
 
         // Générer le PDF
-        String dateOrdonnance = ordonnance.getDate() != null ?
-                ordonnance.getDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) :
-                "Non spécifiée";
+        String dateOrdonnance = ordonnance.getDate() != null
+                ? ordonnance.getDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                : "Non spécifiée";
 
         return PDFGenerator.generateOrdonnancePDF(
                 patient.getNom() != null ? patient.getNom() : "",
@@ -266,8 +274,7 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
                 medecinPrenom,
                 specialite,
                 dateOrdonnance,
-                prescriptionInfos
-        );
+                prescriptionInfos);
     }
 
     // ========== MÉTHODES PRIVÉES ==========
@@ -275,21 +282,21 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
     private Ordonnance convertToOrdonnance(CreateOrdonnanceDTO dto) {
         Ordonnance ordonnance = new Ordonnance();
         ordonnance.setDate(dto.getDate());
-        
+
         // Créer un objet DossierMedicale avec juste l'ID si fourni
         if (dto.getDossierMedicaleId() != null) {
             DossierMedicale dossier = new DossierMedicale();
             dossier.setIdDM(dto.getDossierMedicaleId());
             ordonnance.setDossierMedicale(dossier);
         }
-        
+
         // Créer un objet Consultation avec juste l'ID si fourni
         if (dto.getConsultationId() != null) {
             Consultation consultation = new Consultation();
             consultation.setIdConsultation(dto.getConsultationId());
             ordonnance.setConsultation(consultation);
         }
-        
+
         ordonnance.setCreePar(dto.getCreePar() != null ? dto.getCreePar() : "system");
         ordonnance.setModifiePar(dto.getModifiePar() != null ? dto.getModifiePar() : "system");
         return ordonnance;

@@ -19,14 +19,12 @@ public class UserServiceImpl implements UserService {
     private final UtilisateurRepository utilisateurRepository;
     private final RoleRepository roleRepository;
 
-
     public UserServiceImpl(UtilisateurRepository utilisateurRepository,
-                           RoleRepository roleRepository) {
+            RoleRepository roleRepository) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
 
     }
-
 
     @Override
     public Utilisateur createUser(CreateUserDTO userDTO) {
@@ -42,8 +40,6 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("CIN", userDTO.getCin());
         }
 
-
-
         // Créer l'utilisateur
         Utilisateur user = new Utilisateur();
         user.setNom(userDTO.getNom());
@@ -56,13 +52,15 @@ public class UserServiceImpl implements UserService {
         user.setDateNaissance(userDTO.getDateNaissance());
         user.setSexe(userDTO.getSexe());
         user.setActif(userDTO.isActif());
-        user.setMotDePass(userDTO.getPassword());
+
+        // HASHAGE DU MOT DE PASSE (CORRECTION SÉCURITÉ)
+        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(userDTO.getPassword(),
+                org.mindrot.jbcrypt.BCrypt.gensalt());
+        user.setMotDePass(hashedPassword);
+
         // Set audit fields (hérités de BaseEntity)
         user.setCreePar("system"); // À remplacer par l'utilisateur connecté
         user.setModifiePar("system");
-
-
-
 
         // Sauvegarder l'utilisateur
         utilisateurRepository.create(user);
@@ -74,7 +72,8 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return user;}
+        return user;
+    }
 
     @Override
     public Utilisateur updateUser(Long userId, UpdateUserDTO userDTO) {
@@ -98,7 +97,6 @@ public class UserServiceImpl implements UserService {
 
         // Mettre à jour les champs d'audit
         user.setModifiePar("system"); // À remplacer par l'utilisateur connecté
-
 
         // Mettre à jour les rôles si fournis
         if (userDTO.getRoles() != null) {
@@ -146,8 +144,6 @@ public class UserServiceImpl implements UserService {
     public Optional<Utilisateur> findByCin(String cin) {
         return utilisateurRepository.findByCin(cin);
     }
-
-
 
     @Override
     public List<Utilisateur> findByNomAndPrenom(String nom, String prenom) {
@@ -201,12 +197,13 @@ public class UserServiceImpl implements UserService {
         }
 
         // Convertir List<LibelleRole> en List<Long> de roleIds
-        // Note: Cette conversion dépend de votre implémentation
-        // Pour l'exemple, je suppose que vous avez une méthode pour récupérer les IDs des rôles
         List<Long> roleIds = new ArrayList<>();
         for (LibelleRole role : roles) {
-            // Vous aurez besoin d'une méthode pour récupérer l'ID d'un rôle par son libellé
-             roleRepository.findIdByLibelle(role);
+            // Utilisation d'une méthode hypothétique pour simplifier
+            // roleRepository.findIdByLibelle(role); -> Doit être géré correctement
+            Long roleId = getRoleIdByLibelle(role);
+            if (roleId != null)
+                roleIds.add(roleId);
         }
 
         if (!roleIds.isEmpty()) {
@@ -236,7 +233,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserRoles(Long userId, List<LibelleRole> roles) {
-// Vérifier que l'utilisateur existe
+        // Vérifier que l'utilisateur existe
         if (!utilisateurRepository.existsById(userId)) {
             throw new UserNotFoundException(userId);
         }
@@ -310,12 +307,20 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException(String.join(", ", errors));
         }
 
+        // HASHAGE DU NOUVEAU MOT DE PASSE
+        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
 
-        utilisateurRepository.updatePassword(userId, newPassword);
+        utilisateurRepository.updatePassword(userId, hashedPassword);
 
         // Mettre à jour les champs d'audit
         user.setModifiePar("system");
 
+        // Note: l'appel suivant update(user) pourrait écraser le password hashé si
+        // l'objet user n'est pas à jour
+        // Dans ce cas précis, user.setMotDePass n'a pas été appelé sur l'objet java,
+        // mais DB updaté
+        // Correctif: mettre à jour l'objet aussi
+        user.setMotDePass(hashedPassword);
         utilisateurRepository.update(user);
     }
 
@@ -324,8 +329,6 @@ public class UserServiceImpl implements UserService {
         int offset = page * size;
         return utilisateurRepository.findWithPagination(offset, size);
     }
-
-
 
     @Override
     public UserStatisticsDTO getStatistics() {
@@ -396,7 +399,6 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-
     @Override
     public void validateUserData(CreateUserDTO userDTO) {
         List<String> errors = UserValidator.validateCreateUser(userDTO);
@@ -450,11 +452,11 @@ public class UserServiceImpl implements UserService {
         // Mettre à jour les champs d'audit
         user.setModifiePar("system"); // À remplacer par l'utilisateur connecté
 
-
         utilisateurRepository.update(user);
 
         return getUserProfile(userId);
     }
+
     private Map<Integer, Long> calculateUsersByAgeGroup() {
         Map<Integer, Long> ageGroups = new HashMap<>();
 
@@ -490,6 +492,7 @@ public class UserServiceImpl implements UserService {
 
         return registrationsByMonth;
     }
+
     private Long getRoleIdByLibelle(LibelleRole libelle) {
         // Cette méthode doit récupérer l'ID d'un rôle par son libellé
         // À adapter selon votre implémentation de RoleRepository
@@ -497,15 +500,20 @@ public class UserServiceImpl implements UserService {
                 .map(role -> role.getIdRole())
                 .orElseThrow(() -> new RuntimeException("Rôle non trouvé: " + libelle));
     }
+
     private int calculateAge(LocalDate birthDate) {
         return LocalDate.now().getYear() - birthDate.getYear();
     }
 
     private int getAgeGroup(int age) {
-        if (age <= 18) return 0;
-        if (age <= 30) return 1;
-        if (age <= 45) return 2;
-        if (age <= 60) return 3;
+        if (age <= 18)
+            return 0;
+        if (age <= 30)
+            return 1;
+        if (age <= 45)
+            return 2;
+        if (age <= 60)
+            return 3;
         return 4;
     }
 }
