@@ -3,6 +3,7 @@ package ma.whitecare.service.modules.patient.impl;
 import ma.whitecare.common.exceptions.PatientNotFoundException;
 import ma.whitecare.common.validators.PatientValidator;
 import ma.whitecare.entities.patient.Patient;
+import ma.whitecare.entities.patient.Antecedents;
 import ma.whitecare.mvc.dto.PatientAntecedentDto.PatientDto;
 import ma.whitecare.repository.modules.patient.api.PatientRepository;
 import ma.whitecare.service.modules.patient.api.PatientService;
@@ -28,7 +29,11 @@ public class PatientServiceImpl implements PatientService {
         if (id == null || !patientRepository.existsById(id)) {
             throw new PatientNotFoundException(id);
         }
-        return patientRepository.findById(id);
+        Patient p = patientRepository.findById(id);
+        if (p != null) {
+            p.setAntecedents(patientRepository.getAntecedentsOfPatient(id));
+        }
+        return p;
     }
 
     @Override
@@ -36,6 +41,11 @@ public class PatientServiceImpl implements PatientService {
         PatientDto dto = convertToDto(patient);
         PatientValidator.validate(dto);
         patientRepository.create(patient);
+        if (patient.getAntecedents() != null && !patient.getAntecedents().isEmpty()) {
+            for (Antecedents a : patient.getAntecedents()) {
+                patientRepository.addAntecedentToPatient(patient.getId_Patient(), a.getId_Antecedent());
+            }
+        }
     }
 
     @Override
@@ -43,6 +53,13 @@ public class PatientServiceImpl implements PatientService {
         PatientDto dto = convertToDto(updatedPatient);
         PatientValidator.validate(dto);
         patientRepository.update(updatedPatient);
+        // Manage Antecedents: Clear and Re-add
+        patientRepository.removeAllAntecedentsFromPatient(updatedPatient.getId_Patient());
+        if (updatedPatient.getAntecedents() != null && !updatedPatient.getAntecedents().isEmpty()) {
+            for (Antecedents a : updatedPatient.getAntecedents()) {
+                patientRepository.addAntecedentToPatient(updatedPatient.getId_Patient(), a.getId_Antecedent());
+            }
+        }
     }
 
     @Override

@@ -31,8 +31,8 @@ public class RDVServiceImpl implements RDVService {
     private final DossierMedicalRepository dossierMedicalRepository;
 
     public RDVServiceImpl(RDVRepository rdvRepository,
-                          ConsultationRepository consultationRepository,
-                          DossierMedicalRepository dossierMedicalRepository) {
+            ConsultationRepository consultationRepository,
+            DossierMedicalRepository dossierMedicalRepository) {
         this.rdvRepository = rdvRepository;
         this.consultationRepository = consultationRepository;
         this.dossierMedicalRepository = dossierMedicalRepository;
@@ -56,18 +56,8 @@ public class RDVServiceImpl implements RDVService {
             validateDossierMedicalExists(rdvDTO.getDossierMedicaleId());
         }
 
-        // Vérifier qu'il n'y a pas de conflit (même date/heure pour la même consultation)
-        if (rdvRepository.existsByDateAndHeure(rdvDTO.getDate(), rdvDTO.getHeure())) {
-            List<RDV> existingRDVs = rdvRepository.findByDateAndHeure(rdvDTO.getDate(), rdvDTO.getHeure());
-            for (RDV existingRDV : existingRDVs) {
-                if (existingRDV.getConsultation() != null &&
-                    existingRDV.getConsultation().getIdConsultation().equals(rdvDTO.getConsultationId())) {
-                    throw new RDVConflictException(
-                            String.format("Un rendez-vous existe déjà pour cette consultation à la date %s et l'heure %s",
-                                    rdvDTO.getDate(), rdvDTO.getHeure()));
-                }
-            }
-        }
+        // Vérifier qu'il n'y a pas de conflit (intervalle de 30 min)
+        validateRDVInterval(rdvDTO.getDate(), rdvDTO.getHeure(), null);
 
         // Convertir DTO en entité
         RDV rdv = convertToRDV(rdvDTO);
@@ -143,25 +133,8 @@ public class RDVServiceImpl implements RDVService {
         // Vérifier qu'il n'y a pas de conflit si la date/heure est modifiée
         LocalDate newDate = updateDTO.getDate() != null ? updateDTO.getDate() : rdv.getDate();
         LocalTime newHeure = updateDTO.getHeure() != null ? updateDTO.getHeure() : rdv.getHeure();
-        Long newConsultationId = updateDTO.getConsultationId() != null ?
-                updateDTO.getConsultationId() : rdv.getConsultation().getIdConsultation();
 
-        if (rdvRepository.existsByDateAndHeure(newDate, newHeure)) {
-            List<RDV> existingRDVs = rdvRepository.findByDateAndHeure(newDate, newHeure);
-            for (RDV existingRDV : existingRDVs) {
-                // Ignorer le RDV actuel
-                if (existingRDV.getIdRDV().equals(id)) {
-                    continue;
-                }
-                // Vérifier le conflit avec la même consultation
-                if (existingRDV.getConsultation() != null &&
-                    existingRDV.getConsultation().getIdConsultation().equals(newConsultationId)) {
-                    throw new RDVConflictException(
-                            String.format("Un rendez-vous existe déjà pour cette consultation à la date %s et l'heure %s",
-                                    newDate, newHeure));
-                }
-            }
-        }
+        validateRDVInterval(newDate, newHeure, id);
 
         // Mettre à jour les champs
         updateRDVFields(rdv, updateDTO, consultation);
@@ -447,7 +420,8 @@ public class RDVServiceImpl implements RDVService {
             dossierMedicale.setIdDM(updateDTO.getDossierMedicaleId());
             rdv.setDossierMedicale(dossierMedicale);
         } else if (updateDTO.getDossierMedicaleId() == null && updateDTO.getConsultationId() != null) {
-            // Si consultation est modifiée mais dossierMedicaleId n'est pas fourni, utiliser le dossier de la consultation
+            // Si consultation est modifiée mais dossierMedicaleId n'est pas fourni,
+            // utiliser le dossier de la consultation
             if (consultation != null && consultation.getDossierMedicale() != null) {
                 rdv.setDossierMedicale(consultation.getDossierMedicale());
             }
@@ -478,6 +452,30 @@ public class RDVServiceImpl implements RDVService {
 
         if (dossierMedicalRepository.findById(dossierId) == null) {
             throw new DossierMedicalNotFoundException(dossierId);
+        }
+    }
+
+    private void validateRDVInterval(LocalDate date, LocalTime time, Long excludeId) {
+        List<RDV> dayRDVs = rdvRepository.findByDate(date);
+        for (RDV existing : dayRDVs) {
+            if (excludeId != null && existing.getIdRDV().equals(excludeId)) {
+                continue;
+            }
+
+            // On ne vérifie pas les RDV annulés
+            if (existing.getStatut() == StatutRendezVous.ANNULE) {
+                continue;
+            }
+
+            LocalTime existingTime = existing.getHeure();
+            long diffMinutes = java.time.Duration.between(time, existingTime).abs().toMinutes();
+
+            if (diffMinutes < 30) {
+                throw new RDVConflictException(
+                        String.format(
+                                "Conflit de temps: Un rendez-vous existe déjà à %s. L'intervalle minimum est de 30 minutes.",
+                                existingTime.toString()));
+            }
         }
     }
 }

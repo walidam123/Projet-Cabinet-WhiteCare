@@ -1,7 +1,5 @@
 package ma.whitecare.repository.modules.dossierMedical.impl;
 
-
-
 import ma.whitecare.conf.SessionFactory;
 import ma.whitecare.entities.medical.InterventionMedecin;
 import ma.whitecare.repository.common.RowMappers;
@@ -18,8 +16,8 @@ public class InterventionRepositoryImpl implements InterventionRepository {
         String sql = "SELECT * FROM intervention_medecin ORDER BY id_im";
         List<InterventionMedecin> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 out.add(RowMappers.mapInterventionMedecin(rs));
             }
@@ -33,7 +31,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public InterventionMedecin findById(Long id) {
         String sql = "SELECT * FROM intervention_medecin WHERE id_im = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -49,12 +47,12 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     @Override
     public void create(InterventionMedecin intervention) {
         String sql = """
-            INSERT INTO intervention_medecin(prix_de_patient, num_dent, consultation_id, acte_id,
-                                             creation_date, last_modification_date, created_by, updated_by)
-            VALUES(?,?,?,?,?,?,?,?)
-            """;
+                INSERT INTO intervention_medecin(prix_de_patient, num_dent, consultation_id, acte_id,
+                                                 creation_date, last_modification_date, created_by, updated_by)
+                VALUES(?,?,?,?,?,?,?,?)
+                """;
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             if (intervention.getPrixDePatient() != null) {
                 ps.setDouble(1, intervention.getPrixDePatient());
@@ -100,13 +98,13 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     @Override
     public void update(InterventionMedecin intervention) {
         String sql = """
-            UPDATE intervention_medecin 
-            SET prix_de_patient=?, num_dent=?, consultation_id=?, acte_id=?,
-                last_modification_date=?, updated_by=?
-            WHERE id_im=?
-            """;
+                UPDATE intervention_medecin
+                SET prix_de_patient=?, num_dent=?, consultation_id=?, acte_id=?,
+                    last_modification_date=?, updated_by=?
+                WHERE id_im=?
+                """;
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             if (intervention.getPrixDePatient() != null) {
                 ps.setDouble(1, intervention.getPrixDePatient());
@@ -138,7 +136,8 @@ public class InterventionRepositoryImpl implements InterventionRepository {
 
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de la mise à jour de l'intervention ID: " + intervention.getIdIM(), e);
+            throw new RuntimeException("Erreur lors de la mise à jour de l'intervention ID: " + intervention.getIdIM(),
+                    e);
         }
     }
 
@@ -153,7 +152,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public void deleteById(Long id) {
         String sql = "DELETE FROM intervention_medecin WHERE id_im = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -163,14 +162,20 @@ public class InterventionRepositoryImpl implements InterventionRepository {
 
     @Override
     public List<InterventionMedecin> findByConsultationId(Long consultationId) {
-        String sql = "SELECT * FROM intervention_medecin WHERE consultation_id = ? ORDER BY id_im";
+        String sql = """
+                SELECT im.*, a.libelle
+                FROM intervention_medecin im
+                LEFT JOIN acte a ON im.acte_id = a.idActe
+                WHERE im.consultation_id = ?
+                ORDER BY im.id_im
+                """;
         List<InterventionMedecin> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, consultationId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    out.add(RowMappers.mapInterventionMedecin(rs));
+                    out.add(RowMappers.mapInterventionComplet(rs));
                 }
             }
         } catch (SQLException e) {
@@ -184,7 +189,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
         String sql = "SELECT * FROM intervention_medecin WHERE acte_id = ? ORDER BY id_im";
         List<InterventionMedecin> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, acteId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -202,7 +207,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
         String sql = "SELECT * FROM intervention_medecin WHERE num_dent = ? ORDER BY id_im";
         List<InterventionMedecin> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, numDent);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -220,7 +225,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
         String sql = "SELECT * FROM intervention_medecin WHERE consultation_id = ? AND acte_id = ? ORDER BY id_im";
         List<InterventionMedecin> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, consultationId);
             ps.setLong(2, acteId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -238,7 +243,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public Double calculateTotalByConsultation(Long consultationId) {
         String sql = "SELECT SUM(prix_de_patient) FROM intervention_medecin WHERE consultation_id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, consultationId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -256,7 +261,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public boolean existsById(Long interventionId) {
         String sql = "SELECT 1 FROM intervention_medecin WHERE id_im = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, interventionId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -270,8 +275,8 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public long countAll() {
         String sql = "SELECT COUNT(*) FROM intervention_medecin";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getLong(1);
             }
@@ -285,7 +290,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public long countByConsultationId(Long consultationId) {
         String sql = "SELECT COUNT(*) FROM intervention_medecin WHERE consultation_id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, consultationId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -302,7 +307,7 @@ public class InterventionRepositoryImpl implements InterventionRepository {
     public long countByActeId(Long acteId) {
         String sql = "SELECT COUNT(*) FROM intervention_medecin WHERE acte_id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, acteId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

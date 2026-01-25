@@ -24,15 +24,18 @@ public class FactureServiceImpl implements FactureService {
     private final ConsultationRepository consultationRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
     private final PatientRepository patientRepository;
+    private final ma.whitecare.repository.modules.dossierMedical.api.InterventionRepository interventionRepository;
 
     public FactureServiceImpl(FactureRepository factureRepository,
-                              ConsultationRepository consultationRepository,
-                              DossierMedicalRepository dossierMedicalRepository,
-                              PatientRepository patientRepository) {
+            ConsultationRepository consultationRepository,
+            DossierMedicalRepository dossierMedicalRepository,
+            PatientRepository patientRepository,
+            ma.whitecare.repository.modules.dossierMedical.api.InterventionRepository interventionRepository) {
         this.factureRepository = factureRepository;
         this.consultationRepository = consultationRepository;
         this.dossierMedicalRepository = dossierMedicalRepository;
         this.patientRepository = patientRepository;
+        this.interventionRepository = interventionRepository;
     }
 
     // ========== CRUD FACTURES ==========
@@ -209,10 +212,35 @@ public class FactureServiceImpl implements FactureService {
 
         // Préparer les informations
         String factureIdStr = facture.getIdFature() != null ? facture.getIdFature().toString() : "N/A";
-        String dateFacture = facture.getDateFacture() != null ?
-                facture.getDateFacture().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) :
-                "Non spécifiée";
+        String dateFacture = facture.getDateFacture() != null
+                ? facture.getDateFacture().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                : "Non spécifiée";
         String statut = facture.getStatut() != null ? facture.getStatut().name() : "N/A";
+
+        // Récupérer les interventions si la facture est liée à une consultation
+        java.util.List<PDFGenerator.InterventionInfo> interventions = new java.util.ArrayList<>();
+        if (facture.getConsultation() != null && facture.getConsultation().getIdConsultation() != null) {
+            java.util.List<ma.whitecare.entities.medical.InterventionMedecin> interventionsList = interventionRepository
+                    .findByConsultationId(facture.getConsultation().getIdConsultation());
+
+            for (ma.whitecare.entities.medical.InterventionMedecin intervention : interventionsList) {
+                String acteNom = intervention.getActe() != null && intervention.getActe().getLibelle() != null
+                        ? intervention.getActe().getLibelle()
+                        : "Acte non spécifié";
+                String dent = intervention.getNumDent() != null ? intervention.getNumDent().toString() : null;
+
+                // Use prixDePatient which is the actual price charged for this intervention
+                Double prix = 0.0;
+                if (intervention.getPrixDePatient() != null) {
+                    prix = intervention.getPrixDePatient();
+                } else if (intervention.getActe() != null && intervention.getActe().getPrixDeBase() != null) {
+                    // Fallback to base price if patient price not set
+                    prix = intervention.getActe().getPrixDeBase();
+                }
+
+                interventions.add(new PDFGenerator.InterventionInfo(acteNom, dent, prix));
+            }
+        }
 
         // Générer le PDF
         return PDFGenerator.generateFacturePDF(
@@ -222,10 +250,10 @@ public class FactureServiceImpl implements FactureService {
                 patient.getTelephone() != null ? patient.getTelephone() : "",
                 factureIdStr,
                 dateFacture,
+                interventions,
                 facture.getTotaleFacture(),
                 facture.getTotalePayé(),
                 facture.getReste(),
-                statut
-        );
+                statut);
     }
 }

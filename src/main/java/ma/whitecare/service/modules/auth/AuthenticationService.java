@@ -98,6 +98,12 @@ public class AuthenticationService {
         dto.setPrenom(user.getPrenom());
         dto.setEmail(user.getEmail());
         dto.setLogin(user.getLogin());
+        dto.setActif(user.getActif() != null ? user.getActif() : false);
+        dto.setFirstLogin(user.getFirstLogin() != null ? user.getFirstLogin() : true);
+        // Explicitly fetch roles as they are not loaded by findByLogin
+        java.util.List<ma.whitecare.entities.enums.LibelleRole> roles = userService.getUserRoles(user.getIdUser());
+        dto.setRoles(roles);
+
         // Ne jamais renvoyer le mot de passe, même hashé, dans le DTO
         return dto;
     }

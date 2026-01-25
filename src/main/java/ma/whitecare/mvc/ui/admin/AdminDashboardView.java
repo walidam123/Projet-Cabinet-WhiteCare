@@ -1,14 +1,17 @@
 package ma.whitecare.mvc.ui.admin;
 
+import ma.whitecare.mvc.ui.palette.DesignSystem;
+import ma.whitecare.mvc.ui.palette.RoundedButton;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Component;
 
 public class AdminDashboardView extends JFrame {
     private JPanel sidebar;
     private JPanel contentPanel;
     private CardLayout cardLayout;
 
-    public AdminDashboardView() {
+    public AdminDashboardView(String userName) {
         setTitle("WhiteCare - Administration");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -17,19 +20,47 @@ public class AdminDashboardView extends JFrame {
         // Sidebar
         sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(new Color(25, 25, 112)); // Midnight Blue
-        sidebar.setPreferredSize(new Dimension(250, 800));
+        sidebar.setBackground(DesignSystem.PRIMARY); // Taupe doux
+        sidebar.setPreferredSize(new Dimension(280, 800));
 
         JLabel logoLabel = new JLabel("WHITE CARE");
         logoLabel.setForeground(Color.WHITE);
-        logoLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        logoLabel.setFont(DesignSystem.TITLE);
         logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        logoLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        logoLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 10, 0));
         sidebar.add(logoLabel);
+
+        // User name label
+        JLabel userLabel = new JLabel(userName != null ? userName : "Administrateur");
+        userLabel.setForeground(new Color(220, 220, 220));
+        userLabel.setFont(DesignSystem.BODY);
+        userLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        userLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        sidebar.add(userLabel);
 
         addSidebarButton("Utilisateurs", "USER_MGMT");
         addSidebarButton("Rôles", "ROLE_MGMT");
         addSidebarButton("Données Référentielles", "REF_DATA");
+        addSidebarButton("Gestion Cabinet", "CABINET_MGMT");
+
+        sidebar.add(Box.createVerticalStrut(10));
+        RoundedButton profileBtn = new RoundedButton("Mon Profil");
+        profileBtn.setName("profileBtn");
+        profileBtn.setMaximumSize(new Dimension(240, 50));
+        profileBtn.setBackground(DesignSystem.PRIMARY.darker());
+        profileBtn.setForeground(Color.WHITE);
+        profileBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sidebar.add(profileBtn);
+
+        sidebar.add(Box.createVerticalGlue());
+        RoundedButton logoutBtn = new RoundedButton("Déconnexion");
+        logoutBtn.setName("logoutBtn");
+        logoutBtn.setMaximumSize(new Dimension(240, 50));
+        logoutBtn.setBackground(DesignSystem.BTN_LOGIN);
+        logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sidebar.add(logoutBtn);
+        sidebar.add(Box.createVerticalStrut(20));
 
         // Content Area
         cardLayout = new CardLayout();
@@ -38,6 +69,7 @@ public class AdminDashboardView extends JFrame {
         contentPanel.add(new UserManagementPanel(), "USER_MGMT");
         contentPanel.add(new RoleManagementPanel(), "ROLE_MGMT");
         contentPanel.add(new ReferentialDataPanel(), "REF_DATA");
+        contentPanel.add(new CabinetManagementPanel(), "CABINET_MGMT");
 
         setLayout(new BorderLayout());
         add(sidebar, BorderLayout.WEST);
@@ -45,14 +77,14 @@ public class AdminDashboardView extends JFrame {
     }
 
     private void addSidebarButton(String text, String cardName) {
-        JButton btn = new JButton(text);
-        btn.setMaximumSize(new Dimension(250, 50));
-        btn.setBackground(new Color(25, 25, 112));
+        RoundedButton btn = new RoundedButton(text);
+        btn.setMaximumSize(new Dimension(240, 50));
+        btn.setBackground(DesignSystem.PRIMARY.darker());
         btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         btn.addActionListener(e -> cardLayout.show(contentPanel, cardName));
         sidebar.add(btn);
+        sidebar.add(Box.createVerticalStrut(10));
     }
 
     public UserManagementPanel getUserPanel() {
@@ -65,6 +97,28 @@ public class AdminDashboardView extends JFrame {
 
     public ReferentialDataPanel getReferentialPanel() {
         return (ReferentialDataPanel) findPanel("REF_DATA");
+    }
+
+    public CabinetManagementPanel getCabinetPanel() {
+        return (CabinetManagementPanel) findPanel("CABINET_MGMT");
+    }
+
+    public JButton getLogoutButton() {
+        for (Component c : sidebar.getComponents()) {
+            if (c instanceof JButton && "logoutBtn".equals(c.getName())) {
+                return (JButton) c;
+            }
+        }
+        return null;
+    }
+
+    public JButton getProfileButton() {
+        for (Component c : sidebar.getComponents()) {
+            if (c instanceof JButton && "profileBtn".equals(c.getName())) {
+                return (JButton) c;
+            }
+        }
+        return null;
     }
 
     private JPanel findPanel(String name) {
@@ -80,6 +134,8 @@ public class AdminDashboardView extends JFrame {
                     return (JPanel) c;
                 if (name.equals("REF_DATA") && c instanceof ReferentialDataPanel)
                     return (JPanel) c;
+                if (name.equals("CABINET_MGMT") && c instanceof CabinetManagementPanel)
+                    return (JPanel) c;
             }
         }
         return null;
@@ -87,7 +143,7 @@ public class AdminDashboardView extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new AdminDashboardView().setVisible(true);
+            new AdminDashboardView("Administrateur").setVisible(true);
         });
     }
 }

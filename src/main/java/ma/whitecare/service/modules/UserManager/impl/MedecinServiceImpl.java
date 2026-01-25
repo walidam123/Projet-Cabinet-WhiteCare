@@ -62,7 +62,8 @@ public class MedecinServiceImpl implements MedecinService {
         // Sauvegarder le médecin
         medecinRepository.create(medecin);
 
-        // Assigner le rôle MEDECIN (déjà fait dans UserService via DTO)
+        // Assigner le rôle MEDECIN explicitly
+        userService.assignRoleToUser(medecin.getIdUser(), LibelleRole.MEDECIN);
 
         return medecin;
     }
@@ -329,10 +330,8 @@ public class MedecinServiceImpl implements MedecinService {
         medecin.setActif(dto.isActif());
         medecin.setActif(dto.isActif());
 
-        // HASHAGE DU MOT DE PASSE (CORRECTION SÉCURITÉ)
-        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(dto.getPassword(),
-                org.mindrot.jbcrypt.BCrypt.gensalt());
-        medecin.setMotDePass(hashedPassword);
+        // HASHAGE EFFECTUÉ PAR LE REPOSITORY
+        medecin.setMotDePass(dto.getPassword());
 
         // Champs staff (hérités de CreateStaffDTO) ✅
         medecin.setSalaire(dto.getSalaire());

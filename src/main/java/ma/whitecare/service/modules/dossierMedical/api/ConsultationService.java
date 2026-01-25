@@ -13,16 +13,27 @@ public interface ConsultationService {
 
     // ========== CRUD CONSULTATION ==========
     ConsultationDTO createConsultation(CreateConsultationDTO dto);
+
     ConsultationDTO updateConsultation(Long consultationId, UpdateConsultationDTO dto);
+
     void deleteConsultation(Long consultationId);
+
     ConsultationDTO getConsultationById(Long consultationId);
+
     List<ConsultationDTO> getAllConsultations();
 
     // ========== RECHERCHES SPÉCIFIQUES ==========
     List<ConsultationDTO> findByDossierMedicalId(Long dossierId);
+
+    // Retourne les entités pour affichage complet (ex: historique dossier)
+    List<ma.whitecare.entities.medical.Consultation> getConsultationsByDossierId(Long dossierId);
+
     List<ConsultationDTO> findByStatut(StatutConsultation statut);
+
     List<ConsultationDTO> findByDate(LocalDate date);
+
     List<ConsultationDTO> findByDateBetween(LocalDate startDate, LocalDate endDate);
+
     List<ConsultationDTO> findByDossierAndDate(Long dossierId, LocalDate date);
 
     // ========== GESTION STATUT ==========
@@ -33,10 +44,15 @@ public interface ConsultationService {
 
     // ========== STATISTIQUES ==========
     long countAllConsultations();
+
     long countByStatut(StatutConsultation statut);
+
     long countByDossierMedicalId(Long dossierId);
 
     // ========== MÉTHODES MÉTIER IMPORTANTES ==========
     List<ConsultationDTO> getConsultationsDuJour();
+
     ConsultationCompleteDTO getConsultationComplete(Long consultationId);
+
+    void addIntervention(Long consultationId, ma.whitecare.entities.medical.InterventionMedecin intervention);
 }

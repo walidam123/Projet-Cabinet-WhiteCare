@@ -2487,7 +2487,7 @@ antecedents_id</ColNames>
     <column id="586" parent="317" name="statut">
       <DefaultExpression>&apos;PLANIFIE&apos;</DefaultExpression>
       <Position>5</Position>
-      <StoredType>enum(&apos;PLANIFIE&apos;, &apos;CONFIRME&apos;, &apos;EN_SALLE&apos;, &apos;EN_CONSULTATION&apos;, &apos;TERMINE&apos;, &apos;ANNULE&apos;, &apos;ABSENT&apos;)|0e</StoredType>
+      <StoredType>enum(&apos;PLANIFIE&apos;, &apos;CONFIRME&apos;, &apos;EN_SALLE&apos;, &apos;EN_CONSULTATION&apos;, &apos;TERMINE&apos;, &apos;ANNULE&apos;, &apos;ABSENT&apos;, &apos;EN_ATTENTE&apos;)|0e</StoredType>
     </column>
     <column id="587" parent="317" name="note_medecin">
       <Position>6</Position>
@@ -2871,7 +2871,7 @@ antecedents_id</ColNames>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="668" parent="324" name="id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>11</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -2948,110 +2948,115 @@ antecedents_id</ColNames>
       <Position>17</Position>
       <StoredType>varchar(64)|0s</StoredType>
     </column>
-    <index id="685" parent="324" name="PRIMARY">
+    <column id="685" parent="324" name="first_login">
+      <DefaultExpression>1</DefaultExpression>
+      <Position>18</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <index id="686" parent="324" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="686" parent="324" name="email">
+    <index id="687" parent="324" name="email">
       <ColNames>email</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="687" parent="324" name="cin">
+    <index id="688" parent="324" name="cin">
       <ColNames>cin</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="688" parent="324" name="login">
+    <index id="689" parent="324" name="login">
       <ColNames>login</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="689" parent="324" name="PRIMARY">
+    <key id="690" parent="324" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="690" parent="324" name="email">
+    <key id="691" parent="324" name="email">
       <UnderlyingIndexName>email</UnderlyingIndexName>
     </key>
-    <key id="691" parent="324" name="cin">
+    <key id="692" parent="324" name="cin">
       <UnderlyingIndexName>cin</UnderlyingIndexName>
     </key>
-    <key id="692" parent="324" name="login">
+    <key id="693" parent="324" name="login">
       <UnderlyingIndexName>login</UnderlyingIndexName>
     </key>
-    <column id="693" parent="325" name="utilisateur_id">
+    <column id="694" parent="325" name="utilisateur_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="694" parent="325" name="notification_id">
+    <column id="695" parent="325" name="notification_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <foreign-key id="695" parent="325" name="fk_ur_utilisateur">
+    <foreign-key id="696" parent="325" name="fk_ur_utilisateur">
       <ColNames>utilisateur_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <RefColNames>id</RefColNames>
       <RefTableName>utilisateur</RefTableName>
     </foreign-key>
-    <foreign-key id="696" parent="325" name="fk_ur_notification">
+    <foreign-key id="697" parent="325" name="fk_ur_notification">
       <ColNames>notification_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <RefColNames>id</RefColNames>
       <RefTableName>notification</RefTableName>
     </foreign-key>
-    <index id="697" parent="325" name="PRIMARY">
+    <index id="698" parent="325" name="PRIMARY">
       <ColNames>utilisateur_id
 notification_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="698" parent="325" name="fk_ur_notification">
+    <index id="699" parent="325" name="fk_ur_notification">
       <ColNames>notification_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="699" parent="325" name="PRIMARY">
+    <key id="700" parent="325" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="700" parent="326" name="utilisateur_id">
+    <column id="701" parent="326" name="utilisateur_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="701" parent="326" name="role_id">
+    <column id="702" parent="326" name="role_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <foreign-key id="702" parent="326" name="fk_ur_user">
+    <foreign-key id="703" parent="326" name="fk_ur_user">
       <ColNames>utilisateur_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <RefColNames>id</RefColNames>
       <RefTableName>utilisateur</RefTableName>
     </foreign-key>
-    <foreign-key id="703" parent="326" name="fk_ur_role">
+    <foreign-key id="704" parent="326" name="fk_ur_role">
       <ColNames>role_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <RefColNames>id</RefColNames>
       <RefTableName>role</RefTableName>
     </foreign-key>
-    <index id="704" parent="326" name="PRIMARY">
+    <index id="705" parent="326" name="PRIMARY">
       <ColNames>utilisateur_id
 role_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="705" parent="326" name="fk_ur_role">
+    <index id="706" parent="326" name="fk_ur_role">
       <ColNames>role_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="706" parent="326" name="PRIMARY">
+    <key id="707" parent="326" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>

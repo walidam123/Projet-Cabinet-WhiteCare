@@ -17,8 +17,14 @@ public class CreateConsultationDTO {
 
     @NotNull(message = "L'ID du dossier médical est obligatoire")
     private Long dossierMedicalId;
-
-    private LocalDate date;
+    private Long medecinId;
+    private java.time.LocalDateTime dateConsultation; // Matches usage in controller
+    private LocalDate date; // Keeping original date for compatibility or deprecation? Controller uses
+                            // dateConsultation
     private StatutConsultation statut;
     private String observationMedecin;
+    // Removing TypeConsultation for now as it doesn't exist in enums and user code
+    // failed importing it.
+    // If controller uses it, I must fix controller to remove it or use existing
+    // enums.
 }

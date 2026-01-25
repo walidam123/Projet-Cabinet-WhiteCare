@@ -14,31 +14,34 @@ import static ma.whitecare.repository.common.RowMappers.mapResultSetToMedicament
 public class MedicamentRepositoryImpl implements MedicamentRepository {
     @Override
     public List<Medicament> findAll() {
-        String sql = "SELECT * FROM Medicament ORDER BY nom";
+        String sql = "SELECT * FROM medicament ORDER BY nom";
         List<Medicament> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 out.add(mapResultSetToMedicament(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
 
-
     @Override
     public Medicament findById(Long id) {
-        String sql = "SELECT * FROM Medicament WHERE idMct = ?";
+        String sql = "SELECT * FROM medicament WHERE idMct = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return RowMappers.mapResultSetToMedicament(rs);
                 }
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -49,7 +52,7 @@ public class MedicamentRepositoryImpl implements MedicamentRepository {
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, newElement.getNom());
             ps.setString(2, newElement.getLaboratoire());
@@ -79,7 +82,7 @@ public class MedicamentRepositoryImpl implements MedicamentRepository {
                 "last_modification_date = CURRENT_TIMESTAMP WHERE idMct = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, newValuesElement.getNom());
             ps.setString(2, newValuesElement.getLaboratoire());
@@ -91,9 +94,7 @@ public class MedicamentRepositoryImpl implements MedicamentRepository {
             ps.setString(8, newValuesElement.getModifiePar());
             ps.setLong(9, newValuesElement.getIdMct());
 
-             ps.executeUpdate();
-
-
+            ps.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -102,7 +103,8 @@ public class MedicamentRepositoryImpl implements MedicamentRepository {
 
     @Override
     public void delete(Medicament oldElement) {
-if (oldElement!=null)deleteById(oldElement.getIdMct());
+        if (oldElement != null)
+            deleteById(oldElement.getIdMct());
     }
 
     @Override
@@ -110,11 +112,10 @@ if (oldElement!=null)deleteById(oldElement.getIdMct());
         String sql = "DELETE FROM medicament WHERE idMct = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setLong(1, id);
             ps.executeUpdate();
-
 
         } catch (SQLException e) {
             throw new RuntimeException("Erreur lors de la suppression du médicament", e);
@@ -126,7 +127,7 @@ if (oldElement!=null)deleteById(oldElement.getIdMct());
         String sql = "SELECT * FROM medicament WHERE LOWER(nom) = LOWER(?)";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, nom);
             try (ResultSet rs = ps.executeQuery()) {
@@ -147,7 +148,7 @@ if (oldElement!=null)deleteById(oldElement.getIdMct());
         List<Medicament> out = new ArrayList<>();
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, laboratoire);
             try (ResultSet rs = ps.executeQuery()) {
@@ -168,7 +169,7 @@ if (oldElement!=null)deleteById(oldElement.getIdMct());
         List<Medicament> out = new ArrayList<>();
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, type);
             try (ResultSet rs = ps.executeQuery()) {

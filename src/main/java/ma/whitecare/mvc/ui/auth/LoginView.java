@@ -1,5 +1,6 @@
 package ma.whitecare.mvc.ui.auth;
 
+import ma.whitecare.mvc.ui.palette.DesignSystem;
 import ma.whitecare.mvc.ui.palette.RoundedButton;
 import javax.swing.*;
 import java.awt.*;
@@ -14,59 +15,66 @@ public class LoginView extends JFrame {
         setSize(400, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        getContentPane().setBackground(Color.WHITE);
+        getContentPane().setBackground(DesignSystem.BACKGROUND);
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Logo placeholder (simulating the tooth logo in the mockup)
-        JLabel logoLabel = new JLabel("🦷", SwingConstants.CENTER);
-        logoLabel.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 80));
-        logoLabel.setForeground(new Color(194, 153, 103)); // Brownish color from mockup
+        // Logo display
+        JLabel logoLabel = new JLabel();
+        try {
+            java.net.URL imgUrl = getClass().getResource("/static/images/logo1.png");
+            if (imgUrl != null) {
+                ImageIcon icon = new ImageIcon(imgUrl);
+                Image img = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                logoLabel.setIcon(new ImageIcon(img));
+            } else {
+                logoLabel.setText("🦷");
+                logoLabel.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 80));
+                logoLabel.setForeground(DesignSystem.PRIMARY);
+            }
+        } catch (Exception e) {
+            logoLabel.setText("🦷");
+        }
+        logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         add(logoLabel, gbc);
 
-        JLabel titleLabel = new JLabel("WHITE CARE", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(25, 25, 112)); // Midnight Blue
-        gbc.gridy = 1;
-        add(titleLabel, gbc);
-
-        JLabel subtitleLabel = new JLabel("Cabinet dentaire", SwingConstants.CENTER);
-        subtitleLabel.setFont(new Font("Arial", Font.ITALIC, 14));
-        subtitleLabel.setForeground(Color.GRAY);
-        gbc.gridy = 2;
-        add(subtitleLabel, gbc);
-
         // Username
         gbc.gridwidth = 2;
         gbc.gridy = 3;
         JLabel userLabel = new JLabel("Nom d'utilisateur");
+        userLabel.setFont(DesignSystem.SUBTITLE);
+        userLabel.setForeground(DesignSystem.TEXT_PRIMARY);
         add(userLabel, gbc);
 
         usernameField = new JTextField(20);
         usernameField.setPreferredSize(new Dimension(300, 35));
+        usernameField.setFont(DesignSystem.BODY);
         gbc.gridy = 4;
         add(usernameField, gbc);
 
         // Password
         gbc.gridy = 5;
         JLabel passLabel = new JLabel("Mot de passe");
+        passLabel.setFont(DesignSystem.SUBTITLE);
+        passLabel.setForeground(DesignSystem.TEXT_PRIMARY);
         add(passLabel, gbc);
 
         passwordField = new JPasswordField(20);
         passwordField.setPreferredSize(new Dimension(300, 35));
+        passwordField.setFont(DesignSystem.BODY);
         gbc.gridy = 6;
         add(passwordField, gbc);
 
         // Connexion Button
         loginButton = new RoundedButton("Connexion");
-        loginButton.setBackground(Color.WHITE);
-        loginButton.setPreferredSize(new Dimension(150, 40));
+        loginButton.setBackground(DesignSystem.BTN_LOGIN);
+        loginButton.setPreferredSize(new Dimension(180, 45));
         gbc.gridy = 7;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;

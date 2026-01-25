@@ -26,12 +26,15 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     public Optional<Utilisateur> findByLogin(String login) {
         String sql = "SELECT * FROM utilisateur WHERE login = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, login);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return Optional.of(RowMappers.mapUtilisateur(rs));
+                if (rs.next())
+                    return Optional.of(RowMappers.mapUtilisateur(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return Optional.empty();
     }
 
@@ -39,12 +42,15 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     public Optional<Utilisateur> findByCin(String cin) {
         String sql = "SELECT * FROM utilisateur WHERE cin = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, cin);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return Optional.of(RowMappers.mapUtilisateur(rs));
+                if (rs.next())
+                    return Optional.of(RowMappers.mapUtilisateur(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return Optional.empty();
     }
 
@@ -53,47 +59,60 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
         String sql = "SELECT * FROM utilisateur WHERE nom = ? AND prenom = ?";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, nom);
             ps.setString(2, prenom);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
+                while (rs.next())
+                    out.add(RowMappers.mapUtilisateur(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
-        return out;    }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return out;
+    }
 
     @Override
     public List<Utilisateur> findBySexe(Sexe sexe) {
         String sql = "SELECT * FROM utilisateur WHERE sexe = ? ORDER BY nom, prenom";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, sexe.name());
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
+                while (rs.next())
+                    out.add(RowMappers.mapUtilisateur(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
-        return out;    }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return out;
+    }
 
     @Override
     public List<Utilisateur> findHommes() {
-        return findBySexe(Sexe.HOMME);    }
+        return findBySexe(Sexe.HOMME);
+    }
 
     @Override
     public List<Utilisateur> findFemmes() {
-        return findBySexe(Sexe.FEMME);    }
+        return findBySexe(Sexe.FEMME);
+    }
 
     @Override
     public List<Utilisateur> findByActif(boolean actif) {
         String sql = "SELECT * FROM utilisateur WHERE actif = ? ORDER BY nom, prenom";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setBoolean(1, actif);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
+                while (rs.next())
+                    out.add(RowMappers.mapUtilisateur(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
 
@@ -117,10 +136,13 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                 "ORDER BY u.nom, u.prenom";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
-        } catch (SQLException e) { throw new RuntimeException(e); }
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                out.add(RowMappers.mapUtilisateur(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
 
@@ -133,10 +155,13 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                 "ORDER BY u.nom, u.prenom";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
-        } catch (SQLException e) { throw new RuntimeException(e); }
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                out.add(RowMappers.mapUtilisateur(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
 
@@ -149,10 +174,13 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                 "ORDER BY u.nom, u.prenom";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
-        } catch (SQLException e) { throw new RuntimeException(e); }
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                out.add(RowMappers.mapUtilisateur(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
 
@@ -160,50 +188,61 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     public long countAll() {
         String sql = "SELECT COUNT(*) FROM utilisateur";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             rs.next();
             return rs.getLong(1);
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
-@Override
-    public boolean existsById(Long userId){
-    String sql = "SELECT 1 FROM utilisateur WHERE id = ?";
-    try (Connection c = SessionFactory.getInstance().getConnection();
-         PreparedStatement ps = c.prepareStatement(sql)) {
-        ps.setLong(1, userId);
-        try (ResultSet rs = ps.executeQuery()) {
-            return rs.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-    } catch (SQLException e) { throw new RuntimeException(e); }
+    }
 
-}
+    @Override
+    public boolean existsById(Long userId) {
+        String sql = "SELECT 1 FROM utilisateur WHERE id = ?";
+        try (Connection c = SessionFactory.getInstance().getConnection();
+                PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     @Override
     public List<Utilisateur> findWithPagination(int offset, int limit) {
         String sql = "SELECT * FROM utilisateur ORDER BY nom, prenom LIMIT ? OFFSET ?";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, limit);
             ps.setInt(2, offset);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
+                while (rs.next())
+                    out.add(RowMappers.mapUtilisateur(rs));
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
+
     @Override
     public void updatePassword(Long userId, String newPasswordHash) {
-        authRepository.changePassword(userId,newPasswordHash);
+        authRepository.changePassword(userId, newPasswordHash);
     }
 
     @Override
     public void activateUsers(List<Long> userIds) {
-        if (userIds == null || userIds.isEmpty()) return;
+        if (userIds == null || userIds.isEmpty())
+            return;
 
         String sql = "UPDATE utilisateur SET actif = 1, last_modification_date = ? WHERE id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             for (Long userId : userIds) {
                 ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
@@ -212,15 +251,19 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             }
             ps.executeBatch();
 
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
+
     @Override
     public void deactivateUsers(List<Long> userIds) {
-        if (userIds == null || userIds.isEmpty()) return;
+        if (userIds == null || userIds.isEmpty())
+            return;
 
         String sql = "UPDATE utilisateur SET actif = 0, last_modification_date = ? WHERE id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             for (Long userId : userIds) {
                 ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
@@ -229,19 +272,23 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             }
             ps.executeBatch();
 
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 
     @Override
     public List<Utilisateur> findAll() {
         String sql = "SELECT * FROM utilisateur ORDER BY nom, prenom";
         List<Utilisateur> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(RowMappers.mapUtilisateur(rs));
-        } catch (SQLException e) { throw new RuntimeException(e); }
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                out.add(RowMappers.mapUtilisateur(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return out;
     }
 
@@ -249,12 +296,15 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     public Utilisateur findById(Long id) {
         String sql = "SELECT * FROM utilisateur WHERE id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return RowMappers.mapUtilisateur(rs);
+                if (rs.next())
+                    return RowMappers.mapUtilisateur(rs);
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -271,11 +321,12 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
         String hashedPassword = authRepository.hashPassword(newElement.getMotDePass());
         newElement.setMotDePass(hashedPassword);
         String sql = "INSERT INTO utilisateur (nom, prenom, email, adresse, cin, tel, sexe, login, password_hash, " +
-                "last_login_date, date_naissance, actif, creation_date, last_modification_date, created_by, updated_by) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "last_login_date, date_naissance, actif, first_login, creation_date, last_modification_date, created_by, updated_by) "
+                +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, newElement.getNom());
             ps.setString(2, newElement.getPrenom());
@@ -286,15 +337,17 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             ps.setString(7, newElement.getSexe() != null ? newElement.getSexe().name() : Sexe.HOMME.name());
             ps.setString(8, newElement.getLogin());
             ps.setString(9, newElement.getMotDePass());
-            ps.setTimestamp(10, newElement.getLastLoginDate() != null ?
-                    Timestamp.valueOf(newElement.getLastLoginDate().atStartOfDay()) : null);
-            ps.setDate(11, newElement.getDateNaissance() != null ?
-                    Date.valueOf(newElement.getDateNaissance()) : null);
+            ps.setTimestamp(10,
+                    newElement.getLastLoginDate() != null
+                            ? Timestamp.valueOf(newElement.getLastLoginDate().atStartOfDay())
+                            : null);
+            ps.setDate(11, newElement.getDateNaissance() != null ? Date.valueOf(newElement.getDateNaissance()) : null);
             ps.setBoolean(12, newElement.getActif());
-            ps.setTimestamp(13, new Timestamp(System.currentTimeMillis()));
-            ps.setTimestamp(14, new Timestamp(System.currentTimeMillis() ));
-            ps.setString(15, newElement.getCreePar());
-            ps.setString(16, newElement.getModifiePar());
+            ps.setBoolean(13, newElement.getFirstLogin() != null ? newElement.getFirstLogin() : true);
+            ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
+            ps.setString(16, newElement.getCreePar());
+            ps.setString(17, newElement.getModifiePar());
 
             ps.executeUpdate();
 
@@ -303,17 +356,21 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                     newElement.setIdUser(rs.getLong(1));
                 }
             }
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void update(Utilisateur newValuesElement) {
-        String sql = "UPDATE utilisateur SET nom = ?, prenom = ?, email = ?, adresse = ?, cin = ?, tel = ?, sexe = ?, " +
-                "login = ?, last_login_date = ?, date_naissance = ?, actif = ?, last_modification_date = ?, updated_by = ? " +
+        String sql = "UPDATE utilisateur SET nom = ?, prenom = ?, email = ?, adresse = ?, cin = ?, tel = ?, sexe = ?, "
+                +
+                "login = ?, last_login_date = ?, date_naissance = ?, actif = ?, first_login = ?, last_modification_date = ?, updated_by = ? "
+                +
                 "WHERE id = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, newValuesElement.getNom());
             ps.setString(2, newValuesElement.getPrenom());
@@ -323,17 +380,23 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             ps.setString(6, newValuesElement.getTel());
             ps.setString(7, newValuesElement.getSexe() != null ? newValuesElement.getSexe().name() : null);
             ps.setString(8, newValuesElement.getLogin());
-            ps.setTimestamp(9, newValuesElement.getLastLoginDate() != null ?
-                    Timestamp.valueOf(newValuesElement.getLastLoginDate().atStartOfDay()) : null);
-            ps.setDate(10, newValuesElement.getDateNaissance() != null ?
-                    Date.valueOf(newValuesElement.getDateNaissance()) : null);
+            ps.setTimestamp(9,
+                    newValuesElement.getLastLoginDate() != null
+                            ? Timestamp.valueOf(newValuesElement.getLastLoginDate().atStartOfDay())
+                            : null);
+            ps.setDate(10,
+                    newValuesElement.getDateNaissance() != null ? Date.valueOf(newValuesElement.getDateNaissance())
+                            : null);
             ps.setBoolean(11, newValuesElement.getActif());
-            ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
-            ps.setString(13, newValuesElement.getModifiePar());
-            ps.setLong(14, newValuesElement.getIdUser());
+            ps.setBoolean(12, newValuesElement.getFirstLogin() != null ? newValuesElement.getFirstLogin() : false);
+            ps.setTimestamp(13, new Timestamp(System.currentTimeMillis()));
+            ps.setString(14, newValuesElement.getModifiePar());
+            ps.setLong(15, newValuesElement.getIdUser());
 
             ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -346,9 +409,11 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     public void deleteById(Long id) {
         String sql = "DELETE FROM utilisateur WHERE id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

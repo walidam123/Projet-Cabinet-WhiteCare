@@ -120,7 +120,10 @@ public class RDVValidator {
         // Validation de la cohérence date/heure
         if (dto.getDate() != null && dto.getHeure() != null) {
             if (dto.getDate().equals(LocalDate.now()) && dto.getHeure().isBefore(LocalTime.now())) {
-                errors.add("L'heure du rendez-vous ne peut pas être dans le passé pour aujourd'hui");
+                // Allow past time for status changes like EN_CONSULTATION or TERMINE
+                if (dto.getStatut() == StatutRendezVous.PLANIFIE || dto.getStatut() == StatutRendezVous.CONFIRME) {
+                    errors.add("L'heure du rendez-vous ne peut pas être dans le passé pour aujourd'hui");
+                }
             }
         }
 
@@ -166,8 +169,8 @@ public class RDVValidator {
 
         // Statuts finaux : aucune transition possible
         if (currentStatus == StatutRendezVous.TERMINE ||
-            currentStatus == StatutRendezVous.ANNULE ||
-            currentStatus == StatutRendezVous.ABSENT) {
+                currentStatus == StatutRendezVous.ANNULE ||
+                currentStatus == StatutRendezVous.ABSENT) {
             errors.add(String.format("Impossible de modifier un rendez-vous avec le statut %s", currentStatus));
             return errors;
         }
@@ -192,8 +195,8 @@ public class RDVValidator {
             case EN_CONSULTATION:
                 // Ne peut pas revenir à PLANIFIE, CONFIRME ou EN_SALLE
                 if (newStatus == StatutRendezVous.PLANIFIE ||
-                    newStatus == StatutRendezVous.CONFIRME ||
-                    newStatus == StatutRendezVous.EN_SALLE) {
+                        newStatus == StatutRendezVous.CONFIRME ||
+                        newStatus == StatutRendezVous.EN_SALLE) {
                     errors.add("Impossible de revenir du statut EN_CONSULTATION à " + newStatus);
                 }
                 break;
@@ -211,7 +214,7 @@ public class RDVValidator {
         }
         // Les RDV avec statuts finaux ne peuvent pas être modifiés
         return statut != StatutRendezVous.TERMINE &&
-               statut != StatutRendezVous.ANNULE &&
-               statut != StatutRendezVous.ABSENT;
+                statut != StatutRendezVous.ANNULE &&
+                statut != StatutRendezVous.ABSENT;
     }
 }

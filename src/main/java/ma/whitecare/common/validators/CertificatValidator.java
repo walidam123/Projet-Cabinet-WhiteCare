@@ -15,15 +15,11 @@ public class CertificatValidator {
         // Validation de la date de début
         if (dto.getDateDebut() == null) {
             errors.add("La date de début est obligatoire");
-        } else if (dto.getDateDebut().isAfter(LocalDate.now())) {
-            errors.add("La date de début ne peut pas être dans le futur");
         }
 
         // Validation de la date de fin
         if (dto.getDateFin() == null) {
             errors.add("La date de fin est obligatoire");
-        } else if (dto.getDateFin().isAfter(LocalDate.now())) {
-            errors.add("La date de fin ne peut pas être dans le futur");
         }
 
         // Validation de la cohérence des dates
@@ -157,12 +153,6 @@ public class CertificatValidator {
         if (startDate != null && endDate != null) {
             if (endDate.isBefore(startDate)) {
                 errors.add("La date de fin ne peut pas être antérieure à la date de début");
-            }
-            if (startDate.isAfter(LocalDate.now())) {
-                errors.add("La date de début ne peut pas être dans le futur");
-            }
-            if (endDate.isAfter(LocalDate.now())) {
-                errors.add("La date de fin ne peut pas être dans le futur");
             }
         }
 

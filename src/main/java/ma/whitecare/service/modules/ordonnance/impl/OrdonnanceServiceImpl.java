@@ -34,19 +34,22 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
     private final PrescriptionRepository prescriptionRepository;
     private final PatientRepository patientRepository;
     private final MedecinRepository medecinRepository;
+    private final ma.whitecare.repository.modules.Medicament.MedicamentRepository medicamentRepository;
 
     public OrdonnanceServiceImpl(OrdonnanceRepository ordonnanceRepository,
             ConsultationRepository consultationRepository,
             DossierMedicalRepository dossierMedicalRepository,
             PrescriptionRepository prescriptionRepository,
             PatientRepository patientRepository,
-            MedecinRepository medecinRepository) {
+            MedecinRepository medecinRepository,
+            ma.whitecare.repository.modules.Medicament.MedicamentRepository medicamentRepository) {
         this.ordonnanceRepository = ordonnanceRepository;
         this.consultationRepository = consultationRepository;
         this.dossierMedicalRepository = dossierMedicalRepository;
         this.prescriptionRepository = prescriptionRepository;
         this.patientRepository = patientRepository;
         this.medecinRepository = medecinRepository;
+        this.medicamentRepository = medicamentRepository;
     }
 
     // ========== CRUD ORDONNANCES ==========
@@ -171,6 +174,14 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
         return ordonnanceRepository.findByDateBetween(start, end);
     }
 
+    @Override
+    public List<Prescription> getPrescriptionsByOrdonnanceId(Long ordonnanceId) {
+        if (ordonnanceId == null) {
+            throw new IllegalArgumentException("L'ID de l'ordonnance est obligatoire");
+        }
+        return prescriptionRepository.findByOrdonnanceId(ordonnanceId);
+    }
+
     // ========== CONVERSIONS ==========
 
     @Override
@@ -250,9 +261,11 @@ public class OrdonnanceServiceImpl implements OrdonnanceService {
                 .map(p -> {
                     String medicamentNom = "Non spécifié";
                     if (p.getMedicament() != null && p.getMedicament().getIdMct() != null) {
-                        // Optionnel : récupérer le médicament complet si nécessaire
-                        medicamentNom = p.getMedicament().getNom() != null ? p.getMedicament().getNom()
-                                : "Non spécifié";
+                        ma.whitecare.entities.medical.Medicament m = medicamentRepository
+                                .findById(p.getMedicament().getIdMct());
+                        if (m != null) {
+                            medicamentNom = m.getNom();
+                        }
                     }
                     return new PDFGenerator.PrescriptionInfo(
                             medicamentNom,

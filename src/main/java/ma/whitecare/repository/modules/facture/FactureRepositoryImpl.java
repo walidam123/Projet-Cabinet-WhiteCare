@@ -85,7 +85,7 @@ public class FactureRepositoryImpl implements FactureRepository {
             stmt.setLong(2, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la mise à jour du statut de la facture ID: " + id, e);
         }
     }
 
@@ -110,7 +110,7 @@ public class FactureRepositoryImpl implements FactureRepository {
                     entity.setIdFature(keys.getLong(1));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la création de la facture", e);
         }
     }
 
@@ -139,7 +139,7 @@ public class FactureRepositoryImpl implements FactureRepository {
             stmt.setLong(6, entity.getIdFature());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la mise à jour de la facture ID: " + entity.getIdFature(), e);
         }
     }
 

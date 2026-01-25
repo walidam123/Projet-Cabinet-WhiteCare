@@ -53,10 +53,8 @@ public class UserServiceImpl implements UserService {
         user.setSexe(userDTO.getSexe());
         user.setActif(userDTO.isActif());
 
-        // HASHAGE DU MOT DE PASSE (CORRECTION SÉCURITÉ)
-        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(userDTO.getPassword(),
-                org.mindrot.jbcrypt.BCrypt.gensalt());
-        user.setMotDePass(hashedPassword);
+        // Password will be hashed by the repository layer
+        user.setMotDePass(userDTO.getPassword());
 
         // Set audit fields (hérités de BaseEntity)
         user.setCreePar("system"); // À remplacer par l'utilisateur connecté
@@ -307,20 +305,11 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException(String.join(", ", errors));
         }
 
-        // HASHAGE DU NOUVEAU MOT DE PASSE
-        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
-
-        utilisateurRepository.updatePassword(userId, hashedPassword);
+        // Password will be hashed by the repository layer
+        utilisateurRepository.updatePassword(userId, newPassword);
 
         // Mettre à jour les champs d'audit
         user.setModifiePar("system");
-
-        // Note: l'appel suivant update(user) pourrait écraser le password hashé si
-        // l'objet user n'est pas à jour
-        // Dans ce cas précis, user.setMotDePass n'a pas été appelé sur l'objet java,
-        // mais DB updaté
-        // Correctif: mettre à jour l'objet aussi
-        user.setMotDePass(hashedPassword);
         utilisateurRepository.update(user);
     }
 
@@ -499,6 +488,14 @@ public class UserServiceImpl implements UserService {
         return roleRepository.findByLibelle(libelle)
                 .map(role -> role.getIdRole())
                 .orElseThrow(() -> new RuntimeException("Rôle non trouvé: " + libelle));
+    }
+
+    @Override
+    public void updateFirstLoginStatus(Long userId, boolean status) {
+        Utilisateur user = getUserById(userId);
+        user.setFirstLogin(status);
+        user.setModifiePar("system");
+        utilisateurRepository.update(user);
     }
 
     private int calculateAge(LocalDate birthDate) {

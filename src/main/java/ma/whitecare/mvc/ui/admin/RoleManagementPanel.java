@@ -1,5 +1,7 @@
 package ma.whitecare.mvc.ui.admin;
 
+import ma.whitecare.mvc.ui.palette.DesignSystem;
+import ma.whitecare.mvc.ui.palette.RoundedButton;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -8,25 +10,30 @@ public class RoleManagementPanel extends JPanel {
     public RoleManagementPanel() {
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        DesignSystem.stylePanel(this);
 
         JLabel header = new JLabel("Gestion des Rôles");
-        header.setFont(new Font("Arial", Font.BOLD, 24));
+        header.setFont(DesignSystem.TITLE);
+        header.setForeground(DesignSystem.TEXT_PRIMARY);
         add(header, BorderLayout.NORTH);
 
-        String[] columns = { "ID", "Nom du Rôle", "Description" };
+        String[] columns = { "ID", "Nom du Rôle" };
         Object[][] data = {
-                { "1", "ADMIN", "Accès total au système" },
-                { "2", "DENTISTE", "Gestion médicale et patients" },
-                { "3", "SECRETAIRE", "Gestion des rendez-vous" }
+                { "1", "ADMIN" },
+                { "2", "DENTISTE" },
+                { "3", "SECRETAIRE" }
         };
         DefaultTableModel model = new DefaultTableModel(data, columns);
         JTable table = new JTable(model);
+        DesignSystem.styleTable(table);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        actions.add(new JButton("Ajouter"));
-        actions.add(new JButton("Modifier"));
-        actions.add(new JButton("Supprimer"));
+        DesignSystem.stylePanel(actions);
+        actions.add(new RoundedButton("Ajouter"));
+        actions.add(new RoundedButton("Modifier"));
+        actions.add(new RoundedButton("Supprimer"));
         add(actions, BorderLayout.SOUTH);
     }
 
@@ -52,15 +59,17 @@ public class RoleManagementPanel extends JPanel {
     }
 
     private JButton findButton(String text) {
-        for (Component c : getComponents()) {
-            if (c instanceof JPanel) {
-                for (Component sub : ((JPanel) c).getComponents()) {
-                    if (sub instanceof JButton && ((JButton) sub).getText().equals(text)) {
-                        return (JButton) sub;
+        // Look in the actions panel (SOUTH)
+        if (getLayout() instanceof BorderLayout) {
+            Component south = ((BorderLayout) getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+            if (south instanceof JPanel) {
+                for (Component c : ((JPanel) south).getComponents()) {
+                    if (c instanceof JButton && text.equals(((JButton) c).getText())) {
+                        return (JButton) c;
                     }
                 }
             }
         }
-        return null;
+        return null; // Fallback
     }
 }

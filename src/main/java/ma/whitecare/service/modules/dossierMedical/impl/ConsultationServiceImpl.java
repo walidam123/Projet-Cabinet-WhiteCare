@@ -33,10 +33,10 @@ public class ConsultationServiceImpl implements ConsultationService {
     private final PrescriptionRepository prescriptionRepository;
 
     public ConsultationServiceImpl(ConsultationRepository consultationRepository,
-                                   DossierMedicalRepository dossierMedicalRepository,
-                                   InterventionRepository interventionRepository,
-                                   OrdonnanceRepository ordonnanceRepository,
-                                   PrescriptionRepository prescriptionRepository) {
+            DossierMedicalRepository dossierMedicalRepository,
+            InterventionRepository interventionRepository,
+            OrdonnanceRepository ordonnanceRepository,
+            PrescriptionRepository prescriptionRepository) {
         this.consultationRepository = consultationRepository;
         this.dossierMedicalRepository = dossierMedicalRepository;
         this.interventionRepository = interventionRepository;
@@ -123,6 +123,19 @@ public class ConsultationServiceImpl implements ConsultationService {
         return consultationRepository.findByDossierMedicalId(dossierId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ma.whitecare.entities.medical.Consultation> getConsultationsByDossierId(Long dossierId) {
+        if (dossierId == null) {
+            throw new ValidationException("L'ID du dossier médical ne peut pas être null");
+        }
+        List<ma.whitecare.entities.medical.Consultation> consultations = consultationRepository
+                .findByDossierMedicalId(dossierId);
+        for (ma.whitecare.entities.medical.Consultation c : consultations) {
+            c.setInterventionMedecinList(interventionRepository.findByConsultationId(c.getIdConsultation()));
+        }
+        return consultations;
     }
 
     @Override
@@ -230,6 +243,16 @@ public class ConsultationServiceImpl implements ConsultationService {
     }
 
     @Override
+    public void addIntervention(Long consultationId, ma.whitecare.entities.medical.InterventionMedecin intervention) {
+        ma.whitecare.entities.medical.Consultation consultation = consultationRepository.findById(consultationId);
+        if (consultation == null) {
+            throw new ConsultationNotFoundException(consultationId);
+        }
+        intervention.setConsultation(consultation);
+        interventionRepository.create(intervention); // Assuming create/save exists
+    }
+
+    @Override
     public ConsultationCompleteDTO getConsultationComplete(Long consultationId) {
         if (consultationId == null) {
             throw new ValidationException("L'ID de la consultation ne peut pas être null");
@@ -317,8 +340,7 @@ public class ConsultationServiceImpl implements ConsultationService {
                 .date(entity.getDate())
                 .statut(entity.getStatut())
                 .observationMedecin(entity.getObservationMedecin())
-                .dossierMedicalId(entity.getDossierMedicale() != null ?
-                        entity.getDossierMedicale().getIdDM() : null)
+                .dossierMedicalId(entity.getDossierMedicale() != null ? entity.getDossierMedicale().getIdDM() : null)
                 .dateCreation(entity.getDateCreation())
                 .dateDerniereModification(entity.getDateDerniereModification())
                 .createdBy(entity.getCreePar())
@@ -332,8 +354,7 @@ public class ConsultationServiceImpl implements ConsultationService {
                 .date(entity.getDate())
                 .statut(entity.getStatut())
                 .observationMedecin(entity.getObservationMedecin())
-                .dossierMedicalId(entity.getDossierMedicale() != null ?
-                        entity.getDossierMedicale().getIdDM() : null)
+                .dossierMedicalId(entity.getDossierMedicale() != null ? entity.getDossierMedicale().getIdDM() : null)
                 .dateCreation(entity.getDateCreation())
                 .dateDerniereModification(entity.getDateDerniereModification())
                 .createdBy(entity.getCreePar())
@@ -347,8 +368,7 @@ public class ConsultationServiceImpl implements ConsultationService {
                 .prixDePatient(entity.getPrixDePatient())
                 .numDent(entity.getNumDent())
                 .acteId(entity.getActe() != null ? entity.getActe().getIdActe() : null)
-                .consultationId(entity.getConsultation() != null ?
-                        entity.getConsultation().getIdConsultation() : null)
+                .consultationId(entity.getConsultation() != null ? entity.getConsultation().getIdConsultation() : null)
                 .dateCreation(entity.getDateCreation())
                 .dateDerniereModification(entity.getDateDerniereModification())
                 .createdBy(entity.getCreePar())

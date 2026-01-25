@@ -52,6 +52,9 @@ public class SecretaireServiceImpl implements SecretaireService {
         // Sauvegarder
         secretaireRepository.create(secretaire);
 
+        // Assigner le rôle SECRETAIRE explicitly
+        userService.assignRoleToUser(secretaire.getIdUser(), LibelleRole.SECRETAIRE);
+
         return secretaire;
     }
 
@@ -295,10 +298,8 @@ public class SecretaireServiceImpl implements SecretaireService {
         secretaire.setActif(dto.isActif());
         secretaire.setActif(dto.isActif());
 
-        // HASHAGE DU MOT DE PASSE (CORRECTION SÉCURITÉ)
-        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(dto.getPassword(),
-                org.mindrot.jbcrypt.BCrypt.gensalt());
-        secretaire.setMotDePass(hashedPassword);
+        // HASHAGE EFFECTUÉ PAR LE REPOSITORY
+        secretaire.setMotDePass(dto.getPassword());
 
         // Champs staff ✅
         secretaire.setSalaire(dto.getSalaire());

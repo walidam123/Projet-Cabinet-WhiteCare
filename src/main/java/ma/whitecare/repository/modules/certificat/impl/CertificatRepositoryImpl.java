@@ -16,8 +16,8 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         List<Certificat> out = new ArrayList<>();
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 out.add(RowMappers.mapResultSetToCertificat(rs));
@@ -34,7 +34,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         String sql = "SELECT * FROM certificat WHERE id_certif = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -50,8 +50,6 @@ public class CertificatRepositoryImpl implements CertificatRepository {
 
     }
 
-
-
     @Override
     public void create(Certificat newElement) {
         String sql = "INSERT INTO certificat (date_debut, date_fin, duree, note_medecin, " +
@@ -59,18 +57,18 @@ public class CertificatRepositoryImpl implements CertificatRepository {
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setDate(1, Date.valueOf(newElement.getDateDebut()));
             ps.setDate(2, Date.valueOf(newElement.getDateFin()));
-            ps.setInt(3, newElement.getDuree() != null ? newElement.getDuree() :
-                    (int) java.time.temporal.ChronoUnit.DAYS.between(
-                            newElement.getDateDebut(), newElement.getDateFin()) + 1);
+            ps.setInt(3,
+                    newElement.getDuree() != null ? newElement.getDuree()
+                            : (int) java.time.temporal.ChronoUnit.DAYS.between(
+                                    newElement.getDateDebut(), newElement.getDateFin()) + 1);
             ps.setString(4, newElement.getNoteMedecin());
-            ps.setObject(5, newElement.getDossierMedicale() != null ?
-                    newElement.getDossierMedicale().getIdDM() : null);
-            ps.setObject(6, newElement.getConsultation() != null ?
-                    newElement.getConsultation().getIdConsultation() : null);
+            ps.setObject(5, newElement.getDossierMedicale() != null ? newElement.getDossierMedicale().getIdDM() : null);
+            ps.setObject(6,
+                    newElement.getConsultation() != null ? newElement.getConsultation().getIdConsultation() : null);
             ps.setString(7, newElement.getCreePar() != null ? newElement.getCreePar() : "system");
             ps.setString(8, newElement.getModifiePar() != null ? newElement.getModifiePar() : "system");
 
@@ -98,24 +96,26 @@ public class CertificatRepositoryImpl implements CertificatRepository {
                 "WHERE id_certif = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setDate(1, Date.valueOf(newValuesElement.getDateDebut()));
             ps.setDate(2, Date.valueOf(newValuesElement.getDateFin()));
             ps.setInt(3, newValuesElement.getDuree());
             ps.setString(4, newValuesElement.getNoteMedecin());
-            ps.setObject(5, newValuesElement.getDossierMedicale() != null ?
-                    newValuesElement.getDossierMedicale().getIdDM() : null);
-            ps.setObject(6, newValuesElement.getConsultation() != null ?
-                    newValuesElement.getConsultation().getIdConsultation() : null);
-            ps.setString(7, newValuesElement.getModifiePar() != null ?
-                    newValuesElement.getModifiePar() : "system");
+            ps.setObject(5,
+                    newValuesElement.getDossierMedicale() != null ? newValuesElement.getDossierMedicale().getIdDM()
+                            : null);
+            ps.setObject(6,
+                    newValuesElement.getConsultation() != null ? newValuesElement.getConsultation().getIdConsultation()
+                            : null);
+            ps.setString(7, newValuesElement.getModifiePar() != null ? newValuesElement.getModifiePar() : "system");
             ps.setLong(8, newValuesElement.getIdCertif());
 
-            ps.executeUpdate();}
-     catch(SQLException e){
-         throw new RuntimeException("Erreur lors de la mise à jour du certificat", e);            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la mise à jour du certificat", e);
         }
+    }
 
     @Override
     public void delete(Certificat oldElement) {
@@ -129,7 +129,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         String sql = "DELETE FROM certificat WHERE id_certif = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setLong(1, id);
             ps.executeUpdate();
@@ -145,7 +145,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         List<Certificat> out = new ArrayList<>();
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setLong(1, dossierId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -167,7 +167,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         List<Certificat> out = new ArrayList<>();
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setLong(1, consultationId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -187,7 +187,7 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         String sql = "SELECT COUNT(*) FROM certificat WHERE id_certif = ?";
 
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -202,4 +202,3 @@ public class CertificatRepositoryImpl implements CertificatRepository {
         }
     }
 }
-

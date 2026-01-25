@@ -1,5 +1,7 @@
 package ma.whitecare.mvc.ui.admin;
 
+import ma.whitecare.mvc.ui.palette.DesignSystem;
+import ma.whitecare.mvc.ui.palette.RoundedButton;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -8,10 +10,34 @@ public class UserManagementPanel extends JPanel {
     public UserManagementPanel() {
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        DesignSystem.stylePanel(this);
 
         JLabel header = new JLabel("Gestion des Utilisateurs");
-        header.setFont(new Font("Arial", Font.BOLD, 24));
-        add(header, BorderLayout.NORTH);
+        header.setFont(DesignSystem.TITLE);
+        header.setForeground(DesignSystem.TEXT_PRIMARY);
+
+        // Search Panel
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        DesignSystem.stylePanel(searchPanel);
+        JLabel searchLabel = new JLabel("Rechercher (Nom/Prénom) :");
+        DesignSystem.styleLabel(searchLabel, DesignSystem.BODY);
+        searchPanel.add(searchLabel);
+
+        JTextField searchField = new JTextField(20);
+        searchField.setName("userSearchField");
+        searchField.setFont(DesignSystem.BODY);
+        searchPanel.add(searchField);
+
+        RoundedButton searchBtn = new RoundedButton("Rechercher");
+        searchBtn.setName("userSearchBtn");
+        searchBtn.setPreferredSize(new Dimension(120, 35));
+        searchPanel.add(searchBtn);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        DesignSystem.stylePanel(topPanel);
+        topPanel.add(header, BorderLayout.NORTH);
+        topPanel.add(searchPanel, BorderLayout.SOUTH);
+        add(topPanel, BorderLayout.NORTH);
 
         // Table
         String[] columns = { "ID", "Nom", "Email", "Rôle", "Statut" };
@@ -21,15 +47,19 @@ public class UserManagementPanel extends JPanel {
         };
         DefaultTableModel model = new DefaultTableModel(data, columns);
         JTable table = new JTable(model);
+        DesignSystem.styleTable(table);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // Actions
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        actions.add(new JButton("Ajouter"));
-        actions.add(new JButton("Modifier"));
-        actions.add(new JButton("Supprimer"));
-        actions.add(new JButton("Réinitialiser MDP"));
-        actions.add(new JButton("Activer/Désactiver"));
+        DesignSystem.stylePanel(actions);
+        actions.add(new RoundedButton("Ajouter"));
+        actions.add(new RoundedButton("Modifier"));
+        actions.add(new RoundedButton("Détails"));
+        actions.add(new RoundedButton("Supprimer"));
+        actions.add(new RoundedButton("Réinitialiser MDP"));
+        actions.add(new RoundedButton("Activer/Désactiver"));
         add(actions, BorderLayout.SOUTH);
     }
 
@@ -62,14 +92,49 @@ public class UserManagementPanel extends JPanel {
         return findButton("Activer/Désactiver");
     }
 
+    public JButton getDetailsUserButton() {
+        return findButton("Détails");
+    }
+
+    public JTextField getSearchField() {
+        return findSearchField("userSearchField");
+    }
+
+    public JButton getSearchButton() {
+        return findButton("Rechercher");
+    }
+
+    private JTextField findSearchField(String name) {
+        return (JTextField) findComponentByName(this, name);
+    }
+
     private JButton findButton(String text) {
-        for (Component c : getComponents()) {
-            if (c instanceof JPanel) {
-                for (Component sub : ((JPanel) c).getComponents()) {
-                    if (sub instanceof JButton && ((JButton) sub).getText().equals(text)) {
-                        return (JButton) sub;
-                    }
-                }
+        return findButtonRecursive(this, text);
+    }
+
+    private JButton findButtonRecursive(Container container, String text) {
+        for (Component c : container.getComponents()) {
+            if (c instanceof JButton && text.equals(((JButton) c).getText())) {
+                return (JButton) c;
+            }
+            if (c instanceof Container) {
+                JButton b = findButtonRecursive((Container) c, text);
+                if (b != null)
+                    return b;
+            }
+        }
+        return null;
+    }
+
+    private Component findComponentByName(Container container, String name) {
+        for (Component c : container.getComponents()) {
+            if (name.equals(c.getName())) {
+                return c;
+            }
+            if (c instanceof Container) {
+                Component found = findComponentByName((Container) c, name);
+                if (found != null)
+                    return found;
             }
         }
         return null;

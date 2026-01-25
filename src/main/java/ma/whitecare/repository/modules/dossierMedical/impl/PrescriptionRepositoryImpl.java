@@ -1,6 +1,5 @@
 package ma.whitecare.repository.modules.dossierMedical.impl;
 
-
 import ma.whitecare.conf.SessionFactory;
 import ma.whitecare.entities.medical.Prescription;
 
@@ -11,7 +10,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import static ma.whitecare.repository.common.RowMappers.mapPrescription;
 
 public class PrescriptionRepositoryImpl implements PrescriptionRepository {
@@ -21,8 +19,8 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
         String sql = "SELECT * FROM prescription ORDER BY idPr";
         List<Prescription> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 out.add(mapPrescription(rs));
             }
@@ -36,7 +34,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     public Prescription findById(Long id) {
         String sql = "SELECT * FROM prescription WHERE idPr = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -52,12 +50,12 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     @Override
     public void create(Prescription prescription) {
         String sql = """
-            INSERT INTO prescription(quantite, frequence, dureeEnjours, medicament_id, ordonnance_id,
-                                     creation_date, last_modification_date, created_by, updated_by)
-            VALUES(?,?,?,?,?,?,?,?,?)
-            """;
+                INSERT INTO prescription(quantite, frequence, dureeEnjours, medicament_id, ordonnance_id,
+                                         creation_date, last_modification_date, created_by, updated_by)
+                VALUES(?,?,?,?,?,?,?,?,?)
+                """;
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, prescription.getQuantite());
             ps.setString(2, prescription.getFrequence());
@@ -85,13 +83,13 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     @Override
     public void update(Prescription prescription) {
         String sql = """
-            UPDATE prescription 
-            SET quantite=?, frequence=?, dureeEnjours=?, medicament_id=?, ordonnance_id=?,
-                last_modification_date=?, updated_by=?
-            WHERE idPr=?
-            """;
+                UPDATE prescription
+                SET quantite=?, frequence=?, dureeEnjours=?, medicament_id=?, ordonnance_id=?,
+                    last_modification_date=?, updated_by=?
+                WHERE idPr=?
+                """;
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setInt(1, prescription.getQuantite());
             ps.setString(2, prescription.getFrequence());
@@ -115,7 +113,8 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
 
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de la mise à jour de la prescription ID: " + prescription.getIdPr(), e);
+            throw new RuntimeException("Erreur lors de la mise à jour de la prescription ID: " + prescription.getIdPr(),
+                    e);
         }
     }
 
@@ -130,7 +129,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     public void deleteById(Long id) {
         String sql = "DELETE FROM prescription WHERE idPr = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -140,14 +139,59 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
 
     @Override
     public List<Prescription> findByOrdonnanceId(Long ordonnanceId) {
-        String sql = "SELECT * FROM prescription WHERE ordonnance_id = ? ORDER BY idPr";
+        String sql = """
+                SELECT p.*,
+                       m.nom as medicament_nom,
+                       m.prixUnitaire as medicament_prix,
+                       m.description as medicament_description
+                FROM prescription p
+                LEFT JOIN medicament m ON p.medicament_id = m.idMct
+                WHERE p.ordonnance_id = ?
+                ORDER BY p.idPr
+                """;
         List<Prescription> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, ordonnanceId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    out.add(RowMappers.mapPrescription(rs));
+                    // Custom mapping to include medication details
+                    Prescription prescription = new Prescription();
+                    prescription.setIdPr(rs.getLong("idPr"));
+                    prescription.setQuantite(rs.getInt("quantite"));
+                    prescription.setFrequence(rs.getString("frequence"));
+                    prescription.setDureeEnJours(rs.getInt("dureeEnjours"));
+
+                    // Map medication with full details
+                    Long medicamentId = rs.getObject("medicament_id", Long.class);
+                    if (medicamentId != null) {
+                        ma.whitecare.entities.medical.Medicament medicament = new ma.whitecare.entities.medical.Medicament();
+                        medicament.setIdMct(medicamentId);
+                        medicament.setNom(rs.getString("medicament_nom"));
+                        medicament.setPrixUnitaire(rs.getDouble("medicament_prix"));
+                        medicament.setDescription(rs.getString("medicament_description"));
+                        prescription.setMedicament(medicament);
+                    }
+
+                    // Map ordonnance (just ID)
+                    Long ordId = rs.getObject("ordonnance_id", Long.class);
+                    if (ordId != null) {
+                        ma.whitecare.entities.medical.Ordonnance ordonnance = new ma.whitecare.entities.medical.Ordonnance();
+                        ordonnance.setIdOrd(ordId);
+                        prescription.setOrdonnance(ordonnance);
+                    }
+
+                    // Map audit fields
+                    var dc = rs.getTimestamp("creation_date");
+                    if (dc != null)
+                        prescription.setDateCreation(java.time.LocalDate.from(dc.toLocalDateTime()));
+                    var dl = rs.getTimestamp("last_modification_date");
+                    if (dl != null)
+                        prescription.setDateDerniereModification(java.time.LocalDate.from(dl.toLocalDateTime()));
+                    prescription.setCreePar(rs.getString("created_by"));
+                    prescription.setModifiePar(rs.getString("updated_by"));
+
+                    out.add(prescription);
                 }
             }
         } catch (SQLException e) {
@@ -161,7 +205,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
         String sql = "SELECT * FROM prescription WHERE medicament_id = ? ORDER BY idPr";
         List<Prescription> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, medicamentId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -179,7 +223,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
         String sql = "SELECT * FROM prescription WHERE dureeEnjours >= ? ORDER BY dureeEnjours";
         List<Prescription> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, dureeMin);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -197,7 +241,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
         String sql = "SELECT * FROM prescription WHERE ordonnance_id = ? AND medicament_id = ? ORDER BY idPr";
         List<Prescription> out = new ArrayList<>();
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, ordonnanceId);
             ps.setLong(2, medicamentId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -214,13 +258,13 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     @Override
     public Double calculateCoutTotalOrdonnance(Long ordonnanceId) {
         String sql = """
-            SELECT SUM(p.quantite * m.prixUnitaire) 
-            FROM prescription p 
-            JOIN medicament m ON p.medicament_id = m.idMct 
-            WHERE p.ordonnance_id = ?
-            """;
+                SELECT SUM(p.quantite * m.prixUnitaire)
+                FROM prescription p
+                JOIN medicament m ON p.medicament_id = m.idMct
+                WHERE p.ordonnance_id = ?
+                """;
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, ordonnanceId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -238,7 +282,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     public boolean existsById(Long prescriptionId) {
         String sql = "SELECT 1 FROM prescription WHERE idPr = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, prescriptionId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -252,8 +296,8 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     public long countAll() {
         String sql = "SELECT COUNT(*) FROM prescription";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = c.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getLong(1);
             }
@@ -267,7 +311,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     public long countByOrdonnanceId(Long ordonnanceId) {
         String sql = "SELECT COUNT(*) FROM prescription WHERE ordonnance_id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, ordonnanceId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -284,7 +328,7 @@ public class PrescriptionRepositoryImpl implements PrescriptionRepository {
     public long countByMedicamentId(Long medicamentId) {
         String sql = "SELECT COUNT(*) FROM prescription WHERE medicament_id = ?";
         try (Connection c = SessionFactory.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+                PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setLong(1, medicamentId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

@@ -8,14 +8,31 @@ import ma.whitecare.service.modules.auth.AuthenticationService;
 
 import javax.swing.*;
 
+import ma.whitecare.mvc.ui.palette.DesignSystem;
+
 public class App {
     public static void main(String[] args) {
         // Temporary seeding call
         ma.whitecare.utils.DbSeeder.main(args);
 
-        // Initialize Look and Feel
+        // Initialize Look and Feel and Global Styles
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+            // Set global defaults
+            UIManager.put("Panel.background", DesignSystem.BACKGROUND);
+            UIManager.put("Label.foreground", DesignSystem.TEXT_PRIMARY);
+            UIManager.put("Label.font", DesignSystem.BODY);
+            UIManager.put("TextField.font", DesignSystem.BODY);
+            UIManager.put("PasswordField.font", DesignSystem.BODY);
+            UIManager.put("Button.font", DesignSystem.BUTTON_FONT);
+            UIManager.put("Table.font", DesignSystem.BODY);
+            UIManager.put("TableHeader.font", DesignSystem.BUTTON_FONT);
+            UIManager.put("TabbedPane.font", DesignSystem.BUTTON_FONT);
+            UIManager.put("OptionPane.messageFont", DesignSystem.BODY);
+            UIManager.put("OptionPane.buttonFont", DesignSystem.BUTTON_FONT);
+            UIManager.put("Dialog.background", DesignSystem.BACKGROUND);
+
         } catch (Exception ignored) {
         }
 

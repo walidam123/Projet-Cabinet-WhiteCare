@@ -7,8 +7,8 @@ public enum StatutRendezVous {
     EN_CONSULTATION,
     TERMINE,
     ANNULE,
-    ABSENT
-
-
-
+    ABSENT,
+    EN_ATTENTE,
+    PREVU,
+    BLOQUE
 }

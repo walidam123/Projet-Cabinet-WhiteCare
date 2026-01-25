@@ -33,9 +33,9 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
     private final ConsultationRepository consultationRepository;
 
     public DossierMedicalServiceImpl(DossierMedicalRepository dossierMedicalRepository,
-                                     PatientRepository patientRepository,
-                                     MedecinRepository medecinRepository,
-                                     ConsultationRepository consultationRepository) {
+            PatientRepository patientRepository,
+            MedecinRepository medecinRepository,
+            ConsultationRepository consultationRepository) {
         this.dossierMedicalRepository = dossierMedicalRepository;
         this.patientRepository = patientRepository;
         this.medecinRepository = medecinRepository;
@@ -306,8 +306,8 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
                 .date(consultation.getDate())
                 .statut(consultation.getStatut())
                 .observationMedecin(consultation.getObservationMedecin())
-                .dossierMedicalId(consultation.getDossierMedicale() != null ?
-                        consultation.getDossierMedicale().getIdDM() : null)
+                .dossierMedicalId(
+                        consultation.getDossierMedicale() != null ? consultation.getDossierMedicale().getIdDM() : null)
                 .dateCreation(consultation.getDateCreation())
                 .dateDerniereModification(consultation.getDateDerniereModification())
                 .createdBy(consultation.getCreePar())
@@ -321,5 +321,24 @@ public class DossierMedicalServiceImpl implements DossierMedicalService {
             throw new ValidationException("Le dossier médical ne peut pas être null");
         }
         // La validation des dates est gérée dans les méthodes spécifiques
+    }
+
+    @Override
+    public DossierMedicale saveDossier(DossierMedicale dossierMedical) {
+        if (dossierMedical == null) {
+            throw new ValidationException("Le dossier médical ne peut pas être null");
+        }
+        dossierMedicalRepository.create(dossierMedical);
+        return dossierMedical;
+    }
+
+    @Override
+    public DossierMedicale getDossierByPatientId(Long patientId) {
+        if (patientId == null) {
+            throw new ValidationException("L'ID du patient ne peut pas être null");
+        }
+        return dossierMedicalRepository.findByPatientId(patientId).stream()
+                .findFirst()
+                .orElse(null);
     }
 }

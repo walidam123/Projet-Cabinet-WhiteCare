@@ -11,20 +11,23 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Data @AllArgsConstructor @NoArgsConstructor @SuperBuilder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 public class Antecedents extends BaseEntity {
     private Long id_Antecedent;
     private String nom;
-    private  String categorie;
+    private String categorie;
     private NiveauDeRisque niveauDeRisque;
     private List<Patient> patients = new ArrayList<>();
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Patient)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Patient))
+            return false;
         Antecedents that = (Antecedents) o;
         return id_Antecedent != null && id_Antecedent.equals(that.id_Antecedent);
     }
@@ -37,19 +40,18 @@ public class Antecedents extends BaseEntity {
     @Override
     public String toString() {
         return """
-        Antecedent {
-          id = %d,
-          nom = '%s',
-          categorie = %s,
-          niveauRisque = %s,
-          patientsCount = %d
-        }
-        """.formatted(
+                Antecedent {
+                  id = %d,
+                  nom = '%s',
+                  categorie = %s,
+                  niveauRisque = %s,
+                  patientsCount = %d
+                }
+                """.formatted(
                 id_Antecedent,
                 nom,
                 categorie,
                 niveauDeRisque,
-                patients == null ? 0 : patients.size()
-        );
+                patients == null ? 0 : patients.size());
     }
 }
